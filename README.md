@@ -1,4 +1,4 @@
-# u/kaggle
+# u:kaggle
 
 EDA on public Kaggle kernels.
- 
+
