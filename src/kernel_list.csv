@@ -1,0 +1,1101 @@
+author,categoryIds,competitionDataSources,datasetDataSources,enableGpu,enableInternet,id,isPrivate,kernelDataSources,kernelType,language,lastRunTime,ref,slug,title,totalVotes
+MJ Bahmani,[],[],[],,,0,,[],,,2018-10-26 23:42:31,mjbahmani/a-comprehensive-ml-workflow-with-python,,A Comprehensive ML Workflow with Python,223
+Leonardo Ferreira ,[],[],[],,,0,,[],,,2018-10-26 21:11:44,kabure/exploring-the-consumer-patterns-ml-pipeline,,Exploring the Consumer Patterns + ML Pipeline ,132
+Binu ,[],[],[],,,0,,[],,,2018-10-27 03:04:44,biphili/seaborn-plot-to-visualize-iris-data,,Seaborn plot to visualize Iris data,28
+Jan,[],[],[],,,0,,[],,,2018-10-27 00:41:03,magichanics/amateur-hour-using-headlines-to-predict-stocks,,Amateur Hour - Using Headlines to Predict Stocks,30
+deja vu,[],[],[],,,0,,[],,,2018-10-27 04:12:46,dejavu23/titanic-survival-seaborn-and-ensembles,,Titanic Survival: Seaborn and Ensembles,14
+Janio Alexander Bachmann,[],[],[],,,0,,[],,,2018-10-26 21:35:32,janiobachmann/patient-charges-cluster-analysis-and-prediction,,Patient Charges || Cluster Analysis and Prediction,27
+Jekaterina Kokatjuhha,[],[],[],,,0,,[],,,2018-10-26 18:55:11,jkokatjuhha/in-depth-visualisations-simple-methods,,In-Depth Visualisations - Simple Methods,62
+beluga,[],[],[],,,0,,[],,,2018-10-26 18:23:24,gaborfodor/how-to-draw-an-owl-lb-0-002,,🦉 How to draw an owl? [LB=0.002],67
+Jekaterina Kokatjuhha,[],[],[],,,0,,[],,,2018-10-26 19:50:49,jkokatjuhha/we-are-from-our-childhood,,We are from our childhood,46
+kunal,[],[],[],,,0,,[],,,2018-10-26 22:31:43,kunalvashisht/nba-basic-seaborn,,nba basic seaborn,2
+Ash S,[],[],[],,,0,,[],,,2018-10-27 01:10:43,mrshih/simple-oj-trees-and-eda,,Simple OJ Trees  (and EDA) ,1
+Ashish Patel(阿希什),[],[],[],,,0,,[],,,2018-10-26 12:49:54,ashishpatel26/bird-eye-view-of-two-sigma-nn-approach,,👨‍🔬 Bird Eye 👀 view of Two Sigma + NN Approach,76
+Dromosys,[],[],[],,,0,,[],,,2018-10-27 00:22:30,dromosys/pandas-notes,,Pandas Notes,2
+Allunia,[],[],[],,,0,,[],,,2018-10-26 13:07:22,allunia/protein-atlas-exploration-and-baseline,,Protein Atlas - Exploration and Baseline,167
+Behcet Senturk,[],[],[],,,0,,[],,,2018-10-27 04:53:17,behcetsenturk/analysis-of-bakery-transactions,,Analysis of Bakery Transactions,2
+Ilya Evenbach,[],[],[],,,0,,[],,,2018-10-26 20:12:10,iluxave/inceptionv3-with-sliding-window-image-breakdown,,InceptionV3 with sliding window image breakdown,2
+Carlo Lepelaars,[],[],[],,,0,,[],,,2018-10-26 18:28:27,carlolepelaars/pubg-data-exploration-rf-funny-gifs-v2,,PUBG Data Exploration + RF (+ Funny GIFs) (V2),30
+Siddharth Yadav,[],[],[],,,0,,[],,,2018-10-26 12:56:28,thebrownviking20/intro-to-recurrent-neural-networks-lstm-gru,,Intro to Recurrent Neural Networks LSTM | GRU,68
+kunal,[],[],[],,,0,,[],,,2018-10-26 23:26:39,kunalvashisht/diabetes-visualization-with-seaborn,,diabetes visualization with seaborn,1
+GSD,[],[],[],,,0,,[],,,2018-10-27 04:56:54,gsdeepakkumar/e-commerce-dataset-analysis,,E Commerce Dataset Analysis ,1
+Hyun woo kim,[],[],[],,,0,,[],,,2018-10-26 10:42:39,chocozzz/pubg-data-description-a-to-z-fe-with-python,,PUBG Data Description A to Z + FE with Python,67
+Ash S,[],[],[],,,0,,[],,,2018-10-26 22:46:41,mrshih/boston-and-crime,,Boston and Crime,1
+Kuldeep Singh,[],[],[],,,0,,[],,,2018-10-27 05:11:59,kduhan/gp1-kuldeep,,GP1 Kuldeep,0
+Avni Gupta,[],[],[],,,0,,[],,,2018-10-27 05:06:15,avni09/gp1-gl-avni,,GP1 GL - Avni,0
+Nat Sakol,[],[],[],,,0,,[],,,2018-10-27 04:08:58,natsakol/fork-of-single-layer-keras-lstm-xrp-price-predict,,Fork of Single Layer Keras LSTM :XRP Price Predict,1
+Erik Bruin,[],[],[],,,0,,[],,,2018-10-26 11:24:37,erikbruin/gun-violence-in-the-us-interactive-maps-and-eda,,Gun violence in the US: Interactive maps and EDA,76
+Ash S,[],[],[],,,0,,[],,,2018-10-26 22:04:31,mrshih/cystic-fibrosis-and-maximal-expiratory-pressure,,Cystic Fibrosis and Maximal Expiratory Pressure,1
+Aakash N S,[],[],[],,,0,,[],,,2018-10-27 05:42:07,aakashns/fastai-dev-nb-002-images-ipynb,,fastai/dev_nb/002_images.ipynb	,0
+Tetsuya Zama,[],[],[],,,0,,[],,,2018-10-27 06:55:05,tetsuyazama/first-titanic,,First Titanic,0
+Shravan,[],[],[],,,0,,[],,,2018-10-27 04:20:49,simplyshravan/how-to-align-items-in-store-according-to-picks,,How to align items in store according to picks,0
+plasticgrammer,[],[],[],,,0,,[],,,2018-10-26 15:11:35,plasticgrammer/customer-revenue-prediction-playground,,Customer Revenue Prediction : playground,23
+Iafoss,[],[],[],,,0,,[],,,2018-10-27 07:09:30,iafoss/pretrained-resnet34-with-rgby-0-460-public-lb,,pretrained ResNet34 with RGBY (0.460 public LB),62
+Loic Sanchez,[],[],[],,,0,,[],,,2018-10-27 02:23:35,loicsanchez/an-attempt-to-predict-real-estate-prices,,An attempt to predict real estate prices,1
+ArnabDhar,[],[],[],,,0,,[],,,2018-10-27 03:11:07,arnabd2002/small-lstm-with7dayswindow,,Small_LSTM_with7DaysWindow,0
+Kien,[],[],[],,,0,,[],,,2018-10-27 03:05:14,knly10/exploratory-analysis-and-prediction,,Exploratory analysis and prediction,0
+Paul Larmuseau,[],[],[],,,0,,[],,,2018-10-27 03:23:45,plarmuseau/heart-disease-different-classifiers,,heart disease different classifiers,0
+areeves87,[],[],[],,,0,,[],,,2018-10-27 01:50:09,areeves87/xgb-lgbm-glmnet-on-text2vec-tf-idf-auc-0-821,,xgb + lgbm + glmnet on text2vec tf-idf ~ AUC 0.821,1
+Bruno G. do Amaral,[],[],[],,,0,,[],,,2018-10-26 19:37:19,bguberfain/lab-5-rnn-para-compreens-o-de-linguagem-natural,,LAB 5 – RNN para Compreensão de Linguagem Natural,1
+Vig Nam,[],[],[],,,0,,[],,,2018-10-26 16:04:34,vignam/seam-carving-to-reduce-image-size,,Seam Carving to reduce image size,3
+Kanwalinder Singh,[],[],[],,,0,,[],,,2018-10-27 02:37:47,kanwalinder/rsna-stage-2-step-2-label-preprocessing,,RSNA Stage 2 Step 2 Label Preprocessing,0
+Réda,[],[],[],,,0,,[],,,2018-10-27 01:50:19,moulhanout/projet6-stack,,Projet6-stack,0
+Aditya,[],[],[],,,0,,[],,,2018-10-27 06:58:13,adityashrm21/exploring-the-dark-knights,,Exploring the Dark Knights,0
+Shanygne Downey,[],[],[],,,0,,[],,,2018-10-27 01:47:49,shanygne97/dwdm-project,,DWDM project,0
+johnnyjana730,[],[],[],,,0,,[],,,2018-10-27 00:54:54,johnnyjana730/leak-data-look-around,,leak data look around,2
+Mr Knoot,[],[],[],,,0,,[],,,2018-10-26 12:23:09,mrknoot/gstore-crafting-reasonable-models,,GStore: Crafting Reasonable Models,3
+Kevin Young,[],[],[],,,0,,[],,,2018-10-26 21:18:54,iamkevinyoung/predicting-biomechanical-features,,Predicting biomechanical features,1
+Pedro Marcelino,[],[],[],,,0,,[],,,2018-10-15 07:39:01,pmarcelino/comprehensive-data-exploration-with-python,,Comprehensive data exploration with Python,2855
+Ash S,[],[],[],,,0,,[],,,2018-10-27 01:04:47,mrshih/analysis-of-s-p-500-1990-to-2010,,Analysis of S&P 500 (1990 to 2010),1
+Gilang Ardya,[],[],[],,,0,,[],,,2018-10-26 14:43:06,gilangardya/hmif-iit-challenge-dataset-1-baseline,,[HMIF IIT Challenge] Dataset 1 - Baseline,2
+Marcelo Marques,[],[],[],,,0,,[],,,2018-10-27 01:15:00,mgmarques/cnn-exercise-deep-learning-for-computer-vision,,CNN Exercise - Deep Learning for Computer Vision,0
+Faraz Rahman,[],[],[],,,0,,[],,,2018-10-26 11:27:55,farazrahman/economic-freedom-analysis,,ECONOMIC FREEDOM ANALYSIS,6
+Vadim,[],[],[],,,0,,[],,,2018-10-26 08:38:49,nareyko/returnraw-formula-and-future-past-correlation,,ReturnRaw formula and Future-Past correlation,5
+kxx,[],[],[],,,0,,[],,,2018-10-25 18:58:04,kailex/r-eda-for-gstore-glm-keras-xgb,,R EDA for GStore + GLM + KERAS + XGB,268
+akshay,[],[],[],,,0,,[],,,2018-10-27 01:08:49,akshaykapoor347/eda-and-sentimental-analysis-on-the-reviews,,EDA and Sentimental Analysis on the reviews,0
+DATAI,[],[],[],,,0,,[],,,2018-09-23 08:55:54,kanncaa1/data-sciencetutorial-for-beginners,,Data ScienceTutorial for Beginners,2255
+Victor,[],[],[],,,0,,[],,,2018-10-27 01:31:14,vfrank66/test-model-save,,test_model_save,0
+Ashish Patel(阿希什),[],[],[],,,0,,[],,,2018-10-26 08:11:53,ashishpatel26/zero-to-all-in-pytorch-ml-dl-rl,,Zero to ALL in Pytorch(ML+DL+RL)...!!!👌👌👌,43
+Serigne ,[],[],[],,,0,,[],,,2017-12-16 11:57:12,serigne/stacked-regressions-top-4-on-leaderboard,,Stacked Regressions : Top 4% on LeaderBoard,2046
+DanB,[],[],[],,,0,,[],,,2018-09-27 21:56:05,dansbecker/how-models-work,,How Models Work,2045
+Manav Sehgal,[],[],[],,,0,,[],,,2017-12-28 10:17:53,startupsci/titanic-data-science-solutions,,Titanic Data Science Solutions,2006
+Victor,[],[],[],,,0,,[],,,2018-10-27 02:44:07,vfrank66/midtermcsc570,,midtermcsc570,0
+Rachael Tatman (non-admin),[],[],[],,,0,,[],,,2018-10-27 00:01:49,rebeccaturner/kaggler-s-favorite-packages,,Kaggler's Favorite Packages,0
+Akshay,[],[],[],,,0,,[],,,2018-10-26 10:24:42,asapra/newbie-s-perspective-of-data,,Newbie's perspective of data,3
+Yassine Ghouzam,[],[],[],,,0,,[],,,2017-08-18 01:42:23,yassineghouzam/introduction-to-cnn-keras-0-997-top-6,,Introduction to CNN Keras - 0.997 (top 6%),1618
+Guido Zuidhof,[],[],[],,,0,,[],,,2017-02-24 06:16:38,gzuidhof/full-preprocessing-tutorial,,Full Preprocessing Tutorial,1603
+umar iğan,[],[],[],,,0,,[],,,2018-10-26 23:48:25,umar47/natural-language-processing,,Natural Language Processing,0
+ShiaronHuapaya,[],[],[],,,0,,[],,,2018-10-26 23:46:34,shiaronhuapaya/assignment-2-eda-of-us-flights-experience,,Assignment #2 EDA of US flights - Experience,0
+Will Koehrsen,[],[],[],,,0,,[],,,2018-08-25 02:00:07,willkoehrsen/start-here-a-gentle-introduction,,Start Here: A Gentle Introduction,1522
+Pavan Raj,[],[],[],,,0,,[],,,2018-10-26 06:50:26,pavanraj159/nyc-taxi-fare-time-series-forecasting,,NYC  Taxi Fare - Time series Forecasting,51
+HG,[],[],[],,,0,,[],,,2018-10-26 23:26:33,hg1234/homework2,,Homework2,0
+FengdanYe,[],[],[],,,0,,[],,,2018-10-26 21:23:38,fengdanye/machine-learning-2-regularized-lm-early-stopping,,"Machine Learning 2  Regularized LM, Early Stopping",3
+Rachm,[],[],[],,,0,,[],,,2018-10-26 12:29:26,arnau1994/individual-light-curves-plots,,Individual light curves plots,2
+Colin Pearse,[],[],[],,,0,,[],,,2018-10-26 23:15:06,colinpearse/ga-eda-with-pie-scatter-and-baseline-test,,GA EDA with pie scatter and baseline test,0
+Flokart Blaku,[],[],[],,,0,,[],,,2018-10-26 15:55:56,flokitheviking/convert-dicom-to-png-colaboratory,,Convert DICOM to .png (Colaboratory),1
+LD Freeman,[],[],[],,,0,,[],,,2017-12-31 18:27:17,ldfreeman3/a-data-science-framework-to-achieve-99-accuracy,,A Data Science Framework: To Achieve 99% Accuracy,1120
+Philipp Spachtholz,[],[],[],,,0,,[],,,2017-05-31 18:38:04,philippsp/exploratory-analysis-zillow,,Exploratory Analysis - Zillow,1134
+Omar El Gabry,[],[],[],,,0,,[],,,2016-11-15 18:19:03,omarelgabry/a-journey-through-titanic,,A Journey through Titanic,1033
+DanB,[],[],[],,,0,,[],,,2018-10-12 15:45:34,dansbecker/model-validation,,Model Validation,980
+DanB,[],[],[],,,0,,[],,,2018-01-22 19:25:43,dansbecker/submitting-from-a-kernel,,Submitting From A Kernel,957
+DanB,[],[],[],,,0,,[],,,2018-09-27 21:55:54,dansbecker/explore-your-data,,Explore Your Data,973
+anokas,[],[],[],,,0,,[],,,2017-04-12 14:22:20,anokas/data-analysis-xgboost-starter-0-35460-lb,,Data Analysis & XGBoost Starter (0.35460 LB),964
+ColinMorris,[],[],[],,,0,,[],,,2018-07-10 22:28:22,colinmorris/hello-python,,"Hello, Python",914
+DanB,[],[],[],,,0,,[],,,2018-09-27 21:55:52,dansbecker/your-first-machine-learning-model,,Your First Machine Learning Model,857
+Kjetil Åmdal-Sævik,[],[],[],,,0,,[],,,2018-01-21 00:13:39,keegil/keras-u-net-starter-lb-0-277,,Keras U-Net starter - LB 0.277,871
+Alexandru Papiu,[],[],[],,,0,,[],,,2017-04-21 05:50:08,apapiu/regularized-linear-models,,Regularized Linear Models,863
+DanB,[],[],[],,,0,,[],,,2018-09-27 21:55:56,dansbecker/underfitting-and-overfitting,,Underfitting and Overfitting,818
+SRK,[],[],[],,,0,,[],,,2017-06-03 13:40:09,sudalairajkumar/simple-exploration-notebook-zillow-prize,,Simple Exploration Notebook - Zillow Prize,842
+Kevin Mader,[],[],[],,,0,,[],,,2018-10-26 09:33:39,kmader/rgbt-overview,,RGBT Overview,5
+DATAI,[],[],[],,,0,,[],,,2018-07-24 14:43:45,kanncaa1/machine-learning-tutorial-for-beginners,,Machine Learning Tutorial for Beginners,797
+Heads or Tails,[],[],[],,,0,,[],,,2018-10-19 19:11:58,headsortails/be-my-guest-recruit-restaurant-eda,,Be my guest - Recruit Restaurant EDA,759
+Yassine Ghouzam,[],[],[],,,0,,[],,,2017-08-09 14:34:44,yassineghouzam/titanic-top-4-with-ensemble-modeling,,Titanic Top 4% with ensemble modeling,727
+Ashwini Swain,[],[],[],,,0,,[],,,2018-03-08 17:55:32,ash316/eda-to-prediction-dietanic,,EDA To Prediction(DieTanic),745
+Vadim,[],[],[],,,0,,[],,,2018-10-26 09:54:26,nareyko/market-return-estimation-and-bad-data-detection,,Market  return estimation and bad data detection,2
+Shivam Bansal,[],[],[],,,0,,[],,,2018-10-16 17:08:28,shivamb/data-science-glossary-on-kaggle-updated,,Data Science Glossary on Kaggle [Updated],675
+DanB,[],[],[],,,0,,[],,,2018-01-29 04:38:58,dansbecker/selecting-and-filtering-in-pandas,,Selecting and Filtering in Pandas,673
+DavidS,[],[],[],,,0,,[],,,2017-12-11 21:17:15,davids1992/speech-representation-and-data-exploration,,Speech representation and data exploration,672
+DanB,[],[],[],,,0,,[],,,2018-09-27 21:56:04,dansbecker/random-forests,,Random Forests,652
+Philipp Spachtholz,[],[],[],,,0,,[],,,2017-06-30 06:29:55,philippsp/exploratory-analysis-instacart,,Exploratory Analysis - Instacart,671
+ThyKhueLy,[],[],[],,,0,,[],,,2018-04-22 08:23:34,thykhuely/mercari-interactive-eda-topic-modelling,,Mercari Interactive EDA + Topic Modelling,644
+Hitesh palamada,[],[],[],,,0,,[],,,2018-09-02 18:36:19,hiteshp/head-start-for-data-scientist,,Head Start for Data Scientist,643
+Jesper,[],[],[],,,0,,[],,,2018-07-20 12:47:51,jesperdramsch/intro-to-seismic-salt-and-how-to-geophysics,,"Intro to seismic, salt, and how to geophysics",637
+SRK,[],[],[],,,0,,[],,,2018-09-06 13:25:46,sudalairajkumar/winning-solutions-of-kaggle-competitions,,Winning solutions of kaggle competitions,623
+Sentdex,[],[],[],,,0,,[],,,2017-02-10 14:10:30,sentdex/first-pass-through-data-w-3d-convnet,,First pass through Data w/ 3D ConvNet,615
+Chris X,[],[],[],,,0,,[],,,2018-10-26 19:58:57,docxian/explore-variable-impact-on-target,,Explore Variable Impact on Target,1
+MJ Bahmani,[],[],[],,,0,,[],,,2018-10-26 11:45:22,mjbahmani/python-iris-for-ml-from-start-to-finish,,Python+iris for ML from Start to Finish,5
+Jeremy Howard,[],[],[],,,0,,[],,,2018-02-03 19:44:11,jhoward/nb-svm-strong-linear-baseline,,NB-SVM strong linear baseline,611
+SRK,[],[],[],,,0,,[],,,2018-09-25 12:47:47,sudalairajkumar/simple-exploration-baseline-ga-customer-revenue,,Simple Exploration+Baseline - GA Customer Revenue,570
+DATAI,[],[],[],,,0,,[],,,2018-06-16 08:37:21,kanncaa1/feature-selection-and-data-visualization,,Feature Selection and Data Visualization,583
+Heads or Tails,[],[],[],,,0,,[],,,2018-08-13 16:28:08,headsortails/steering-wheel-of-fortune-porto-seguro-eda,,Steering Wheel of Fortune - Porto Seguro EDA,572
+DanB,[],[],[],,,0,,[],,,2018-07-26 19:16:27,dansbecker/handling-missing-values,,Handling Missing Values,572
+Illiyas,[],[],[],,,0,,[],,,2018-10-27 05:41:27,illliyas/complete-analysis-along-with-apriori,,Complete analysis along with Apriori,1
+Jing Feng,[],[],[],,,0,,[],,,2018-10-26 20:39:22,jfeng1023/gender-difference-in-south-park-episode-ratings,,Gender Difference in South Park Episode Ratings,0
+Lathwal,[],[],[],,,0,,[],,,2018-06-08 11:56:26,codename007/home-credit-complete-eda-feature-importance,,Home Credit : Complete EDA + Feature Importance ✓✓,559
+jinglebot,[],[],[],,,0,,[],,,2018-10-26 20:36:48,jinglebot/eda-by-a-beginner,,EDA by a Beginner,0
+Michal Bogacz,[],[],[],,,0,,[],,,2018-10-26 20:45:00,michau96/stars-distribution-by-continent,,Stars distribution by continent,0
+Mohamed Naas,[],[],[],,,0,,[],,,2018-10-26 00:51:41,bibs2091/diabetes-database-analysis-and-model-choosing,,Diabetes Database Analysis and model choosing ,11
+Katayoon Sarafrazi,[],[],[],,,0,,[],,,2018-10-26 20:25:16,ksarafrazi/advertisement,,Advertisement,0
+Sina,[],[],[],,,0,,[],,,2016-12-18 17:09:08,sinakhorami/titanic-best-working-classifier,,Titanic best working Classifier,533
+DATAI,[],[],[],,,0,,[],,,2018-09-15 18:46:25,kanncaa1/deep-learning-tutorial-for-beginners,,Deep Learning Tutorial for Beginners,525
+Ashwini Swain,[],[],[],,,0,,[],,,2018-03-07 17:18:09,ash316/novice-to-grandmaster,,Novice to Grandmaster,498
+Heads or Tails,[],[],[],,,0,,[],,,2018-10-16 22:34:41,headsortails/nyc-taxi-eda-update-the-fast-the-curious,,NYC Taxi EDA - Update: The fast & the curious,509
+codlife,[],[],[],,,0,,[],,,2018-10-26 02:34:24,codlife/baseline-with-xgb,,Baseline With XGB,12
+EivindStrømsvåg,[],[],[],,,0,,[],,,2018-10-26 12:34:25,eivindstroemsvaag/some-analysis-of-walmart-with-linear-regression,,Some analysis of Walmart with Linear Regression,1
+Raghu,[],[],[],,,0,,[],,,2018-10-26 20:09:20,raghuchaudhary/sms-spam-detection,,SMS Spam Detection,0
+Houssem Hosni,[],[],[],,,0,,[],,,2018-10-26 20:04:43,hosnihoussem/eda-on-haberman-cancer-survival-data-set,,EDA on Haberman cancer survival Data set,0
+DanB,[],[],[],,,0,,[],,,2018-07-25 21:52:04,dansbecker/xgboost,,XGBoost,463
+Helge Bjorland,[],[],[],,,0,,[],,,2017-01-28 19:54:58,helgejo/an-interactive-data-science-tutorial,,An Interactive Data Science Tutorial,445
+ColinMorris,[],[],[],,,0,,[],,,2018-06-11 02:56:58,colinmorris/learn-python-challenge-day-1,,Learn Python Challenge: Day 1,463
+DanB,[],[],[],,,0,,[],,,2018-10-19 16:48:25,dansbecker/permutation-importance,,Permutation Importance,449
+Erik Bruin,[],[],[],,,0,,[],,,2018-05-10 06:33:09,erikbruin/house-prices-lasso-xgboost-and-a-detailed-eda,,"House prices: Lasso, XGBoost, and a detailed EDA",439
+Santhosh Sharma Ananthramu,[],[],[],,,0,,[],,,2016-10-16 14:59:30,sharmasanthosh/exploratory-study-on-ml-algorithms,,Exploratory study on ML algorithms,459
+Ali Saeidi,[],[],[],,,0,,[],,,2018-10-26 22:13:34,alisaeidi92/items-that-are-likely-to-go-together-apriori,,Items that are likely to go together (Apriori),1
+Aguiar,[],[],[],,,0,,[],,,2018-09-27 05:52:12,jsaguiar/lightgbm-with-simple-features,,LightGBM with Simple Features,445
+Gilang Ardya,[],[],[],,,0,,[],,,2018-10-26 14:49:19,gilangardya/hmif-iit-challenge-dataset-2-baseline,,[HMIF IIT Challenge] Dataset 2 - Baseline,1
+Dimitrios Effrosynidis,[],[],[],,,0,,[],,,2018-10-09 11:18:30,deffro/eda-is-fun,,EDA is Fun!,385
+Aaron Johnson,[],[],[],,,0,,[],,,2018-10-26 19:46:42,aj65461/project-estimator-analysis,,Project Estimator Analysis,0
+Abhishek,[],[],[],,,0,,[],,,2018-07-24 20:28:10,abhishek/approaching-almost-any-nlp-problem-on-kaggle,,Approaching (Almost) Any NLP Problem on Kaggle,414
+SundarV,[],[],[],,,0,,[],,,2018-10-26 19:40:38,vsundar/amazon-reviews-nb,,Amazon_Reviews_NB,0
+BuryBuryZymon,[],[],[],,,0,,[],,,2017-09-17 13:33:16,maheshdadhich/strength-of-visualization-python-visuals-tutorial,,Strength of visualization-python visuals tutorial,430
+Erik Bruin,[],[],[],,,0,,[],,,2018-04-24 07:08:13,erikbruin/titanic-2nd-degree-families-and-majority-voting,,Titanic: 2nd degree families and majority voting,418
+Jagan,[],[],[],,,0,,[],,,2018-03-11 10:00:52,jagangupta/stop-the-s-toxic-comments-eda,,Stop the S@#$ - Toxic Comments EDA,423
+Stephen Bailey,[],[],[],,,0,,[],,,2018-02-01 21:40:10,stkbailey/teaching-notebook-for-total-imaging-newbies,,Teaching notebook for total imaging newbies,412
+Heads or Tails,[],[],[],,,0,,[],,,2018-09-12 20:07:56,headsortails/shopping-for-insights-favorita-eda,,Shopping for Insights - Favorita EDA,410
+DJ Sterling,[],[],[],,,0,,[],,,2018-10-03 19:41:21,dster/two-sigma-news-official-getting-started-kernel,,Two Sigma News Official Getting Started Kernel,307
+joparga3,[],[],[],,,0,,[],,,2016-12-17 09:03:25,joparga3/in-depth-skewed-data-classif-93-recall-acc-now,,In depth skewed data classif. (93% recall acc now),392
+SRK,[],[],[],,,0,,[],,,2017-06-02 04:20:53,sudalairajkumar/simple-exploration-notebook-instacart,,Simple Exploration Notebook - Instacart,400
+randy lao,[],[],[],,,0,,[],,,2018-01-05 03:42:27,randylaosat/predicting-employee-kernelover,,Predicting Employee Kernelover,385
+ArnavJain,[],[],[],,,0,,[],,,2017-04-11 15:58:41,arnavkj95/candidate-generation-and-luna16-preprocessing,,Candidate Generation and LUNA16 preprocessing,392
+SRK,[],[],[],,,0,,[],,,2017-02-10 03:04:05,sudalairajkumar/simple-exploration-notebook-2-connect,,Simple Exploration Notebook - 2σ Connect,390
+Baris Camli,[],[],[],,,0,,[],,,2018-10-26 08:54:06,mcamli/avocado,,Avocado,7
+OverFit,[],[],[],,,0,,[],,,2018-10-26 19:14:05,deadfit/kernel3bccbac0d0,,kernel3bccbac0d0,0
+Will Koehrsen,[],[],[],,,0,,[],,,2018-07-31 23:50:27,willkoehrsen/introduction-to-manual-feature-engineering,,Introduction to Manual Feature Engineering,383
+Heads or Tails,[],[],[],,,0,,[],,,2018-09-04 22:00:43,headsortails/pytanic,,Pytanic,382
+DATAI,[],[],[],,,0,,[],,,2018-09-10 19:52:09,kanncaa1/seaborn-tutorial-for-beginners,,Seaborn Tutorial for Beginners,360
+Poonam Ligade,[],[],[],,,0,,[],,,2018-07-09 09:53:52,poonaml/deep-neural-network-keras-way,,Deep Neural Network Keras way,380
+Abinash Singh,[],[],[],,,0,,[],,,2018-10-26 11:24:13,singh001avinash/restaurants-order-prediction-model-predection,,Restaurants Order Prediction_Model_Predection,1
+Rachael Tatman,[],[],[],,,0,,[],,,2018-02-21 00:54:05,rtatman/sql-scavenger-hunt-handbook,,SQL Scavenger Hunt Handbook,379
+DeveshMaheshwari,[],[],[],,,0,,[],,,2017-11-14 06:58:14,devm2024/keras-model-for-beginners-0-210-on-lb-eda-r-d,,Keras Model for Beginners (0.210 on LB)+EDA+R&D,376
+Julián Peller,[],[],[],,,0,,[],,,2018-09-14 18:44:48,julian3833/1-quick-start-read-csv-and-flatten-json-fields,,1 - Quick start: read csv and flatten json fields,334
+yulia,[],[],[],,,0,,[],,,2018-03-08 13:33:34,yuliagm/talkingdata-eda-plus-time-patterns,,TalkingData EDA plus time patterns,373
+Bojan Tunguz,[],[],[],,,0,,[],,,2018-03-20 15:10:01,tunguz/logistic-regression-with-words-and-char-n-grams,,Logistic regression with words and char n-grams,372
+DanB,[],[],[],,,0,,[],,,2018-02-27 13:58:38,dansbecker/learning-materials-on-kaggle,,Learning Materials on Kaggle,371
+Yury Kashnitskiy,[],[],[],,,0,,[],,,2018-04-05 06:47:46,kashnitsky/vowpal-wabbit-tutorial-blazingly-fast-learning,,Vowpal Wabbit tutorial: blazingly fast learning,369
+ColinMorris,[],[],[],,,0,,[],,,2018-07-10 22:47:25,colinmorris/functions-and-getting-help,,Functions and Getting Help,349
+DanB,[],[],[],,,0,,[],,,2018-01-22 00:36:58,dansbecker/using-categorical-data-with-one-hot-encoding,,Using Categorical Data with One Hot Encoding,348
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 04:50:22,kerneler/starter-best-places-to-pay-off-student-28cabdd8-0,,Starter: Best places to pay off student 28cabdd8-0,0
+SRK,[],[],[],,,0,,[],,,2017-06-03 13:29:40,sudalairajkumar/simple-exploration-notebook-mercedes,,Simple Exploration Notebook - Mercedes,361
+Faysal,[],[],[],,,0,,[],,,2018-10-25 06:47:04,eraaz1/a-comprehensive-guide-to-titanic-machine-learning,,A Comprehensive Guide to Titanic Machine Learning ,123
+SRK,[],[],[],,,0,,[],,,2018-04-27 12:54:58,sudalairajkumar/simple-exploration-baseline-notebook-avito,,Simple Exploration + Baseline Notebook - Avito,354
+Wesam Elshamy,[],[],[],,,0,,[],,,2018-06-09 20:42:39,wesamelshamy/trackml-problem-explanation-and-data-exploration,,TrackML Problem Explanation and Data Exploration,346
+Asmin,[],[],[],,,0,,[],,,2018-10-26 10:57:00,asminalev/pokemon-with-stats,,Pokemon with stats,1
+DATAI,[],[],[],,,0,,[],,,2018-07-29 16:37:47,kanncaa1/plotly-tutorial-for-beginners,,Plotly Tutorial for Beginners,333
+DSangeetha,[],[],[],,,0,,[],,,2018-10-26 16:48:13,devisangeetha/predicting-employee-churn,,Predicting Employee Churn,2
+beluga,[],[],[],,,0,,[],,,2017-09-17 12:08:35,gaborfodor/from-eda-to-the-top-lb-0-367,,From EDA to the Top (LB 0.367),339
+Praveen,[],[],[],,,0,,[],,,2018-10-26 18:44:16,dadayadav/rnn-in-tensorflow,,RNN_ in tensorflow,0
+Mhamed Jabri,[],[],[],,,0,,[],,,2018-02-28 08:57:35,mhajabri/what-do-kagglers-say-about-data-science,,What do Kagglers say about Data Science ?,332
+Ashwini Swain,[],[],[],,,0,,[],,,2018-03-02 05:02:32,ash316/terrorism-around-the-world,,Terrorism Around The World,329
+Shivam Bansal,[],[],[],,,0,,[],,,2018-05-07 05:19:32,shivamb/in-depth-analysis-visualisations-avito,,In-Depth Analysis & Visualisations - Avito,327
+Jeff Delaney,[],[],[],,,0,,[],,,2016-08-03 12:53:14,jeffd23/scikit-learn-ml-from-start-to-finish,,Scikit-Learn ML from Start to Finish,320
+Alpha Scorpii,[],[],[],,,0,,[],,,2018-10-26 10:36:34,alphascorpii/pathology-prediction,,Pathology Prediction,1
+Guy Zahavi,[],[],[],,,0,,[],,,2018-09-15 09:13:50,zahaviguy/what-are-lung-opacities,,What are lung opacities? ,308
+Heads or Tails,[],[],[],,,0,,[],,,2018-10-23 22:40:59,headsortails/wiki-traffic-forecast-exploration-wtf-eda,,Wiki Traffic Forecast Exploration - WTF EDA,301
+Zafar,[],[],[],,,0,,[],,,2018-03-30 00:46:52,fizzbuzz/beginner-s-guide-to-capsule-networks,,Beginner's Guide to Capsule Networks,316
+Shivam Kumar,[],[],[],,,0,,[],,,2018-10-26 10:33:51,shivam1600/simple-information-retrieval-using-tf-idf-and-lsa,,Simple Information Retrieval using TF-IDF and LSA,1
+Nadin Tamer,[],[],[],,,0,,[],,,2018-09-11 07:57:12,nadintamer/titanic-survival-predictions-beginner,,Titanic Survival Predictions (Beginner),305
+darkmabler,[],[],[],,,0,,[],,,2018-10-26 18:31:40,markrdabler/scoring-metric-template,,scoring_metric_template,0
+thie1e,[],[],[],,,0,,[],,,2015-12-13 23:23:13,thie1e/exploratory-analysis-rossmann,,Exploratory Analysis Rossmann,309
+Allunia,[],[],[],,,0,,[],,,2018-10-26 13:23:23,allunia/lighthouses-for-hidden-treasures-in-our-groceries,,Lighthouses for hidden treasures in our groceries,6
+rajnishkgaur,[],[],[],,,0,,[],,,2018-10-26 18:20:24,rajnishkgaur/digits-rajnishkgaur,,DIGITS_rajnishkgaur,0
+Bongo,[],[],[],,,0,,[],,,2018-01-24 08:43:28,sbongo/for-beginners-tackling-toxic-using-keras,,[For Beginners] Tackling Toxic Using Keras,305
+Poonam Ligade,[],[],[],,,0,,[],,,2017-05-02 17:16:38,poonaml/titanic-survival-prediction-end-to-end-ml-pipeline,,Titanic Survival Prediction End to End ML Pipeline,305
+Peter Hönigschmid,[],[],[],,,0,,[],,,2018-08-01 07:35:57,phoenigs/u-net-dropout-augmentation-stratification,,"U-net, dropout, augmentation, stratification",303
+NanoMathias,[],[],[],,,0,,[],,,2018-04-16 11:07:45,nanomathias/feature-engineering-importance-testing,,Feature Engineering & Importance Testing,302
+Pavan Sanagapati,[],[],[],,,0,,[],,,2018-10-26 06:49:55,pavansanagapati/simple-tutorial-on-how-to-handle-missing-data,,Simple Tutorial on How to handle missing data!!,133
+Troy Walters,[],[],[],,,0,,[],,,2017-05-13 15:15:59,captcalculator/a-very-extensive-sberbank-exploratory-analysis,,A Very Extensive Sberbank Exploratory Analysis,299
+Heads or Tails,[],[],[],,,0,,[],,,2018-06-29 22:59:01,headsortails/breaking-bank-santander-eda,,Breaking Bank - Santander EDA,297
+anokas,[],[],[],,,0,,[],,,2017-04-21 18:30:17,anokas/data-exploration-analysis,,Data Exploration & Analysis,297
+Albert van Breemen,[],[],[],,,0,,[],,,2018-08-27 08:30:58,breemen/nyc-taxi-fare-data-exploration,,NYC Taxi Fare - Data Exploration,273
+Jeffrey Mills,[],[],[],,,0,,[],,,2018-10-26 18:06:49,jlmsch1/systematic-treatment-of-equilibrium,,Systematic treatment of equilibrium,0
+olivier,[],[],[],,,0,,[],,,2018-05-30 11:34:50,ogrellier/good-fun-with-ligthgbm,,Good_fun_with_LigthGBM,286
+Alexander Firsov,[],[],[],,,0,,[],,,2018-10-25 18:44:56,alexfir/light-curves-visualization,,Light curves visualization,9
+Rachael Tatman,[],[],[],,,0,,[],,,2018-02-12 19:25:05,rtatman/sql-scavenger-hunt-day-1,,SQL Scavenger Hunt: Day 1,284
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 03:47:49,kerneler/starter-nhl-draft-picks-2009-2018-443461b9-0,,Starter: NHL Draft Picks 2009-2018 443461b9-0,0
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 03:46:15,kerneler/starter-titanic-historic-data-ac9ecffd-5,,Starter: Titanic Historic data ac9ecffd-5,0
+kxx,[],[],[],,,0,,[],,,2018-05-04 08:38:17,kailex/talkingdata-eda-and-class-imbalance,,TalkingData EDA and Class Imbalance,282
+DanB,[],[],[],,,0,,[],,,2018-01-22 00:44:20,dansbecker/data-leakage,,Data Leakage,259
+Mohsin hasan,[],[],[],,,0,,[],,,2018-07-21 06:29:45,tezdhar/breaking-lb-fresh-start,,Breaking LB - Fresh start,276
+ColinMorris,[],[],[],,,0,,[],,,2018-06-13 17:00:37,colinmorris/learn-python-challenge-day-2,,Learn Python Challenge: Day 2,276
+Rachael Tatman,[],[],[],,,0,,[],,,2018-03-30 21:18:36,rtatman/data-cleaning-challenge-scale-and-normalize-data,,Data Cleaning Challenge: Scale and Normalize Data,274
+DanB,[],[],[],,,0,,[],,,2018-04-20 18:43:12,dansbecker/intro-to-deep-learning-and-computer-vision,,Intro to Deep Learning and Computer Vision,272
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 03:37:27,kerneler/starter-countrycode-b32c7455-8,,Starter: countrycode b32c7455-8,0
+Oleg Trott,[],[],[],,,0,,[],,,2017-04-07 19:19:15,olegtrott/the-perfect-score-script,,"The ""Perfect Score"" Script",271
+Tianqi Chen,[],[],[],,,0,,[],,,2015-05-08 17:10:29,tqchen/understanding-xgboost-model-on-otto-data,,Understanding XGBoost Model on Otto Data,269
+anokas,[],[],[],,,0,,[],,,2017-04-07 17:22:48,anokas/exploratory-data-analysis-4,,Exploratory Data Analysis,265
+cast42,[],[],[],,,0,,[],,,2016-04-23 13:47:30,cast42/exploring-features,,Exploring features,265
+Awani Gujar,[],[],[],,,0,,[],,,2018-10-26 17:54:23,awanig/insurance,,Insurance,0
+Tanner Carbonati,[],[],[],,,0,,[],,,2017-07-15 19:36:06,tannercarbonati/detailed-data-analysis-ensemble-modeling,,Detailed Data Analysis & Ensemble Modeling,254
+Andre Sionek,[],[],[],,,0,,[],,,2018-10-16 20:10:12,andresionek/geospatial-analysis-of-brazilian-e-commerce,,Geospatial Analysis of Brazilian E-Commerce,53
+FabienDaniel,[],[],[],,,0,,[],,,2017-11-27 08:13:28,fabiendaniel/film-recommendation-engine,,Film recommendation engine,262
+Pavan Sanagapati,[],[],[],,,0,,[],,,2018-10-27 05:44:54,pavansanagapati/simple-exploration-lgbm-model-lb-1-4187,,Simple Exploration + LGBM Model LB 1.4187,101
+Zafar,[],[],[],,,0,,[],,,2018-04-12 05:41:34,fizzbuzz/beginner-s-guide-to-audio-data,,Beginner's Guide to Audio Data,260
+Lathwal,[],[],[],,,0,,[],,,2018-05-14 17:23:55,codename007/a-very-extensive-kiva-exploratory-analysis,,A Very Extensive Kiva Exploratory Analysis ✓✓,260
+Kevin Mader,[],[],[],,,0,,[],,,2018-01-17 09:38:56,kmader/nuclei-overview-to-submission,,Nuclei Overview to Submission,259
+Ashwini Swain,[],[],[],,,0,,[],,,2017-08-31 06:00:20,ash316/ml-from-scratch-with-iris,,ML from Scratch with IRIS!!,227
+Binu ,[],[],[],,,0,,[],,,2018-10-26 14:44:16,biphili/food-through-a-bakery,,Food through a Bakery,3
+Mechmet Kasap,[],[],[],,,0,,[],,,2018-10-26 00:56:01,mehmetkasap/machine-learning-2-gender-recognition-by-voice,,Machine Learning #2 (Gender Recognition by Voice) ,6
+Alihan Tabak,[],[],[],,,0,,[],,,2018-10-26 16:32:14,alihantabak/6-classification-methods-in-machine-learning,,6 Classification Methods in Machine Learning,1
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 03:22:58,kerneler/starter-sca2-diffusion-tensor-imaging-4ea25d6f-7,,Starter: SCA2 Diffusion Tensor Imaging 4ea25d6f-7,0
+beluga,[],[],[],,,0,,[],,,2017-12-16 16:32:44,gaborfodor/dog-breed-pretrained-keras-models-lb-0-3,,Dog Breed - Pretrained keras models(LB 0.3) ,253
+anokas,[],[],[],,,0,,[],,,2016-10-09 19:48:58,anokas/outbrain-eda,,Outbrain EDA,251
+Erik Bruin,[],[],[],,,0,,[],,,2018-10-11 09:34:28,erikbruin/google-analytics-eda-lightgbm-screenshots,,Google Analytics EDA + LightGBM + Screenshots,239
+DanB,[],[],[],,,0,,[],,,2018-04-04 12:21:16,dansbecker/learn-machine-learning,,Learn Machine Learning,249
+anttip,[],[],[],,,0,,[],,,2018-04-18 10:38:05,anttip/talkingdata-wordbatch-fm-ftrl-lb-0-9769,,TalkingData Wordbatch FM_FTRL LB:0.9769,247
+noobhound,[],[],[],,,0,,[],,,2017-11-24 09:42:25,knowledgegrappler/a-simple-nn-solution-with-keras-0-48611-pl,,A simple nn solution with Keras (~0.48611 PL),246
+Peter,[],[],[],,,0,,[],,,2018-08-27 14:52:22,peterchang77/exploratory-data-analysis,,Exploratory Data Analysis,231
+Andrew Lukyanenko,[],[],[],,,0,,[],,,2018-10-17 14:45:32,artgor/eda-feature-engineering-and-everything,,"EDA, feature engineering and everything",180
+Heads or Tails,[],[],[],,,0,,[],,,2018-08-24 23:44:23,headsortails/personalised-medicine-eda-with-tidy-r,,Personalised Medicine - EDA with tidy R,239
+Manju Madhav,[],[],[],,,0,,[],,,2018-10-26 16:14:16,manjumadhav/mushroom-dataset,,Mushroom Dataset,1
+Luca Basanisi,[],[],[],,,0,,[],,,2018-10-25 22:10:27,lucabasa/checking-quickly-the-quality-of-your-data,,Checking quickly the quality of your data.,4
+SRK,[],[],[],,,0,,[],,,2016-12-09 09:55:42,sudalairajkumar/simple-exploration-notebook-5,,Simple Exploration Notebook,234
+Pranav Pandya,[],[],[],,,0,,[],,,2018-03-31 05:03:34,pranav84/talkingdata-eda-to-model-evaluation-lb-0-9683,,TalkingData: EDA to Model Evaluation | LB: 0.9683,232
+SRK,[],[],[],,,0,,[],,,2017-05-02 13:08:54,sudalairajkumar/simple-exploration-notebook-sberbank,,Simple Exploration Notebook - Sberbank,232
+Oğuzhan Kurtuluş,[],[],[],,,0,,[],,,2018-10-26 15:09:17,kurtoscience/some-function-practices,,Some Function Practices,2
+DATAI,[],[],[],,,0,,[],,,2018-09-09 13:39:20,kanncaa1/statistical-learning-tutorial-for-beginners,,Statistical Learning Tutorial for Beginners,211
+Mahadev Maitri,[],[],[],,,0,,[],,,2018-10-26 16:06:51,mahadevmm9/earthquake-prediction,,Earthquake Prediction,1
+olivier,[],[],[],,,0,,[],,,2018-06-14 06:44:06,ogrellier/feature-selection-with-null-importances,,Feature Selection with Null Importances,228
+Vladimir Demidov,[],[],[],,,0,,[],,,2018-02-26 19:02:25,yekenot/pooled-gru-fasttext,,Pooled GRU + FastText,228
+Andy Harless,[],[],[],,,0,,[],,,2017-10-31 02:14:50,aharless/xgboost-cv-lb-284,,XGBoost CV (LB .284),227
+Rachael Tatman,[],[],[],,,0,,[],,,2018-04-11 21:56:06,rtatman/welcome-to-data-science-in-r,,Welcome to Data Science in R,226
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-01-23 20:24:14,residentmario/welcome-to-data-visualization,,Welcome to data visualization,215
+Idris,[],[],[],,,0,,[],,,2018-10-26 17:02:30,iham97/deepscapssm,,DeepScapSSM,0
+ColinMorris,[],[],[],,,0,,[],,,2018-07-10 22:47:28,colinmorris/booleans-and-conditionals,,Booleans and Conditionals,194
+Alex,[],[],[],,,0,,[],,,2018-07-08 22:33:24,alexpengxiao/preprocessing-model-averaging-by-xgb-lgb-1-39,,"preprocessing, model averaging by xgb + lgb [1.39]",224
+Philipp Schmidt,[],[],[],,,0,,[],,,2017-04-14 22:37:26,philschmidt/quora-eda-model-selection-roc-pr-plots,,"Quora EDA & Model selection (ROC, PR plots)",223
+bsivavenu,[],[],[],,,0,,[],,,2018-08-08 21:26:08,bsivavenu/house-price-calculation-methods-for-beginners,,House Price Calculation  methods for beginners,212
+Pavan Raj,[],[],[],,,0,,[],,,2018-07-14 10:14:25,pavanraj159/fifa-world-cup-1930-to-2014-data-analysis,,FIFA  World Cup (1930 to 2014) - Data analysis,221
+DATAI,[],[],[],,,0,,[],,,2018-06-19 16:46:53,kanncaa1/time-series-prediction-tutorial-with-eda,,Time Series Prediction Tutorial with EDA,221
+inversion,[],[],[],,,0,,[],,,2018-07-30 17:45:35,inversion/run-length-decoding-quick-start,,Run Length Decoding - Quick Start,220
+Konstantin Lopuhin,[],[],[],,,0,,[],,,2017-12-17 19:51:48,lopuhin/eli5-for-mercari,,ELI5 for Mercari,218
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-09-19 21:30:13,residentmario/univariate-plotting-with-pandas,,Univariate plotting with pandas,218
+Bert Carremans,[],[],[],,,0,,[],,,2017-10-29 14:08:38,bertcarremans/data-preparation-exploration,,Data Preparation & Exploration,218
+DanB,[],[],[],,,0,,[],,,2018-01-22 02:09:12,dansbecker/pipelines,,Pipelines,217
+Omri Goldstein,[],[],[],,,0,,[],,,2017-12-09 14:50:15,drgilermo/dynamics-of-new-york-city-animation,,Dynamics of New York city - Animation,217
+Niklas Donges,[],[],[],,,0,,[],,,2018-08-23 10:13:11,niklasdonges/end-to-end-project-with-python,,End to End Project with Python,216
+Jeff Delaney,[],[],[],,,0,,[],,,2016-09-04 18:20:48,jeffd23/10-classifier-showdown-in-scikit-learn,,10 Classifier Showdown in Scikit-Learn,216
+DanB,[],[],[],,,0,,[],,,2018-09-27 21:55:58,dansbecker/exercise-build-your-first-machine-learning-model,,Exercise: Build Your First Machine Learning Model,215
+Carlo Lepelaars,[],[],[],,,0,,[],,,2018-10-26 13:06:36,carlolepelaars/exploration-of-kickstarter-data-work-in-progress,,Exploration of Kickstarter Data (Work in Progress),4
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 02:42:25,kerneler/starter-rsna-stage2-preprocessed-test-bd5d6403-3,,Starter: RSNA Stage2 Preprocessed Test bd5d6403-3,0
+Siddharth Yadav,[],[],[],,,0,,[],,,2018-08-02 14:42:50,thebrownviking20/everything-you-can-do-with-a-time-series,,Everything you can do with a time series,213
+olivier,[],[],[],,,0,,[],,,2018-07-02 08:41:58,ogrellier/lighgbm-with-selected-features,,LighGBM_with_Selected_Features,213
+Konstantin Lopuhin,[],[],[],,,0,,[],,,2018-02-21 07:59:37,lopuhin/mercari-golf-0-3875-cv-in-75-loc-1900-s,,"Mercari Golf: 0.3875 CV in 75 LOC, 1900 s",213
+Oscar Takeshita,[],[],[],,,0,,[],,,2018-06-12 16:58:44,pliptor/divide-and-conquer-0-82296,,Divide and Conquer [0.82296],213
+"Alan ""AJ"" Pryor, Ph.D.",[],[],[],,,0,,[],,,2016-12-22 05:45:00,apryor6/detailed-cleaning-visualization-python,,Detailed Cleaning/Visualization (Python),213
+Mechmet Kasap,[],[],[],,,0,,[],,,2018-10-27 07:06:02,mehmetkasap/machine-learning-algorithms-3-knn-algorithm,,Machine Learning Algorithms # 3: KNN Algorithm,0
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 02:41:56,kerneler/starter-rsna-stage2-preprocessed-train-e5750c2a-c,,Starter: RSNA Stage2 Preprocessed Train e5750c2a-c,0
+Jeremy Howard,[],[],[],,,0,,[],,,2018-01-28 00:45:39,jhoward/improved-lstm-baseline-glove-dropout,,Improved LSTM baseline: GloVe + dropout,212
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 02:40:31,kerneler/starter-rsna-stage1-archived-inputs-43210649-3,,Starter: rsna stage1 archived inputs 43210649-3,0
+DanB,[],[],[],,,0,,[],,,2018-10-19 16:48:26,dansbecker/partial-plots,,Partial Plots,211
+Brian Farrar,[],[],[],,,0,,[],,,2017-09-30 15:15:49,jbfarrar/exploratory-data-analysis-and-example-generation,,Exploratory Data Analysis and Example Generation,201
+ksayantani,[],[],[],,,0,,[],,,2018-10-26 13:46:47,ksayantani/cuisine-analysis,,Cuisine Analysis,3
+Troy Walters,[],[],[],,,0,,[],,,2017-12-05 17:26:30,captcalculator/a-very-extensive-mercari-exploratory-analysis,,A Very Extensive Mercari Exploratory Analysis,207
+Kevin Mader,[],[],[],,,0,,[],,,2018-08-27 22:07:58,kmader/lung-opacity-overview,,Lung Opacity Overview,196
+Jack (Jiaxin) Shao,[],[],[],,,0,,[],,,2018-09-08 21:39:54,shaojiaxin/u-net-with-simple-resnet-blocks-v2-new-loss,,U-net with simple ResNet Blocks v2 (New loss),203
+Jiazhen Xi,[],[],[],,,0,,[],,,2018-07-19 10:46:12,johnfarrell/giba-s-property-extended-extended-result,,Giba's Property (Extended Extended Result),203
+FabienDaniel,[],[],[],,,0,,[],,,2017-10-03 17:43:13,fabiendaniel/predicting-flight-delays-tutorial,,Predicting flight delays [Tutorial],203
+Pavan Sanagapati,[],[],[],,,0,,[],,,2018-10-26 05:49:50,pavansanagapati/anomaly-detection-credit-card-fraud-analysis,,Anomaly Detection - Credit Card Fraud Analysis,109
+Janio Alexander Bachmann,[],[],[],,,0,,[],,,2018-09-04 19:34:46,janiobachmann/credit-fraud-dealing-with-imbalanced-datasets,,Credit Fraud  || Dealing with Imbalanced Datasets,180
+CVxTz,[],[],[],,,0,,[],,,2018-01-19 21:26:53,CVxTz/keras-bidirectional-lstm-baseline-lb-0-069,,Keras - Bidirectional LSTM baseline ( lb 0.069),199
+Heads or Tails,[],[],[],,,0,,[],,,2018-06-18 18:45:30,headsortails/should-i-stay-or-should-i-go-kkbox-eda,,Should I stay or should I go? - KKBox EDA,189
+Megan Risdal,[],[],[],,,0,,[],,,2016-04-04 14:24:16,mrisdal/quick-dirty-randomforest,,Quick & Dirty RandomForest,198
+Darragh,[],[],[],,,0,,[],,,2015-08-31 13:29:31,darraghdog/explore-springleaf,,Digging into Springleaf data,197
+randy lao,[],[],[],,,0,,[],,,2018-07-14 13:50:08,randylaosat/simple-exploratory-data-analysis-passnyc,,Simple Exploratory Data Analysis - PASSNYC,196
+MuonNeutrino,[],[],[],,,0,,[],,,2017-08-02 04:08:56,muonneutrino/wikipedia-traffic-data-exploration,,Wikipedia Traffic Data Exploration,196
+Peter,[],[],[],,,0,,[],,,2018-08-07 10:02:18,pestipeti/explanation-of-scoring-metric,,Explanation of Scoring Metric,185
+Bukun,[],[],[],,,0,,[],,,2018-05-08 05:18:09,ambarish/kiva-data-analysis-w-naive-poverty-metric,,Kiva Data Analysis w/ Naive Poverty Metric,195
+Will Koehrsen,[],[],[],,,0,,[],,,2018-06-17 00:21:22,willkoehrsen/automated-feature-engineering-basics,,Automated Feature Engineering Basics ,194
+Shivam Bansal,[],[],[],,,0,,[],,,2018-05-14 03:54:15,shivamb/ideas-for-image-features-and-image-quality,,Ideas for Image Features and Image Quality,194
+Jeff Delaney,[],[],[],,,0,,[],,,2016-09-04 00:27:26,jeffd23/catdognet-keras-convnet-starter,,CatdogNet - Keras Convnet Starter,194
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 02:19:56,kerneler/starter-studydata-481babf3-d,,Starter: studyData 481babf3-d,0
+Shivam Bansal,[],[],[],,,0,,[],,,2018-06-27 02:00:27,shivamb/homecreditrisk-extensive-eda-baseline-0-772,,HomeCreditRisk: Extensive EDA + Baseline [0.772],193
+DanB,[],[],[],,,0,,[],,,2018-01-22 00:39:40,dansbecker/partial-dependence-plots,,Partial Dependence Plots,193
+João Pedro Peinado,[],[],[],,,0,,[],,,2018-03-31 14:59:10,joaopmpeinado/talkingdata-xgboost-lb-0-966,,TalkingData XGBoost - LB: 0.966,192
+anokas,[],[],[],,,0,,[],,,2018-03-05 22:44:23,anokas/talkingdata-adtracking-eda,,TalkingData AdTracking EDA,192
+Heads or Tails,[],[],[],,,0,,[],,,2018-08-21 22:08:05,headsortails/tidy-titarnic,,Tidy TitaRnic,189
+MichaelApers,[],[],[],,,0,,[],,,2018-09-27 19:27:32,michaelapers/the-plasticc-astronomy-starter-kit,,"The PLAsTiCC Astronomy ""Starter Kit""",138
+Kevin Mader,[],[],[],,,0,,[],,,2018-10-19 09:51:40,kmader/baseline-u-net-model-part-1,,Baseline U-Net Model (Part 1),188
+anokas,[],[],[],,,0,,[],,,2016-11-15 08:05:05,anokas/finding-boatids,,Finding BoatIDs,178
+ColinMorris,[],[],[],,,0,,[],,,2018-07-10 22:47:29,colinmorris/loops-and-list-comprehensions,,Loops and List Comprehensions,167
+Ashwini Swain,[],[],[],,,0,,[],,,2018-06-11 08:47:49,ash316/let-s-play-cricket,,Let's Play Cricket,187
+Luis Andre Dutra e Silva,[],[],[],,,0,,[],,,2018-07-19 17:32:14,mindcool/unrolling-of-helices-outliers-removal,,Unrolling of helices + outliers removal,186
+Kuan-Hao Huang,[],[],[],,,0,,[],,,2018-10-26 16:10:51,khhuang/same-continent-similar-policies,,Same continent = similar policies? ,0
+Troy Walters,[],[],[],,,0,,[],,,2018-09-22 00:39:08,captcalculator/a-very-extensive-gstore-exploratory-analysis,,A Very Extensive GStore Exploratory Analysis,185
+Lathwal,[],[],[],,,0,,[],,,2018-05-29 02:22:14,codename007/donorchoose-complete-eda-time-series-analysis,,DonorChoose: Complete EDA + Time Series Analysis✓✓,184
+DanB,[],[],[],,,0,,[],,,2018-01-22 00:42:53,dansbecker/cross-validation,,Cross-Validation,174
+cc05,[],[],[],,,0,,[],,,2017-02-07 07:00:01,chenjx1005/physical-meanings-of-technical-20-30,,"physical meanings of technical_20, 30",184
+Currie32,[],[],[],,,0,,[],,,2017-03-29 04:49:28,currie32/predicting-fraud-with-tensorflow,,Predicting Fraud with TensorFlow,183
+ColinMorris,[],[],[],,,0,,[],,,2018-06-14 05:12:13,colinmorris/learn-python-challenge-day-3,,Learn Python Challenge: Day 3,181
+SRK,[],[],[],,,0,,[],,,2018-03-19 07:07:04,sudalairajkumar/simple-exploration-notebook-kiva,,Simple Exploration Notebook - Kiva,181
+Gabriel Preda,[],[],[],,,0,,[],,,2018-10-26 14:17:33,gpreda/google-analytics-customer-revenue-extensive-eda,,Google Analytics Customer Revenue  Extensive EDA,27
+SungraeCho,[],[],[],,,0,,[],,,2018-10-26 16:12:33,ecardin/week-2-titanic-survival,,[Week 2] Titanic Survival,0
+Pranav Pandya,[],[],[],,,0,,[],,,2018-05-09 16:42:36,pranav84/a-beginner-s-guide-to-cern-s-trackml-challenge,,A Beginner's Guide to CERN's TrackML Challenge,179
+Pranav Pandya,[],[],[],,,0,,[],,,2018-03-23 08:16:31,pranav84/lightgbm-fixing-unbalanced-data-lb-0-9680,,LightGBM (Fixing unbalanced data) ,179
+Ben Hamner,[],[],[],,,0,,[],,,2016-09-18 21:28:57,benhamner/random-forest-benchmark-r,,Random Forest Benchmark (R),179
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 01:59:31,kerneler/starter-test1234-0636c4ca-d,,Starter: Test1234 0636c4ca-d,0
+Will Koehrsen,[],[],[],,,0,,[],,,2018-07-09 00:20:48,willkoehrsen/automated-model-tuning,,Automated Model Tuning,178
+Lathwal,[],[],[],,,0,,[],,,2018-05-12 14:38:57,codename007/avito-eda-fe-time-series-dt-visualization,,"Avito EDA, FE, Time Series, DT Visualization ✓✓",178
+Pavan Raj,[],[],[],,,0,,[],,,2018-10-09 16:19:07,pavanraj159/telecom-customer-churn-prediction,,Telecom Customer Churn Prediction,167
+olivier,[],[],[],,,0,,[],,,2018-10-01 04:33:52,ogrellier/teach-lightgbm-to-sum-predictions,,Teach_LightGBM_to_Sum_Predictions,157
+SRK,[],[],[],,,0,,[],,,2017-12-02 12:13:47,sudalairajkumar/simple-feature-engg-notebook-spooky-author,,Simple Feature Engg Notebook - Spooky Author,177
+Alex Ozerin,[],[],[],,,0,,[],,,2017-11-19 04:36:25,alexozerin/end-to-end-baseline-tf-estimator-lb-0-72,,End-to-end baseline TF Estimator LB 0.72,176
+Selfish Gene,[],[],[],,,0,,[],,,2017-09-21 08:54:59,selfishgene/analyzing-soccer-player-faces,,Analyzing Soccer Player Faces,176
+DATAI,[],[],[],,,0,,[],,,2018-06-03 07:19:43,kanncaa1/does-alcohol-affect-success,,Does Alcohol Affect Success,174
+JPHwang,[],[],[],,,0,,[],,,2017-02-21 05:25:15,jph84562/the-ugly-truth-of-people-decisions-in-speed-dating,,The Ugly Truth of People Decisions in Speed Dating,174
+dune_dweller,[],[],[],,,0,,[],,,2016-08-05 10:28:37,dvasyukova/a-linear-model-on-apps-and-labels,,A linear model on apps and labels,173
+Shivam Bansal,[],[],[],,,0,,[],,,2018-09-21 03:02:22,shivamb/how-autoencoders-work-intro-and-usecases,,How Autoencoders Work: Intro and UseCases,172
+Shivam Bansal,[],[],[],,,0,,[],,,2018-05-30 18:28:55,shivamb/a-visual-and-insightful-journey-donorschoose,,!! A Visual and Insightful Journey - DonorsChoose,172
+Vitaly Byrachonok,[],[],[],,,0,,[],,,2018-10-26 12:27:31,byrachonok/short-simple-code-for-show-quick-draw-data,,"Short simple code for show ""Quick, Draw"" data",4
+Heads or Tails,[],[],[],,,0,,[],,,2018-09-06 00:36:56,headsortails/treemap-house-of-horror-spooky-eda-lda-features,,Treemap House of Horror: Spooky EDA/LDA/Features,171
+anokas,[],[],[],,,0,,[],,,2016-08-05 16:48:26,anokas/time-travel-eda,,Time Travel (EDA),171
+JMT5802,[],[],[],,,0,,[],,,2016-09-07 21:40:00,jimthompson/ensemble-model-stacked-model-example,,Ensemble Model:  Stacked Model Example,170
+arnaud demytt,[],[],[],,,0,,[],,,2015-07-02 16:09:20,ademyttenaere/0-2748-with-rf-and-log-transformation,,0.2748 with RF and log transformation,170
+DSEverything,[],[],[],,,0,,[],,,2017-11-30 02:02:45,dongxu027/explore-stacking-lb-0-1463,,Explore Stacking (LB 0.1463),168
+Bruno G. do Amaral,[],[],[],,,0,,[],,,2018-09-27 17:11:53,bguberfain/a-simple-model-using-the-market-and-news-data,,A simple model - using the market and news data,128
+Heads or Tails,[],[],[],,,0,,[],,,2018-06-27 16:08:36,headsortails/mercedas-update2-intrinsic-noise,,MercEDAs - update2 - intrinsic noise,167
+Andrew Gelé,[],[],[],,,0,,[],,,2016-08-30 18:29:25,ndrewgele/visualizing-pok-mon-stats-with-seaborn,,Visualizing Pokémon Stats with Seaborn,167
+ADM,[],[],[],,,0,,[],,,2018-05-12 05:57:27,arjundas/simpleanalysis-for-kiva-its-time-for-africa,,SimpleAnalysis for KIVA (Its time for Africa!!!),166
+DATAI,[],[],[],,,0,,[],,,2018-06-18 04:20:34,kanncaa1/tutorial-pca-intuition-and-image-completion,,Tutorial: PCA Intuition and Image Completion,166
+Jordan Tremoureux,[],[],[],,,0,,[],,,2017-12-05 09:41:39,jtremoureux/map-visualizations-with-external-shapefile,,Map visualizations with external shapefile,166
+DanB,[],[],[],,,0,,[],,,2018-04-20 18:48:06,dansbecker/building-models-from-convolutions,,Building Models from Convolutions,165
+Nick,[],[],[],,,0,,[],,,2018-10-26 13:09:20,nnnnick/do-we-drink-more-coffee-during-the-week,,Do We Drink More Coffee During the Week?,8
+Darryl,[],[],[],,,0,,[],,,2018-10-26 10:59:21,darryldias/data-exploration-dd8,,Data Exploration - DD8,5
+NanoMathias,[],[],[],,,0,,[],,,2018-07-02 10:43:57,nanomathias/distribution-of-test-vs-training-data,,Distribution of Test vs. Training data,164
+Jeremy Howard,[],[],[],,,0,,[],,,2018-02-03 19:50:59,jhoward/minimal-lstm-nb-svm-baseline-ensemble,,Minimal LSTM + NB-SVM baseline ensemble,164
+Vivek Srinivasan,[],[],[],,,0,,[],,,2017-04-23 04:54:22,viveksrinivasan/eda-ensemble-model-top-10-percentile,,EDA & Ensemble Model (Top 10 Percentile) ,164
+Philipp Schmidt,[],[],[],,,0,,[],,,2017-04-12 21:00:53,philschmidt/cervix-eda-model-selection,,Cervix EDA & Model selection,163
+Jonne,[],[],[],,,0,,[],,,2018-09-04 12:07:42,jonnedtc/cnn-segmentation-connected-components,,CNN Segmentation + connected components,162
+Pavan Raj,[],[],[],,,0,,[],,,2018-07-06 07:21:14,pavanraj159/loan-repayers-v-s-loan-defaulters-home-credit,,Loan repayers   v/s Loan defaulters - HOME CREDIT,162
+Arun Palaniappan,[],[],[],,,0,,[],,,2018-10-27 02:22:24,arunpalaniappan/neural-networks-and-their-comparison,,Neural Networks and their Comparison,0
+MJ Bahmani,[],[],[],,,0,,[],,,2018-10-24 19:20:44,mjbahmani/10-steps-to-become-a-data-scientist,,10 Steps to Become a Data Scientist,96
+Peter Grenholm,[],[],[],,,0,,[],,,2017-05-01 14:36:46,toregil/welcome-to-deep-learning-cnn-99,,Welcome to deep learning (CNN 99%),162
+DJ Sterling,[],[],[],,,0,,[],,,2018-07-25 02:04:06,dster/nyc-taxi-fare-starter-kernel-simple-linear-model,,NYC Taxi Fare Starter Kernel - Simple Linear Model,160
+Niraj Verma,[],[],[],,,0,,[],,,2017-01-12 18:47:03,nirajvermafcb/principal-component-analysis-explained,,Principal Component Analysis explained,150
+Li Li,[],[],[],,,0,,[],,,2017-02-19 18:46:57,aikinogard/random-forest-starter-with-numerical-features,,Random Forest Starter with numerical features,159
+ColinMorris,[],[],[],,,0,,[],,,2018-07-10 22:30:17,colinmorris/lists,,Lists,147
+Serg Lavrikov,[],[],[],,,0,,[],,,2018-02-13 15:01:49,rumbok/ridge-lb-0-41944,,Ridge (LB 0.41943),157
+DATAI,[],[],[],,,0,,[],,,2018-05-26 21:53:34,kanncaa1/roc-curve-with-k-fold-cv,,ROC Curve with k-Fold CV,157
+Human Analog,[],[],[],,,0,,[],,,2017-10-06 09:06:26,humananalog/keras-generator-for-reading-directly-from-bson,,Keras generator for reading directly from BSON,157
+Sergei Neviadomski,[],[],[],,,0,,[],,,2018-01-30 03:20:01,neviadomski/how-to-get-to-top-25-with-simple-model-sklearn,,How to get to TOP 25% with Simple Model (sklearn),157
+Rafael Alencar,[],[],[],,,0,,[],,,2017-11-15 18:42:18,rafjaa/resampling-strategies-for-imbalanced-datasets,,Resampling strategies for imbalanced datasets,116
+Selfish Gene,[],[],[],,,0,,[],,,2017-09-16 07:52:29,selfishgene/yellow-cabs-tell-the-story-of-new-york-city,,Yellow Cabs tell The Story of New York City,156
+kxx,[],[],[],,,0,,[],,,2018-07-03 23:11:53,kailex/tidy-xgb-all-tables-0-796,,tidy_xgb - all_tables [0.796],155
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-09-19 21:36:58,residentmario/plotting-with-seaborn,,Plotting with seaborn,134
+ML,[],[],[],,,0,,[],,,2018-09-15 22:39:48,mrlong/r-flatten-json-columns-to-make-single-data-frame,,R - Flatten JSON columns to make single data frame,154
+chongjiujjin,[],[],[],,,0,,[],,,2018-03-17 01:56:51,chongjiujjin/capsule-net-with-gru,,Capsule net with GRU,153
+Vladimir Demidov,[],[],[],,,0,,[],,,2017-10-26 22:07:16,yekenot/simple-stacker-lb-0-284,,Simple Stacker LB 0.284,153
+Manish Kumar,[],[],[],,,0,,[],,,2017-05-30 15:30:18,gargmanish/basic-machine-learning-with-cancer,,Basic Machine Learning with Cancer,153
+Jagan,[],[],[],,,0,,[],,,2018-03-02 18:21:54,jagangupta/time-series-basics-exploring-traditional-ts,,Time series Basics : Exploring traditional TS ,152
+Rachael Tatman,[],[],[],,,0,,[],,,2018-03-27 16:47:15,rtatman/manipulating-data-with-the-tidyverse,,Manipulating Data with the Tidyverse,152
+Dr. James Bond,[],[],[],,,0,,[],,,2018-06-29 21:55:14,agostontorok/soccer-world-cup-2018-winner,,Soccer World Cup 2018 Winner,151
+Heads or Tails,[],[],[],,,0,,[],,,2018-06-19 00:44:23,headsortails/an-educated-guess-update-feature-engineering,,An Educated Guess - Update: Feature Engineering,151
+FabienDaniel,[],[],[],,,0,,[],,,2018-09-21 20:25:08,fabiendaniel/customer-segmentation,,Customer Segmentation,141
+Anna Montoya,[],[],[],,,0,,[],,,2018-05-18 20:39:59,annavictoria/ml-friendly-public-datasets,,ML-friendly Public Datasets,150
+Kevin Mader,[],[],[],,,0,,[],,,2017-11-03 08:09:46,kmader/capsulenet-on-mnist,,CapsuleNet on MNIST,150
+Alexander Kireev,[],[],[],,,0,,[],,,2018-03-25 20:32:56,alexanderkireev/deep-learning-support-9663,,Deep learning support [.9663],149
+Julien Heiduk,[],[],[],,,0,,[],,,2018-04-13 09:41:51,zoupet/predictive-analysis-with-different-approaches,,Predictive Analysis with different approaches,149
+"Alan ""AJ"" Pryor, Ph.D.",[],[],[],,,0,,[],,,2016-12-22 13:23:01,apryor6/detailed-cleaning-visualization,,Detailed Cleaning/Visualization,149
+Lathwal,[],[],[],,,0,,[],,,2018-05-05 04:33:27,codename007/a-very-extensive-landmark-exploratory-analysis,,A Very Extensive Landmark  Exploratory Analysis,148
+Janio Alexander Bachmann,[],[],[],,,0,,[],,,2018-08-21 20:21:48,janiobachmann/lending-club-risk-analysis-and-metrics,,Lending Club || Risk Analysis and Metrics,138
+Kevin Mader,[],[],[],,,0,,[],,,2018-10-02 11:06:05,kmader/quickdraw-baseline-lstm-reading-and-submission,,QuickDraw Baseline LSTM Reading and Submission,107
+Will Koehrsen,[],[],[],,,0,,[],,,2018-06-22 01:21:29,willkoehrsen/introduction-to-feature-selection,,Introduction to Feature Selection,147
+ColinMorris,[],[],[],,,0,,[],,,2018-06-14 03:26:03,colinmorris/learn-python-challenge-day-4,,Learn Python Challenge: Day 4,147
+DimitriF,[],[],[],,,0,,[],,,2017-10-28 23:06:02,dimitrif/domain-knowledge,,Domain knowledge,147
+Rachael Tatman,[],[],[],,,0,,[],,,2018-03-30 21:17:59,rtatman/data-cleaning-challenge-parsing-dates,,Data Cleaning Challenge: Parsing Dates,146
+gopisaran,[],[],[],,,0,,[],,,2018-05-15 02:44:29,gopisaran/indepth-eda-entire-talkingdata-dataset,,Indepth EDA - Entire TalkingData dataset,146
+Oscar Takeshita,[],[],[],,,0,,[],,,2018-07-22 15:57:55,pliptor/how-am-i-doing-with-my-score,,How am I doing with my score?,146
+Jared Turkewitz,[],[],[],,,0,,[],,,2017-05-03 16:27:24,jturkewitz/magic-features-0-03-gain,,Magic Features (0.03 gain),146
+olivier,[],[],[],,,0,,[],,,2018-10-07 17:51:02,ogrellier/i-have-seen-the-future,,I_have_seen_the_future,135
+James Shepherd,[],[],[],,,0,,[],,,2018-06-10 13:56:12,shep312/deep-learning-in-tf-with-upsampling-lb-758,,Deep learning in TF with upsampling [LB: .758],145
+Heads or Tails,[],[],[],,,0,,[],,,2018-10-18 15:11:42,headsortails/resistance-is-futile-transparent-conductors-eda,,Resistance is futile - Transparent Conductors EDA,145
+SRK,[],[],[],,,0,,[],,,2017-05-25 08:43:45,sudalairajkumar/simple-leaky-exploration-notebook-quora,,Simple Leaky Exploration Notebook - Quora,145
+Xavier,[],[],[],,,0,,[],,,2018-08-03 08:15:14,xvivancos/analyzing-star-wars-movie-scripts,, Analyzing Star Wars Movie Scripts,144
+Rachael Tatman,[],[],[],,,0,,[],,,2018-03-30 21:14:30,rtatman/data-cleaning-challenge-inconsistent-data-entry,,Data Cleaning Challenge: Inconsistent Data Entry,134
+Artem Puzanov,[],[],[],,,0,,[],,,2016-08-11 10:38:25,loisso/lb-0-987-group-1-and-date-trick,,"LB 0.987, group_1 and date trick",144
+DanB,[],[],[],,,0,,[],,,2018-04-30 16:42:24,dansbecker/programming-in-tensorflow-and-keras,,Programming in TensorFlow and Keras,143
+DATAI,[],[],[],,,0,,[],,,2018-06-09 12:23:06,kanncaa1/note-prediction-results-of-kernel-rank,,Note: Prediction Results of Kernel Rank !!!,143
+Paulo Pinto,[],[],[],,,0,,[],,,2017-12-02 12:12:25,paulorzp/log-ma-and-days-of-week-means-lb-0-529,,Log MA and  Days of Week Means (LB: 0.529),143
+amrrs,[],[],[],,,0,,[],,,2018-06-14 20:39:05,nulldata/so-survey-insights-who-s-left-out-who-s-rich,,"SO Survey Insights  - Who's left out, Who's rich",142
+Abigail Larion,[],[],[],,,0,,[],,,2016-12-29 03:32:56,abigaillarion/terrorist-attacks-in-united-states,,Terrorist Attacks in United States,142
+Tuatini GODARD,[],[],[],,,0,,[],,,2017-07-21 22:36:29,ekami66/0-92837-on-private-lb-solution-with-keras,,[0.92837 on private LB] Solution with Keras,141
+Samrat P,[],[],[],,,0,,[],,,2018-08-10 09:04:16,samratp/lightgbm-xgboost-catboost,,LightGBM + XGBoost + Catboost,140
+Rounak Banik,[],[],[],,,0,,[],,,2017-11-08 06:27:49,rounakbanik/data-science-faq,,Data Science FAQ,139
+Poonam Ligade,[],[],[],,,0,,[],,,2017-05-02 19:42:49,poonaml/two-sigma-renthop-eda,,Two Sigma RentHop EDA,129
+DATAI,[],[],[],,,0,,[],,,2018-07-27 04:39:51,kanncaa1/pytorch-tutorial-for-deep-learning-lovers,,Pytorch Tutorial for Deep Learning Lovers,138
+Kirill Vlasov,[],[],[],,,0,,[],,,2018-03-18 14:49:26,vlasoff/beginner-s-guide-nn-with-multichannel-input,, Beginner's guide: NN with multichannel input,138
+KarelVerhoeven,[],[],[],,,0,,[],,,2017-09-14 07:55:42,karelrv/nyct-from-a-to-z-with-xgboost-tutorial,,NYCT - from A to Z with XGBoost (Tutorial),138
+olivier,[],[],[],,,0,,[],,,2018-10-05 17:12:50,ogrellier/user-level-lightgbm-lb-1-4480,,user_level_lightgbm LB 1.4480,127
+Marco Giuseppe de Pinto,[],[],[],,,0,,[],,,2018-09-23 13:00:07,marcogdepinto/let-s-discover-more-about-the-olympic-games,,Let's discover more about the Olympic Games!,137
+Rachael Tatman,[],[],[],,,0,,[],,,2018-02-13 18:27:07,rtatman/sql-scavenger-hunt-day-2,,SQL Scavenger Hunt: Day 2,137
+Anisotropic,[],[],[],,,0,,[],,,2018-06-16 14:41:15,arthurtok/introduction-to-ensembling-stacking-in-python,,Introduction to Ensembling/Stacking in Python,2411
+MJ Bahmani,[],[],[],,,0,,[],,,2018-10-24 16:50:20,mjbahmani/20-ml-algorithms-for-house-prices-prediction,,20 ML Algorithms for House Prices prediction,72
+Elena Petrova,[],[],[],,,0,,[],,,2017-07-19 11:33:33,elenapetrova/time-series-analysis-and-forecasts-with-prophet,, Time Series Analysis and Forecasts with Prophet,126
+anokas,[],[],[],,,0,,[],,,2016-12-01 20:24:29,anokas/two-sigma-time-travel-eda,,Two Sigma Time Travel (EDA),136
+A.M.A,[],[],[],,,0,,[],,,2015-11-16 18:36:21,owise83/should-i-do-a-phd,,Should I do a PhD?,136
+Will Koehrsen,[],[],[],,,0,,[],,,2018-08-19 21:17:12,willkoehrsen/a-complete-introduction-and-walkthrough,,A Complete Introduction and Walkthrough ,135
+Bongo,[],[],[],,,0,,[],,,2018-02-01 07:43:48,sbongo/do-pretrained-embeddings-give-you-the-extra-edge,,Do Pretrained Embeddings Give You The Extra Edge?,135
+Pavan Sanagapati,[],[],[],,,0,,[],,,2018-10-27 05:50:12,pavansanagapati/tutorial-cnn-model-with-tensorflow-keras,,"Tutorial - CNN Model with Tensorflow,Keras",75
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-27 00:48:44,kerneler/starter-r-science-popular-comment-b1a736e3-1,,Starter: /r/science popular comment b1a736e3-1,0
+DATAI,[],[],[],,,0,,[],,,2018-07-24 14:37:41,kanncaa1/rare-visualization-tools,,Rare Visualization Tools,134
+Ashwini Swain,[],[],[],,,0,,[],,,2017-10-11 01:18:05,ash316/ml-from-scratch-part-2,,ML From Scratch-Part 2,134
+Paul Mooney,[],[],[],,,0,,[],,,2018-06-26 19:45:58,paultimothymooney/how-models-work,,How Models Work,123
+Lingzhi,[],[],[],,,0,,[],,,2017-12-02 08:19:07,vrtjso/mercari-eda-more-info-than-you-can-imagine,,Mercari EDA - More Info Than You Can Imagine,133
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-09-19 21:04:48,residentmario/bivariate-plotting-with-pandas,,Bivariate plotting with pandas,133
+Ashwini Swain,[],[],[],,,0,,[],,,2017-11-19 14:01:00,ash316/learn-pandas-with-pokemons,,Learn Pandas with Pokemons,133
+Miri Choi,[],[],[],,,0,,[],,,2018-05-16 04:33:54,mirichoi0218/classification-breast-cancer-or-not-with-15-ml,,[Classification] Breast Cancer or Not (with 15 ML),132
+Nick Brooks,[],[],[],,,0,,[],,,2018-07-13 21:59:31,nicapotato/titanic-voting-pipeline-stack-and-guide,,"Titanic: Voting, Pipeline, Stack, and Guide",132
+SRK,[],[],[],,,0,,[],,,2017-01-04 01:04:11,sudalairajkumar/am-i-over-fitting,,Am I Over-fitting?,132
+Andrew Lukyanenko,[],[],[],,,0,,[],,,2018-09-24 04:27:52,artgor/eda-on-basic-data-and-lgb-in-progress,,EDA on basic data and LGB (in progress),131
+DanB,[],[],[],,,0,,[],,,2018-10-19 16:48:23,dansbecker/use-cases-for-model-insights,,Use Cases for Model Insights,131
+BuryBuryZymon,[],[],[],,,0,,[],,,2017-12-15 09:09:56,maheshdadhich/creative-feature-engineering-lb-0-35,,Creative Feature Engineering (LB 0.35),131
+garydee,[],[],[],,,0,,[],,,2016-09-14 11:08:30,garydee/who-not-to-fly-with,,Who not to fly with...,131
+Selfish Gene,[],[],[],,,0,,[],,,2017-09-13 16:17:41,selfishgene/psychology-of-a-professional-athlete,,Psychology of a Professional Athlete,131
+James Shepherd,[],[],[],,,0,,[],,,2018-06-13 13:05:29,shep312/lightgbm-with-weighted-averages-dropout-787,,LightGBM with weighted averages & dropout [.787],130
+kxx,[],[],[],,,0,,[],,,2018-06-05 09:32:10,kailex/tidy-xgb-0-778,,tidy_xgb [0.778],130
+vfdev,[],[],[],,,0,,[],,,2017-07-27 06:37:23,vfdev5/data-visualization,,Data visualization,130
+paulantoine,[],[],[],,,0,,[],,,2017-06-12 06:30:12,paulantoine/light-gbm-benchmark-0-3692,,light GBM benchmark 0.3692,130
+Eryk Walczak,[],[],[],,,0,,[],,,2016-07-24 23:56:41,erykwalczak/initial-loan-book-analysis,,Initial loan book analysis,130
+Arda Yildirim,[],[],[],,,0,,[],,,2016-10-12 08:18:58,yildirimarda/decision-tree-visualization-submission,,Decision Tree Visualization & Submission,130
+Saif,[],[],[],,,0,,[],,,2018-10-25 23:11:39,saif1234/exploration-pre-analysis,,Exploration-Pre Analysis,6
+Wei Chun Chang,[],[],[],,,0,,[],,,2018-09-10 05:48:32,justjun0321/way-to-google-get-a-job-in-goggle-word-cloud,,Way to Google - Get a job in Goggle (Word Cloud),129
+olivier,[],[],[],,,0,,[],,,2017-10-27 18:06:08,ogrellier/xgb-classifier-upsampling-lb-0-283,,"XGB classifier, upsampling LB 0.283",129
+Kheirallah Samaha,[],[],[],,,0,,[],,,2017-05-15 09:54:28,khsamaha/who-killed-who-homicide-reports-1980-2014,,Who Killed Who? Homicide Reports 1980-2014,129
+olivier,[],[],[],,,0,,[],,,2018-07-23 15:26:06,ogrellier/feature-scoring-vs-zeros,,feature_scoring_vs_zeros,118
+ColinMorris,[],[],[],,,0,,[],,,2018-07-10 22:47:31,colinmorris/strings-and-dictionaries,,Strings and Dictionaries,108
+kxx,[],[],[],,,0,,[],,,2018-05-31 21:00:11,kailex/xgb-text2vec-tfidf-0-2237,,xgb+text2vec+tfidf [0.2237],128
+Baris Kanber,[],[],[],,,0,,[],,,2018-04-15 20:35:04,bk0000/non-blending-lightgbm-model-lb-0-977,,non-blending lightGBM model LB: 0.977,128
+olivier,[],[],[],,,0,,[],,,2017-11-11 15:46:51,ogrellier/python-target-encoding-for-categorical-features,,Python target encoding for categorical features,128
+Rachael Tatman,[],[],[],,,0,,[],,,2017-12-01 21:49:24,rtatman/getting-started-in-r-first-steps,,Getting staRted in R: First Steps,118
+CPMP,[],[],[],,,0,,[],,,2017-05-12 06:46:25,cpmpml/spell-checker-using-word2vec,,Spell Checker using Word2vec,128
+amrrs,[],[],[],,,0,,[],,,2018-08-17 12:25:46,nulldata/jiazhen-to-armamut-via-gurchetan1000-0-56,,Jiazhen to Armamut via gurchetan1000 - 0.56,127
+Bruno G. do Amaral,[],[],[],,,0,,[],,,2018-07-20 20:25:32,bguberfain/unet-with-depth,,UNet with depth,127
+Shivam Bansal,[],[],[],,,0,,[],,,2018-07-04 18:35:41,shivamb/dataset-decomposition-techniques,,Dataset Decomposition Techniques,127
+Leonardo Ferreira ,[],[],[],,,0,,[],,,2018-05-21 21:15:58,kabure/extenkiva-exploration-eda,,ExtenKiva Exploration - EDA ,127
+Hakeem,[],[],[],,,0,,[],,,2017-06-16 01:32:50,hakeem/stacked-then-averaged-models-0-5697,,stacked then averaged models [~ 0.5697],127
+Pedro Marcelino,[],[],[],,,0,,[],,,2018-10-15 07:39:14,pmarcelino/data-analysis-and-feature-extraction-with-python,,Data analysis and feature extraction with Python,126
+Vivek Srinivasan,[],[],[],,,0,,[],,,2017-06-19 12:02:42,viveksrinivasan/zillow-eda-on-missing-values-multicollinearity,,Zillow EDA On Missing Values & Multicollinearity,126
+Dominik Gawlik,[],[],[],,,0,,[],,,2017-02-20 10:51:47,dgawlik/house-prices-eda,,House Prices EDA,126
+Peter,[],[],[],,,0,,[],,,2018-09-27 20:23:44,pestipeti/simple-eda-two-sigma,,Simple EDA - Two Sigma,95
+Samson Qian,[],[],[],,,0,,[],,,2018-09-08 00:05:55,samsonqian/titanic-guide-with-sklearn-and-eda,,Titanic: Guide with sklearn and EDA,125
+ColinMorris,[],[],[],,,0,,[],,,2018-06-15 05:14:23,colinmorris/learn-python-challenge-day-5,,Learn Python Challenge: Day 5,125
+Md Asraful Kabir,[],[],[],,,0,,[],,,2018-04-29 14:20:07,asraful70/talkingdata-added-new-features-in-lightgbm,,TalkingData: Added new features  in  LightGBM,125
+DATAI,[],[],[],,,0,,[],,,2018-05-26 21:54:19,kanncaa1/visualization-bokeh-tutorial-part-1,,Visualization: Bokeh Tutorial Part 1,125
+Stephanie Kirmer,[],[],[],,,0,,[],,,2016-09-01 20:00:01,skirmer/fun-with-real-estate-data,,Fun with Real Estate Data,115
+Will Koehrsen,[],[],[],,,0,,[],,,2018-07-17 14:03:18,willkoehrsen/intro-to-model-tuning-grid-and-random-search,,Intro to Model Tuning: Grid and Random Search,124
+Wesam Elshamy,[],[],[],,,0,,[],,,2018-06-09 20:43:38,wesamelshamy/high-correlation-feature-image-classification-conf,,High Correlation Feature Image Classification Conf,125
+szelee,[],[],[],,,0,,[],,,2018-09-01 02:18:51,szelee/how-to-import-a-csv-file-of-55-million-rows,,How to import a CSV file of 55 million rows,113
+DanB,[],[],[],,,0,,[],,,2018-06-02 00:08:57,dansbecker/getting-started-with-sql-and-bigquery,,Getting Started with SQL and BigQuery,113
+Lex Toumbourou,[],[],[],,,0,,[],,,2018-01-26 06:53:27,lextoumbourou/humpback-whale-id-data-and-aug-exploration,,Humpback Whale ID: Data and Aug Exploration,123
+Wendy Kan,[],[],[],,,0,,[],,,2017-08-25 15:28:50,wendykan/starter-explore-youtube8m-sample-data,,Starter: Explore Youtube8M sample data,123
+rahul yadav,[],[],[],,,0,,[],,,2018-10-25 17:56:16,rahullalu/gstore-eda-lgbm-baseline-1-4270,,GStore EDA (LGBM Baseline 1.4270),27
+DanB,[],[],[],,,0,,[],,,2018-10-19 16:48:29,dansbecker/shap-values,,SHAP Values,122
+Bruce,[],[],[],,,0,,[],,,2018-09-06 16:05:02,moizzz/applied-predictive-modelling-brief-overview,,Applied Predictive Modelling (Brief Overview),122
+Ranjeet Jain,[],[],[],,,0,,[],,,2018-06-16 12:57:43,ranjeetjain3/stack-over-flow-results,,let's walk through stackoverflow worldwide survey,122
+Shivam Bansal,[],[],[],,,0,,[],,,2018-05-06 09:57:43,shivamb/imaterialist-fashion-eda-object-detection-colors,,iMaterialist(Fashion): EDA+Object Detection+Colors,122
+Håkon Hapnes Strand,[],[],[],,,0,,[],,,2018-03-09 20:03:09,hhstrand/oof-stacking-regime,,OOF stacking regime,122
+Deborah Gertrude Digges,[],[],[],,,0,,[],,,2018-04-07 18:58:58,ddigges/exploratory-data-analysis-india-s-story,,Exploratory Data Analysis + India's story,122
+Alexandru Papiu,[],[],[],,,0,,[],,,2017-11-30 20:39:28,apapiu/ridge-script,,Ridge Script,122
+Xavier,[],[],[],,,0,,[],,,2018-10-16 08:14:16,xvivancos/market-basket-analysis,,Market Basket Analysis ,91
+ColinMorris,[],[],[],,,0,,[],,,2018-07-10 22:47:31,colinmorris/working-with-external-libraries,,Working with External Libraries,121
+Mhamed Jabri,[],[],[],,,0,,[],,,2018-05-21 18:28:24,mhajabri/kiv-me-a-loan,,Kiv'me a loan,121
+Troy Walters,[],[],[],,,0,,[],,,2018-03-16 01:07:06,captcalculator/a-very-extensive-ncaa-exploratory-analysis,,A Very Extensive NCAA Exploratory Analysis,121
+BuryBuryZymon,[],[],[],,,0,,[],,,2017-11-24 12:18:37,maheshdadhich/i-will-sell-everything-for-free-0-55,,I will sell everything for free (~0.55),121
+Andrey Vykhodtsev,[],[],[],,,0,,[],,,2016-06-15 22:51:16,vykhand/exploring-products,,Exploring products,121
+Bojan Tunguz,[],[],[],,,0,,[],,,2018-05-15 12:26:47,tunguz/bow-meta-text-and-dense-features-lb-0-2241,,"BoW, Meta text , and Dense Features - [LB 0.2241]",120
+beluga,[],[],[],,,0,,[],,,2018-04-06 13:54:13,gaborfodor/seedlings-pretrained-keras-models,,Seedlings - Pretrained keras models,120
+DeveshMaheshwari,[],[],[],,,0,,[],,,2017-11-21 04:33:39,devm2024/transfer-learning-with-vgg-16-cnn-aug-lb-0-1712,,Transfer Learning with VGG-16 CNN+AUG LB 0.1712,120
+noobhound,[],[],[],,,0,,[],,,2017-11-28 12:30:43,knowledgegrappler/a-keras-prototype-0-21174-on-pl,,A keras prototype (0.21174 on PL),120
+Rounak Banik,[],[],[],,,0,,[],,,2017-10-19 13:46:29,rounakbanik/ted-data-analysis,,TED Data Analysis,120
+Frans Slothouber,[],[],[],,,0,,[],,,2016-12-04 10:17:29,slothouber/kagglegym-emulation,,kagglegym_emulation,120
+Shail Deliwala,[],[],[],,,0,,[],,,2017-07-12 19:13:17,shaildeliwala/exploratory-analysis-and-predictions,,Exploratory Analysis and Predictions,120
+Bojan Tunguz,[],[],[],,,0,,[],,,2018-07-01 02:46:25,tunguz/yaeda-yet-another-eda,,YAEDA - Yet Another EDA,119
+Andy Harless,[],[],[],,,0,,[],,,2018-07-23 13:29:28,aharless/simple-linear-stacking-lb-9730,,Simple Linear Stacking (LB .9730),119
+Rachael Tatman,[],[],[],,,0,,[],,,2018-03-30 21:17:02,rtatman/data-cleaning-challenge-character-encodings,,Data Cleaning Challenge: Character Encodings,119
+DATAI,[],[],[],,,0,,[],,,2018-05-26 21:53:29,kanncaa1/dangerous-bites,,Dangerous Bites !!!,119
+Masum Rumi,[],[],[],,,0,,[],,,2018-10-17 10:07:38,masumrumi/a-statistical-analysis-of-titanic-with-ml-models,,A Statistical Analysis of Titanic with ML Models,108
+JohnM,[],[],[],,,0,,[],,,2018-07-19 15:58:31,jpmiller/patterns-of-missing-data,,Patterns of Missing Data,108
+Faron,[],[],[],,,0,,[],,,2017-07-26 09:52:06,mmueller/f1-score-expectation-maximization-in-o-n,,F1-Score Expectation Maximization in O(n²),118
+Dieter,[],[],[],,,0,,[],,,2018-10-17 08:22:42,christofhenkel/market-data-nn-baseline,,Market Data NN Baseline,78
+Siddhartha,[],[],[],,,0,,[],,,2018-09-20 14:10:17,meaninglesslives/airbus-ship-detection-data-visualization,,Airbus Ship Detection: Data Visualization,107
+Andrea,[],[],[],,,0,,[],,,2017-10-18 05:50:20,asindico/customer-segments-with-pca,,Customer Segments with PCA,117
+Lorinc,[],[],[],,,0,,[],,,2017-03-15 17:08:59,lorinc/feature-extraction-from-images,,feature extraction from images,117
+Pascal Nagel,[],[],[],,,0,,[],,,2017-10-17 20:04:19,pnagel/reconstruction-of-ps-reg-03,,Reconstruction of 'ps_reg_03',116
+David Gasquez,[],[],[],,,0,,[],,,2015-12-13 10:31:26,davidgasquez/user-data-exploration,,User Data Exploration,117
+"Neil Schneider, FSA",[],[],[],,,0,,[],,,2017-09-14 16:55:25,nschneider/gbm-vs-xgboost-vs-lightgbm,,GBM vs xgboost vs lightGBM,115
+Fabienvs,[],[],[],,,0,,[],,,2016-07-19 09:22:02,fabienvs/grupo-bimbo-data-analysis,,Grupo Bimbo data analysis,115
+Hiroki Miyamoto,[],[],[],,,0,,[],,,2018-10-26 13:46:35,hmiyamoto/day-2-rev-1-homework-for-a-machine-learning-course,,Day 2 Rev 1 Homework for a Machine Learning Course,0
+Eliot Barril,[],[],[],,,0,,[],,,2018-05-30 21:28:45,eliotbarr/stacking-test-sklearn-xgboost-catboost-lightgbm,,"Stacking Test-Sklearn, XGBoost, CatBoost, LightGBM",114
+Philipp Spachtholz,[],[],[],,,0,,[],,,2017-06-20 09:56:58,philippsp/interactive-dashboards-in-r,,Interactive Dashboards in R,114
+Will Guedes,[],[],[],,,0,,[],,,2018-10-26 04:40:34,willbrazil/avocado,,Avocado,1
+DanB,[],[],[],,,0,,[],,,2018-10-19 16:48:22,dansbecker/advanced-uses-of-shap-values,,Advanced Uses of SHAP Values,113
+hakki_kaan,[],[],[],,,0,,[],,,2018-10-14 15:13:23,hakkisimsek/plotly-tutorial-1,,PLOTLY TUTORIAL - 1,113
+Pooh,[],[],[],,,0,,[],,,2018-06-27 20:23:25,poohtls/fork-of-fork-lightgbm-with-simple-features,,Fork_of_ForK_LightGBM_with_Simple_Features ,113
+Alexander Kireev,[],[],[],,,0,,[],,,2018-05-02 21:22:31,alexanderkireev/experiments-with-imbalance-nn-arch-9728,,....[experiments with imbalance & nn arch; .9728],113
+Heads or Tails,[],[],[],,,0,,[],,,2018-08-26 22:59:40,headsortails/watch-your-language-update-feature-engineering,,Watch your language - update: feature engineering,113
+Marcel Spitzer,[],[],[],,,0,,[],,,2017-06-26 21:23:17,msp48731/feature-engineering-and-visualization,,Feature Engineering and Visualization,113
+Vladislav Amelin,[],[],[],,,0,,[],,,2016-11-11 21:50:27,amelinvladislav/map-of-temperatures-and-analysis-of-global-warming,,Map of temperatures and analysis of global warming,113
+Ashwini Swain,[],[],[],,,0,,[],,,2018-05-30 16:41:06,ash316/support-a-classroom-donorschoose-org,,Support a classroom - DonorsChoose.org,112
+Shivam Bansal,[],[],[],,,0,,[],,,2018-07-17 10:46:43,shivamb/deep-exploration-of-gun-violence-in-us,,Deep Exploration of Gun Violence in US ,112
+ShenShen,[],[],[],,,0,,[],,,2018-01-23 02:13:48,shenmbsw/data-augmentation-and-tensorflow-u-net,,Data augmentation and Tensorflow U-Net,112
+gdy5,[],[],[],,,0,,[],,,2017-08-14 04:42:04,guoday/cv-statistics-better-parameters-and-explaination,,CV statistics（Better parameters and  explaination）,112
+logo,[],[],[],,,0,,[],,,2016-02-19 16:09:46,briantc/homedepot-first-dataexploreation-k,,HomeDepot Data Ex,112
+Dromosys,[],[],[],,,0,,[],,,2018-07-03 09:50:51,dromosys/fork-of-fork-lightgbm-with-simple-features-cee847,,Fork_of_ForK_LightGBM_with_Simple_Features  cee847,111
+Yvon Dalat,[],[],[],,,0,,[],,,2018-09-21 19:22:35,ydalat/titanic-a-step-by-step-intro-to-machine-learning,,"Titanic, a step-by-step intro to Machine Learning",111
+Stephen Bailey,[],[],[],,,0,,[],,,2018-03-21 14:38:00,stkbailey/step-by-step-explanation-of-scoring-metric,,Step-By-Step Explanation of Scoring Metric,111
+DanB,[],[],[],,,0,,[],,,2018-06-18 23:10:12,dansbecker/transfer-learning,,Transfer Learning,111
+Poonam Ligade,[],[],[],,,0,,[],,,2018-02-02 17:39:28,poonaml/real-estate-prediction-on-zillow-with-prophet,,Real Estate Prediction on Zillow with Prophet,111
+Ceshine Lee,[],[],[],,,0,,[],,,2017-12-02 16:08:05,ceshine/lgbm-starter,,LGBM Starter,111
+Szamil,[],[],[],,,0,,[],,,2018-09-30 16:01:52,szamil/where-is-my-output-file,,Where is my output file?,111
+Sohier Dane,[],[],[],,,0,,[],,,2017-08-02 20:04:53,sohier/whirlwind-tour-of-python-index,,Whirlwind Tour of Python - Index,111
+Bruno G. do Amaral,[],[],[],,,0,,[],,,2017-05-02 12:41:05,bguberfain/naive-xgb-lb-0-317,,Naive XGB [LB ~0.317],111
+Gabriel Moreira,[],[],[],,,0,,[],,,2016-10-17 19:22:26,gspmoreira/unveiling-page-views-csv-with-pyspark,,Unveiling page_views.csv with PySpark,111
+thomasjpfan,[],[],[],,,0,,[],,,2018-09-01 23:30:42,thomasjpfan/q-a-with-only-pictures,,Q&A with Only Pictures!,110
+Shivam Bansal,[],[],[],,,0,,[],,,2018-08-30 01:39:42,shivamb/tf-idf-with-ovr-svm-what-s-cooking,,TF-IDF with OvR SVM : What's Cooking,110
+Badal Gupta,[],[],[],,,0,,[],,,2018-05-29 09:15:38,badalgupta/eda-recommender-systemdeep-learningmodel-intuition,,EDA Recommender SystemDeep LearningModel Intuition,110
+Tilii,[],[],[],,,0,,[],,,2017-10-19 17:51:47,tilii7/dimensionality-reduction-pca-tsne,,"Dimensionality reduction (PCA, tSNE)",100
+Pradyumna Khawas,[],[],[],,,0,,[],,,2018-10-26 13:31:45,realppk/simple-analysis,,Simple Analysis,0
+Ann Antonova,[],[],[],,,0,,[],,,2018-08-06 06:43:57,aantonova/797-lgbm-and-bayesian-optimization,,[.797] LGBM and Bayesian Optimization,109
+olivier,[],[],[],,,0,,[],,,2018-07-13 16:11:15,ogrellier/santander-46-features,,Santander_46_features,109
+Data Liftoff,[],[],[],,,0,,[],,,2018-06-30 20:04:14,morrisb/what-does-your-smartphone-know-about-you,,What Does Your Smartphone Know About You?,109
+Aashita Kesarwani,[],[],[],,,0,,[],,,2018-09-02 03:56:12,aashita/guide-to-animated-bubble-charts-using-plotly,,Guide to Animated Bubble Charts using Plotly,109
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-09-26 20:05:35,residentmario/creating-reading-and-writing-workbook,,"Creating, reading, and writing workbook",109
+brassmonkey,[],[],[],,,0,,[],,,2018-01-18 01:37:42,brassmonkey381/viewing-leak-and-machine-images,,Viewing Leak and Machine Images,109
+Sentdex,[],[],[],,,0,,[],,,2017-02-22 22:29:36,sentdex/full-classification-example-with-convnet,,Full Classification Example with ConvNet,99
+ZFTurbo,[],[],[],,,0,,[],,,2016-05-10 06:25:42,zfturbo/leakage-solution,,Leakage solution,109
+Scirpus,[],[],[],,,0,,[],,,2018-10-25 12:01:00,scirpus/lomb-scargle,,Lomb Scargle,11
+beluga,[],[],[],,,0,,[],,,2018-10-22 07:49:21,gaborfodor/greyscale-mobilenet-lb-0-892,,🐘Greyscale MobileNet [LB=0.892],89
+Iafoss,[],[],[],,,0,,[],,,2018-10-09 14:16:52,iafoss/unet34-submission-tta-0-699-new-public-lb,,Unet34 submission TTA (0.699 new public LB),78
+Shivam Bansal,[],[],[],,,0,,[],,,2018-09-14 16:17:19,shivamb/exploratory-analysis-ga-customer-revenue,,Exploratory Analysis - GA Customer Revenue,108
+Shivam Bansal,[],[],[],,,0,,[],,,2018-06-28 03:16:56,shivamb/interactive-d3-js-visualisations-in-kaggle-kernels,,Interactive D3.js Visualisations in Kaggle Kernels,108
+Jagan,[],[],[],,,0,,[],,,2018-02-17 08:48:14,jagangupta/what-s-in-a-review-yelp-ratings-eda,,What's in a review? - Yelp ratings EDA,108
+DanB,[],[],[],,,0,,[],,,2018-09-27 22:01:11,dansbecker/exercise-convolutions-for-computer-vision,,Exercise: Convolutions for Computer Vision,108
+Joe Eddy,[],[],[],,,0,,[],,,2018-09-08 01:54:58,aquatic/entity-embedding-neural-net,,Entity Embedding Neural Net,108
+Philipp Spachtholz,[],[],[],,,0,,[],,,2017-10-03 08:18:23,philippsp/book-recommender-collaborative-filtering-shiny,,"Book Recommender: Collaborative Filtering, Shiny",108
+Leonardo Ferreira ,[],[],[],,,0,,[],,,2018-10-23 02:33:58,kabure/titanic-eda-keras-nn-pipelines,,Titanic [EDA] + Keras NN + Pipelines,107
+Pete Cooper,[],[],[],,,0,,[],,,2018-10-26 15:25:39,pecooper/r-keras-dinner,,R Keras Dinner,0
+Harry,[],[],[],,,0,,[],,,2018-10-25 22:03:33,harinathselvaraj/exploring-the-consumer-patterns-ml-pipeline,,Exploring the Consumer Patterns + ML Pipeline ,3
+NanoMathias,[],[],[],,,0,,[],,,2018-07-25 11:53:01,nanomathias/feature-engineering-benchmarks,,Feature Engineering Benchmarks,107
+Shanth,[],[],[],,,0,,[],,,2018-05-28 13:21:44,shanth84/home-credit-bureau-data-feature-engineering,,HOME CREDIT - BUREAU DATA - FEATURE ENGINEERING,107
+Donyoe,[],[],[],,,0,,[],,,2018-03-01 21:51:58,donyoe/exploring-youtube-trending-statistics-eda,,Exploring Youtube Trending Statistics EDA,97
+Selfish Gene,[],[],[],,,0,,[],,,2017-12-16 00:23:55,selfishgene/generating-sentences-one-letter-at-a-time,,Generating Sentences One Letter at a Time ,107
+CPMP,[],[],[],,,0,,[],,,2017-07-25 08:13:59,cpmpml/smape-weirdness,,SMAPE Weirdness,107
+Ben Kamphaus,[],[],[],,,0,,[],,,2016-05-11 22:05:56,bkamphaus/exploratory-image-analysis,,Exploratory Image Analysis,107
+beluga,[],[],[],,,0,,[],,,2018-10-24 13:40:29,gaborfodor/kaggle-trends,,📈 Kaggle Trends,96
+Lathwal,[],[],[],,,0,,[],,,2018-04-24 05:39:05,codename007/a-very-extensive-end-to-end-project-donorschoose,,A Very Extensive End to End Project : DonorsChoose,106
+Jagan,[],[],[],,,0,,[],,,2018-03-17 08:02:20,jagangupta/lessons-from-toxic-blending-is-the-new-sexy,,Lessons from Toxic : Blending is the new sexy,106
+TimLee,[],[],[],,,0,,[],,,2017-12-10 19:08:21,timolee/a-home-for-pandas-and-sklearn-beginner-how-tos,,A Home for Pandas and Sklearn: Beginner How-Tos,106
+Philipp Schmidt,[],[],[],,,0,,[],,,2017-04-30 17:49:16,philschmidt/multilabel-classification-rainforest-eda,,Multilabel Classification & Rainforest EDA,106
+Ankasor,[],[],[],,,0,,[],,,2017-01-24 22:23:13,ankasor/improved-lung-segmentation-using-watershed,,Improved Lung Segmentation using Watershed,106
+Arindam Dutta,[],[],[],,,0,,[],,,2018-09-22 09:32:35,arindamgot/eda-prophet-mlp-neural-network-forecasting,,EDA+Prophet+ MLP Neural Network Forecasting,95
+Rachael Tatman,[],[],[],,,0,,[],,,2017-11-01 21:53:59,rtatman/beginner-s-tutorial-python,,Beginner's Tutorial: Python,105
+Bulent Siyah,[],[],[],,,0,,[],,,2018-10-26 16:50:40,bulentsiyah/3-basic-nlp-nltk-word2vec-skipgram-cbow-glove,,"3.Basic NLP(NLTK-Word2Vec(SkipGram,CBOW)-Glove)",0
+Shivam Bansal,[],[],[],,,0,,[],,,2018-08-12 07:05:33,shivamb/data-science-trends-on-kaggle,,Data Science Trends on Kaggle !!,104
+Scirpus,[],[],[],,,0,,[],,,2018-06-01 12:13:51,scirpus/hybrid-jeepy-and-lgb,,Hybrid Jeepy and LGB,104
+SRK,[],[],[],,,0,,[],,,2018-06-12 09:06:42,sudalairajkumar/an-interactive-deep-dive-into-survey-results,,An Interactive Deep Dive into Survey Results,104
+Akshay,[],[],[],,,0,,[],,,2018-10-26 13:11:13,asapra/kernel0e585008ab,,kernel0e585008ab,0
+Shivam Bansal,[],[],[],,,0,,[],,,2018-10-11 17:05:47,shivamb/hunting-for-insights-geo-maps,,Hunting for Insights + Geo Maps,103
+Abhishek,[],[],[],,,0,,[],,,2018-04-02 19:12:33,abhimicro3/story-of-kiva,,Story of Kiva,103
+Patrick DeKelly,[],[],[],,,0,,[],,,2018-01-22 01:42:40,valkling/mercari-rnn-2ridge-models-with-notes-0-42755,,Mercari RNN + 2Ridge models with notes (~0.42755),103
+Rachael Tatman,[],[],[],,,0,,[],,,2017-11-07 17:57:53,rtatman/the-5-day-data-challenge,,The 5-Day Data Challenge,103
+dbaghern,[],[],[],,,0,,[],,,2017-10-30 20:25:44,baghern/a-deep-dive-into-sklearn-pipelines,,A Deep Dive Into Sklearn Pipelines,103
+SRK,[],[],[],,,0,,[],,,2016-12-09 09:30:11,sudalairajkumar/univariate-analysis-regression-lb-0-006,,Univariate Analysis & Regression (LB : 0.006),103
+PaulShearer,[],[],[],,,0,,[],,,2015-10-29 18:29:23,shearerp/interactive-sales-visualization,,Interactive Sales Visualization!,103
+DataCanary,[],[],[],,,0,,[],,,2015-11-21 09:02:15,datacanary/xgboost-example-python,,XGBoost example (Python),103
+elaaboum,[],[],[],,,0,,[],,,2018-10-26 14:04:13,elaaboum/titanic-notebook,,titanic_notebook,0
+Siddharth Yadav,[],[],[],,,0,,[],,,2018-10-25 13:46:11,thebrownviking20/clustering-fmnist-w-neural-networks,,Clustering FMNIST w/ Neural Networks,22
+YouHan Lee,[],[],[],,,0,,[],,,2018-09-27 17:24:22,youhanlee/simple-quant-features-using-python,,Simple quant features using python,52
+Andrew Lukyanenko,[],[],[],,,0,,[],,,2018-09-19 18:00:58,artgor/movie-review-sentiment-analysis-eda-and-models,,Movie Review Sentiment Analysis EDA and models,102
+VincentLugat,[],[],[],,,0,,[],,,2018-05-24 16:06:00,vincentlugat/titanic-data-analysis-rf-prediction-0-81818,,Titanic - Data Analysis + RF Prediction 0.81818 ,102
+Leonardo Ferreira ,[],[],[],,,0,,[],,,2018-10-25 00:33:12,kabure/extensive-us-youtube-eda,,Extensive US Youtube [EDA],62
+Shivam Bansal,[],[],[],,,0,,[],,,2018-10-24 07:56:27,shivamb/costa-rica-poverty-exploration-kernel,,Costa Rica Poverty Exploration Kernel,101
+Grzegorz Sionkowski,[],[],[],,,0,,[],,,2018-06-21 16:04:38,sionek/mod-dbscan-x-100-parallel,,mod DBSCAN x 100 (parallel),101
+DATAI,[],[],[],,,0,,[],,,2018-07-27 04:39:46,kanncaa1/recurrent-neural-network-with-pytorch,,Recurrent Neural Network with Pytorch,101
+DanB,[],[],[],,,0,,[],,,2018-05-07 20:17:04,dansbecker/rectified-linear-units-relu-in-deep-learning,,Rectified Linear Units (ReLU) in Deep Learning,81
+Lingzhi,[],[],[],,,0,,[],,,2017-12-18 06:39:21,vrtjso/lgbm-one-step-ahead,,LGBM One Step Ahead,101
+Serigne ,[],[],[],,,0,,[],,,2017-07-05 19:00:23,serigne/instacart-simple-data-exploration,,Instacart Simple Data Exploration,101
+Chris Cross,[],[],[],,,0,,[],,,2018-04-13 14:02:13,crailtap/basic-network-analysis-tutorial,,Basic Network Analysis Tutorial,100
+Ashwini Swain,[],[],[],,,0,,[],,,2018-09-10 05:32:08,ash316/20-years-of-games-analysis,,20 Years Of Games Analysis,100
+Kevin Mader,[],[],[],,,0,,[],,,2018-10-19 10:05:07,kmader/transfer-learning-for-boat-or-no-boat,,Transfer Learning for Boat or No-Boat,89
+rejasupotaro,[],[],[],,,0,,[],,,2018-10-19 06:36:23,rejasupotaro/effective-feature-engineering,,Effective Feature Engineering,79
+Andrew Gelé,[],[],[],,,0,,[],,,2016-10-06 17:48:41,ndrewgele/omg-nlp-with-the-djia-and-reddit,,OMG! NLP with the DJIA and Reddit!,89
+yulia,[],[],[],,,0,,[],,,2018-03-20 18:30:21,yuliagm/be-careful-about-ips-as-a-signal,,BE CAREFUL about IPs as a signal,98
+Adarsh Nair,[],[],[],,,0,,[],,,2017-07-02 17:31:43,dextrousjinx/brief-insight-on-genetic-variations,,Brief insight on Genetic variations,98
+HyeonDeok Seo,[],[],[],,,0,,[],,,2018-09-26 04:57:33,seohyeondeok/yolov3-rsna-starting-notebook,,YOLOv3-RSNA Starting Notebook,97
+Bojan Tunguz,[],[],[],,,0,,[],,,2018-02-06 15:44:58,tunguz/surprise-me-2,,Surprise Me 2!,97
+Rachael Tatman,[],[],[],,,0,,[],,,2018-07-24 18:21:46,rtatman/machine-learning-with-xgboost-in-r,,Machine Learning with XGBoost (in R),97
+Troy Walters,[],[],[],,,0,,[],,,2017-11-12 17:32:13,captcalculator/a-very-extensive-favorita-exploratory-analysis,,A Very Extensive Favorita Exploratory Analysis,97
+David Thaler,[],[],[],,,0,,[],,,2017-04-27 20:16:05,davidthaler/how-many-1-s-are-in-the-public-lb,,How many 1's are in the Public LB?,97
+Yuvraj Sidhu,[],[],[],,,0,,[],,,2016-12-14 18:06:02,ysidhu/two-sigma-portfolio-returns-eda,,Two Sigma Portfolio Returns EDA,97
+Burhan Y. Kiyakoglu,[],[],[],,,0,,[],,,2018-10-23 20:34:38,burhanykiyakoglu/predicting-house-prices,,Predicting House Prices,83
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-26 23:16:38,kerneler/starter-stack-overflow-2018-questions-13d1d194-8,,Starter: Stack Overflow 2018 questions 13d1d194-8,0
+Jack (Jiaxin) Shao,[],[],[],,,0,,[],,,2018-09-02 00:44:22,shaojiaxin/u-net-with-simple-resnet-blocks,,U-net with simple ResNet Blocks,86
+Anna Shen,[],[],[],,,0,,[],,,2018-08-24 04:29:02,aeshen/the-secret-to-getting-the-second-date,,The Secret to Getting the Second Date,96
+Alexander Liao,[],[],[],,,0,,[],,,2018-09-19 23:46:19,alexanderliao/u-net-bn-aug-strat-focal-loss-fixed,,U-Net-BN-Aug-Strat-Focal_Loss(fixed),96
+Siddhartha,[],[],[],,,0,,[],,,2018-07-25 15:47:12,meaninglesslives/apply-crf,,apply_crf,96
+Bojan Tunguz,[],[],[],,,0,,[],,,2018-02-08 19:59:35,tunguz/more-effective-ridge-lgbm-script-lb-0-44823,,More Effective Ridge LGBM Script (LB 0.44823),96
+Troy Walters,[],[],[],,,0,,[],,,2017-05-28 22:53:02,captcalculator/a-very-extensive-zillow-exploratory-analysis,,A Very Extensive Zillow Exploratory Analysis,96
+Robin,[],[],[],,,0,,[],,,2017-05-10 17:26:02,robinkraft/getting-started-with-the-data-now-with-docs,,Getting started with the data - now with docs!,96
+Currie32,[],[],[],,,0,,[],,,2017-04-01 20:29:19,currie32/the-importance-of-cleaning-text,,The Importance of Cleaning  Text,96
+Santhosh Sharma Ananthramu,[],[],[],,,0,,[],,,2016-10-13 02:03:02,sharmasanthosh/exploratory-study-on-feature-selection,,Exploratory study on feature selection,96
+Alexandru Papiu,[],[],[],,,0,,[],,,2016-07-08 08:44:26,apapiu/predictions-in-the-republican-primary,,Predictions in the Republican Primary ,96
+Han_Zhao,[],[],[],,,0,,[],,,2018-10-26 13:09:01,hannahzhaouk/performance-comparison-of-ann-on-iris-flowers,,Performance comparison of ANN on Iris Flowers,0
+Henrique Mendonça,[],[],[],,,0,,[],,,2018-10-22 06:48:24,hmendonca/mask-rcnn-and-coco-transfer-learning-lb-0-155,,Mask-RCNN and COCO transfer learning LB:0.155,95
+Erik Bruin,[],[],[],,,0,,[],,,2018-08-29 12:24:07,erikbruin/recommendations-to-passnyc-1st-place-solution,,Recommendations to PASSNYC (1st place solution),95
+Eike Dehling,[],[],[],,,0,,[],,,2018-01-18 14:55:29,eikedehling/feature-engineering,,Feature engineering,95
+bgo,[],[],[],,,0,,[],,,2017-12-25 20:43:16,bugraokcu/cnn-with-keras,,CNN with Keras,95
+Arjun Joshua,[],[],[],,,0,,[],,,2018-01-21 10:42:31,arjunjoshua/predicting-fraud-in-financial-payment-services,,  Predicting Fraud in Financial Payment Services,95
+olivier,[],[],[],,,0,,[],,,2018-10-27 07:06:17,ogrellier/plasticc-in-a-kernel-meta-and-data,,PLAsTiCC_in_a_kernel_meta_and_data,74
+Will Koehrsen,[],[],[],,,0,,[],,,2018-08-07 16:04:12,willkoehrsen/introduction-to-manual-feature-engineering-p2,,Introduction to Manual Feature Engineering P2,94
+Gonçalo Abreu,[],[],[],,,0,,[],,,2016-08-26 22:22:16,abriosi/raddar-0-98-xgboost-sparse-matrix-python,,raddar 0.98 xgboost sparse matrix python,94
+dune_dweller,[],[],[],,,0,,[],,,2016-05-04 00:17:43,dvasyukova/predict-hotel-type-with-pandas,,Predict hotel type with pandas,94
+oskird,[],[],[],,,0,,[],,,2018-06-29 14:07:48,sz8416/simple-bayesian-optimization-for-lightgbm,,Simple Bayesian Optimization for LightGBM,93
+DATAI,[],[],[],,,0,,[],,,2018-06-22 22:56:01,kanncaa1/why-gun-violance-increase-in-texas,,Why gun violance increase in Texas,93
+Bukun,[],[],[],,,0,,[],,,2018-06-14 12:36:43,ambarish/eda-and-recommendation-system-donors-choose,,EDA and Recommendation System Donors Choose,93
+Tony Y.,[],[],[],,,0,,[],,,2018-01-23 11:05:31,tonyyy/how-to-get-atomic-coordinates,,How to get atomic coordinates,93
+TheGruffalo,[],[],[],,,0,,[],,,2017-12-08 22:51:39,cbryant/keras-cnn-statoil-iceberg-lb-0-1995-now-0-1516,,Keras CNN - StatOil Iceberg LB 0.1995 (now 0.1516),93
+dmi3kno,[],[],[],,,0,,[],,,2016-08-17 07:16:19,dmi3kno/redhat-hack-in-plain-english-eda,,RedHat Hack in plain English (EDA),93
+Abhishek,[],[],[],,,0,,[],,,2015-05-12 04:16:09,abhishek/vote-me-up,,Beating the Benchmark ;) (0.71+),93
+hakan ozen,[],[],[],,,0,,[],,,2018-10-26 12:40:16,hakanozen/compare-learning-methods,,Compare Learning Methods,0
+YouHan Lee,[],[],[],,,0,,[],,,2018-09-27 15:01:42,youhanlee/stratified-sampling-for-regression-lb-1-4627,,Stratified sampling for regression LB: 1.4627,72
+Konstantin,[],[],[],,,0,,[],,,2018-02-11 04:48:42,konstantinmasich/titanic-0-82-0-83,,Titanic [0.82] - [0.83],82
+Enrique Pérez Herrero,[],[],[],,,0,,[],,,2017-02-11 20:48:30,enrique1500/rental-listing-ny-map,,Rental Listing NY Map,92
+Dominic Breuker,[],[],[],,,0,,[],,,2017-01-01 15:17:02,breuker/can-we-improve-by-increasing-variance,,Can we improve by increasing variance?,92
+DATAI,[],[],[],,,0,,[],,,2018-08-03 19:26:51,kanncaa1/earthquake-animation-with-plotly,,Earthquake Animation with Plotly,91
+Ashish Gupta,[],[],[],,,0,,[],,,2018-03-06 19:36:41,eashish/bidirectional-gru-with-convolution,,Bidirectional LSTM with Convolution,91
+Rachael Tatman,[],[],[],,,0,,[],,,2018-02-15 20:22:53,rtatman/sql-scavenger-hunt-day-4,,SQL Scavenger Hunt: Day 4,91
+Gabriel Moreira,[],[],[],,,0,,[],,,2017-10-29 12:46:21,gspmoreira/recommender-systems-in-python-101,,Recommender Systems in Python 101,91
+Summit,[],[],[],,,0,,[],,,2018-10-09 05:59:56,summitkwan/tl-gan-demo,,tl-GAN demo,13
+Siddharth Yadav,[],[],[],,,0,,[],,,2018-06-25 16:55:09,thebrownviking20/intermediate-visualization-tutorial-using-plotly,,Intermediate visualization tutorial using Plotly ,90
+marsggbo,[],[],[],,,0,,[],,,2017-08-01 03:14:41,marsggbo/kaggle,,房价预测kaggle入门项目,90
+Dotman,[],[],[],,,0,,[],,,2016-11-22 19:07:04,dotman/data-exploration-and-visualization,,Data Exploration and Visualization,80
+Nurbek ,[],[],[],,,0,,[],,,2018-10-26 12:23:35,nurbeks/xgboost-testing,,XGBoost testing,0
+AmmarIkhlaq,[],[],[],,,0,,[],,,2018-10-25 15:07:08,ammarikhlaq/eda-and-apriori-alogrithm,,EDA and Apriori Alogrithm,14
+olivier,[],[],[],,,0,,[],,,2018-10-05 15:37:42,ogrellier/using-classification-for-predictions,,using_classification_for_predictions,89
+Viacheslav Prokopev,[],[],[],,,0,,[],,,2018-10-07 19:38:25,vprokopev/mean-likelihood-encodings-a-comprehensive-study,,Mean (likelihood) encodings: a comprehensive study,79
+Lathwal,[],[],[],,,0,,[],,,2018-06-08 00:58:31,codename007/developer-survey-2018-complete-analysis,,Developer Survey 2018 : Complete Analysis✓✓,89
+Arun Godwin Patel,[],[],[],,,0,,[],,,2018-06-12 20:13:04,agodwinp/stacking-house-prices-walkthrough-to-top-5,,Stacking House Prices - Walkthrough to Top 5%,89
+DanB,[],[],[],,,0,,[],,,2017-09-20 22:36:33,dansbecker/finding-your-files-in-kaggle-kernels,,Finding Your Files in Kaggle Kernels,89
+Sergei Neviadomski,[],[],[],,,0,,[],,,2017-10-05 07:11:18,neviadomski/data-exploration-two-sigma-renthop,,Data Exploration Two Sigma Renthop,89
+Leonardo Ferreira ,[],[],[],,,0,,[],,,2018-10-22 15:46:43,kabure/predicting-credit-risk-model-pipeline,,Predicting Credit Risk - Model Pipeline,88
+Ishaan Jain,[],[],[],,,0,,[],,,2018-08-30 04:24:38,ishaan45/thank-you,,Thank you!,88
+DATAI,[],[],[],,,0,,[],,,2018-10-17 20:32:44,kanncaa1/applying-text-mining,,Applying Text Mining,88
+Costas Voglis,[],[],[],,,0,,[],,,2018-03-14 07:23:08,voglinio/external-h-e-data-with-mask-annotations,,External H&E Data with Mask Annotations,88
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-04-16 22:20:52,residentmario/faceting-with-seaborn,,Faceting with seaborn,88
+Yassine Ghouzam,[],[],[],,,0,,[],,,2017-08-20 01:29:46,yassineghouzam/don-t-know-why-employees-leave-read-this,,Don't know why employees leave ? Read this,88
+SRK,[],[],[],,,0,,[],,,2017-05-02 14:13:35,sudalairajkumar/feature-engineering-validation-strategy,,Feature Engineering & Validation Strategy,88
+Gouher Danish,[],[],[],,,0,,[],,,2018-10-26 12:15:27,gouherdanishiitkgp/exploring-who-suicide-stats-data,,Exploring WHO Suicide Stats Data,0
+Shivam Bansal,[],[],[],,,0,,[],,,2018-10-18 08:58:15,shivamb/cnn-architectures-vgg-resnet-inception-alex,,"CNN Architectures: VGG, Resnet, Inception, Alex",68
+Kyle Boone,[],[],[],,,0,,[],,,2018-09-30 19:36:02,kyleboone/naive-benchmark-galactic-vs-extragalactic,,Naive Benchmark - Galactic vs Extragalactic,67
+Henrique Mendonça,[],[],[],,,0,,[],,,2018-10-02 18:16:13,hmendonca/u-net-model-with-submission,,U-Net Model with submission,87
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-06-28 16:46:05,residentmario/time-series-plotting-optional,,Time-series plotting (Optional),87
+Cihan Oklap,[],[],[],,,0,,[],,,2018-06-12 15:38:56,cihanoklap/top-songs-on-spotify-what-makes-them-popular,,Top Songs on Spotify: What makes them popular?,87
+beluga,[],[],[],,,0,,[],,,2018-04-03 06:44:05,gaborfodor/external-data-for-kiva-crowdfunding,,External Data for Kiva Crowdfunding,87
+Rachael Tatman,[],[],[],,,0,,[],,,2018-01-18 18:12:38,rtatman/regression-challenge-day-1,,Regression Challenge: Day 1,87
+DATAI,[],[],[],,,0,,[],,,2018-07-09 20:38:05,kanncaa1/interactive-bokeh-tutorial-part-2,,Interactive Bokeh Tutorial Part 2,87
+swamysm,[],[],[],,,0,,[],,,2018-03-11 08:59:07,swamysm/beginners-titanic,,Beginners Titanic,87
+Ben Hamner,[],[],[],,,0,,[],,,2017-07-06 17:44:42,benhamner/adversarial-learning-challenges-getting-started,,Adversarial Learning Challenges - Getting Started,87
+Koba ,[],[],[],,,0,,[],,,2015-11-19 02:46:44,kobakhit/digit-recognizer-in-python-using-cnn,,Digit recognizer in Python using CNN,87
+Ibtesam Ahmed,[],[],[],,,0,,[],,,2018-09-26 18:09:33,ibtesama/getting-started-with-a-movie-recommendation-system,,Getting Started with a Movie Recommendation System,76
+Himanshu Chaudhary,[],[],[],,,0,,[],,,2018-06-14 16:02:15,him4318/avito-lightgbm-with-ridge-feature-v-2-0,,avito_LightGBM with Ridge Feature V 2.0,86
+Nick Brooks,[],[],[],,,0,,[],,,2018-05-26 20:04:37,nicapotato/bow-meta-text-and-dense-features-lgbm,,"BoW, Meta text, and Dense Features - LGBM",86
+Lathwal,[],[],[],,,0,,[],,,2018-06-06 18:58:04,codename007/google-landmark-retrieval-exploratory-analysis,,Google Landmark Retrieval Exploratory Analysis,86
+Hoon Beng,[],[],[],,,0,,[],,,2018-04-09 00:28:31,rhodiumbeng/classifying-multi-label-comments-0-9741-lb,,Classifying multi-label comments (0.9741 lb),86
+nzw,[],[],[],,,0,,[],,,2017-12-02 08:50:52,nzw0301/simple-keras-fasttext-val-loss-0-31,,Simple Keras FastText: val_loss 0.31,86
+Andy Harless,[],[],[],,,0,,[],,,2017-07-18 02:21:21,aharless/xgb-w-o-outliers-lgb-with-outliers-combined,,XGB w/o outliers & LGB with outliers combined,86
+Heads or Tails,[],[],[],,,0,,[],,,2018-06-27 15:55:13,headsortails/mercedas-2-feature-interactions,,MercEDAs 2 - feature interactions,86
+Vivek Srinivasan,[],[],[],,,0,,[],,,2017-10-03 18:00:47,viveksrinivasan/eda-focus-on-missing-values-and-simple-xgb,,EDA Focus On Missing Values And Simple XGB,86
+Henning Sperr,[],[],[],,,0,,[],,,2015-06-15 22:28:27,hsperr/finding-ensamble-weights,,Finding Ensemble Weights,86
+Pavan Sanagapati,[],[],[],,,0,,[],,,2018-10-26 05:48:25,pavansanagapati/karnataka-education-eda-bokeh,,Karnataka Education - EDA -Bokeh,50
+Costas Voglis,[],[],[],,,0,,[],,,2018-10-16 07:11:46,voglinio/from-masks-to-bounding-boxes,,From masks to bounding boxes,65
+Lathwal,[],[],[],,,0,,[],,,2018-06-10 07:41:55,codename007/dangerous-places-in-usa-2013-2018,,Dangerous Places in USA : 2013 - 2018,85
+Lathwal,[],[],[],,,0,,[],,,2018-06-06 18:58:33,codename007/simple-exploration-notebook-furniture,,Simple Exploration Notebook - Furniture,85
+Rachael Tatman,[],[],[],,,0,,[],,,2018-02-16 18:58:16,rtatman/sql-scavenger-hunt-day-5,,SQL Scavenger Hunt: Day 5,85
+ZlatanKremonic,[],[],[],,,0,,[],,,2017-02-03 19:39:35,zlatankr/titanic-random-forest-82-78,,Titanic Random Forest: 82.78%,85
+Poonam Ligade,[],[],[],,,0,,[],,,2018-02-10 16:13:06,poonaml/house-prices-data-exploration-and-visualisation,,House Prices - Data Exploration and Visualisation,85
+joconnor,[],[],[],,,0,,[],,,2016-09-16 21:17:01,joconnor/python-xgboost-starter-0-209-public-mcc,,Python XGBoost Starter (0.209 Public MCC),85
+Vicens Gaitan,[],[],[],,,0,,[],,,2018-09-27 09:48:20,vicensgaitan/salt-jigsaw-puzzle,,Salt Jigsaw Puzzle,84
+EZ,[],[],[],,,0,,[],,,2018-08-03 21:29:58,ezietsman/airbus-eda,,Airbus EDA,84
+Kostiantyn Isaienkov,[],[],[],,,0,,[],,,2018-02-06 10:14:18,isaienkov/rnn-with-keras-ridge-sgdr-0-43553,,RNN_with_Keras_Ridge_SGDR_0.43553,84
+olivier,[],[],[],,,0,,[],,,2017-10-23 18:05:33,ogrellier/noise-analysis-of-porto-seguro-s-features,,Noise analysis of Porto Seguro's features ,84
+Arpita Ghosh,[],[],[],,,0,,[],,,2018-10-26 12:05:07,arpitaghosh/diabetes-analysis,,Diabetes analysis,0
+Owen Ouyang,[],[],[],,,0,,[],,,2018-06-07 01:20:45,couyang/home-credit-eda-lightgbm,,Home Credit EDA + lightGBM,83
+Troy Walters,[],[],[],,,0,,[],,,2017-12-08 04:09:41,captcalculator/logistic-regression-and-roc-curve-primer,,Logistic Regression and ROC Curve Primer,83
+anokas,[],[],[],,,0,,[],,,2017-05-30 17:41:14,anokas/mercedes-eda-xgboost-starter-0-55,,Mercedes EDA &  XGBoost Starter (~0.55),83
+Fred Navruzov,[],[],[],,,0,,[],,,2017-05-21 09:12:22,frednavruzov/dumb-and-the-dumber-baselines-plb-0-3276826,,Dumb-and-the-Dumber-Baselines (PLB=0.3276826),83
+Martin Piotte,[],[],[],,,0,,[],,,2018-07-25 15:10:28,martinpiotte/whale-recognition-model-with-score-0-78563,,Whale Recognition Model with score 0.78563,82
+Rounak Banik,[],[],[],,,0,,[],,,2017-11-06 00:44:55,rounakbanik/movie-recommender-systems,,Movie Recommender Systems,82
+Allunia,[],[],[],,,0,,[],,,2017-08-31 13:48:05,allunia/example-attacking-logistic-regression,,Example: Attacking logistic regression,82
+Gabriel Kerr,[],[],[],,,0,,[],,,2017-04-19 18:47:08,mgabrielkerr/visualizing-knn-svm-and-xgboost-on-iris-dataset,,"Visualizing KNN, SVM, and XGBoost on Iris Dataset",82
+Triskelion,[],[],[],,,0,,[],,,2015-05-15 03:06:35,triskelion/normalized-kaggle-distance,,Normalized Kaggle Distance,82
+AbhijeetMulgund,[],[],[],,,0,,[],,,2016-12-28 18:09:59,abhmul/keras-convnet-lb-0-0052-w-visualization,,Keras ConvNet LB 0.0052 w/ Visualization,81
+Infocusp,[],[],[],,,0,,[],,,2018-07-17 11:48:46,infocusp/holographic-view-of-underperforming-schools,,Holographic view of underperforming schools,80
+NIKHIL KUMAR,[],[],[],,,0,,[],,,2018-05-24 17:32:46,nikhilkumar15508/understanding-donor-a-complete-eda,,Understanding Donor!!! A Complete EDA,80
+olivier,[],[],[],,,0,,[],,,2018-03-04 13:25:50,ogrellier/lgbm-with-words-and-chars-n-gram,,LGBM with words and chars n_gram ,80
+thousandvoices,[],[],[],,,0,,[],,,2018-02-22 18:24:21,thousandvoices/logistic-regression-with-words-and-char-n-grams,,Logistic regression with words and char n-grams,80
+tour1st,[],[],[],,,0,,[],,,2017-05-21 00:51:38,tour1st/magic-feature-v2-0-045-gain,,Magic feature v2(0.045 gain),80
+chattob,[],[],[],,,0,,[],,,2017-07-06 19:32:32,chattob/cervix-segmentation-gmm,,Cervix segmentation (GMM),80
+FabienDaniel,[],[],[],,,0,,[],,,2018-09-25 11:14:10,fabiendaniel/lgbm-starter,,LGBM starter,79
+Tilii,[],[],[],,,0,,[],,,2018-06-02 03:59:46,tilii7/olivier-lightgbm-parameters-by-bayesian-opt,,olivier + LightGBM parameters by Bayesian opt,79
+Shivam Bansal,[],[],[],,,0,,[],,,2018-10-06 04:51:54,shivamb/deep-healthcare-analysis-using-bigquery,,Deep Healthcare Analysis using BigQuery,79
+DanB,[],[],[],,,0,,[],,,2018-06-18 23:24:05,dansbecker/data-augmentation,,Data Augmentation,79
+Andrea,[],[],[],,,0,,[],,,2018-01-27 13:07:40,asindico/a-japanese-journey,,A Japanese Journey,79
+Umberto,[],[],[],,,0,,[],,,2017-07-08 08:01:09,umbertogriffo/deep-learning,,Deep Learning,79
+Ben Fung,[],[],[],,,0,,[],,,2017-05-21 05:01:22,benjibb/lstm-stock-prediction-20170507,,LSTM_Stock_prediction-20170507,69
+ash hafez,[],[],[],,,0,,[],,,2017-04-16 19:14:35,ashhafez/temporal-pattern-in-train-response-rates,,Temporal pattern in train response rates?,79
+Joshua Bonatt,[],[],[],,,0,,[],,,2018-05-03 20:55:23,jbonatt/trackml-eda-etc,,"TrackML EDA, etc.",78
+Niyamat Ullah,[],[],[],,,0,,[],,,2018-05-15 20:53:58,niyamatalmass/who-takes-the-loan,,Who takes the loan?,78
+Troy Walters,[],[],[],,,0,,[],,,2017-12-10 03:04:58,captcalculator/a-very-extensive-recruit-exploratory-analysis,,A Very Extensive Recruit Exploratory Analysis,78
+ArjanGroen,[],[],[],,,0,,[],,,2017-08-06 19:33:20,arjanso/reducing-dataframe-memory-size-by-65,,Reducing DataFrame memory size by ~65% ,78
+Abigail Larion,[],[],[],,,0,,[],,,2017-01-01 14:57:37,abigaillarion/traffic-fatalities-in-2015,,Traffic Fatalities in 2015,78
+33Vito,[],[],[],,,0,,[],,,2016-07-22 02:27:13,tonyliu/the-battle-of-smart-phones,,The battle of smart phones,78
+JohnM,[],[],[],,,0,,[],,,2018-09-16 03:46:14,jpmiller/basic-eda-with-images,,Basic EDA with Images,77
+Kevin Mader,[],[],[],,,0,,[],,,2018-10-24 09:07:36,kmader/lung-opacity-classification-transfer-learning,,Lung Opacity Classification Transfer Learning,77
+OsciiArt,[],[],[],,,0,,[],,,2018-05-24 09:27:54,osciiart/homecreditrisk-extensive-eda-baseline-model-jp,,HomeCreditRisk : Extensive EDA + Baseline Model JP,77
+Aleksey Bilogur,[],[],[],,,0,,[],,,2017-12-13 17:11:15,residentmario/multivariate-plotting,,Multivariate plotting,67
+Peter Nagy,[],[],[],,,0,,[],,,2018-06-05 18:50:00,ngyptr/python-nltk-sentiment-analysis,,Python NLTK sentiment analysis,77
+shaz13,[],[],[],,,0,,[],,,2018-07-29 12:58:13,shaz13/simple-exploration-notebook-map-plots-v2,,Simple Exploration Notebook + Map Plots v2,66
+Will Koehrsen,[],[],[],,,0,,[],,,2018-07-21 02:09:55,willkoehrsen/model-tuning-results-random-vs-bayesian-opt,,Model Tuning Results: Random vs Bayesian Opt,76
+Janio Alexander Bachmann,[],[],[],,,0,,[],,,2018-07-15 15:51:15,janiobachmann/s-p-500-simple-forecasting-with-prophet,,S&P 500 || Simple Forecasting with Prophet,76
+ololo,[],[],[],,,0,,[],,,2018-01-01 19:40:03,agrigorev/tensorflow-starter-conv1d-embeddings-0-442-lb,,Tensorflow starter: conv1d + embeddings (0.442 LB),76
+Chippy,[],[],[],,,0,,[],,,2016-07-15 12:19:26,nigelcarpenter/santa-exploration,,Santa exploration,76
+MJ Bahmani,[],[],[],,,0,,[],,,2018-10-24 19:38:35,mjbahmani/linear-algebra-for-data-scientists,,Linear Algebra for Data Scientists,55
+Sachin Chorge ,[],[],[],,,0,,[],,,2018-10-26 11:55:56,sachinjchorge/pubg-neural-networks,,PUBG - Neural Networks,0
+amrrs,[],[],[],,,0,,[],,,2018-10-15 09:42:20,nulldata/hacker-women-in-tech-hackerrank-analysis,,Hacker Women in Tech - HackerRank Analysis,75
+Dieter,[],[],[],,,0,,[],,,2018-07-20 07:11:19,christofhenkel/keras-baseline,,keras baseline,75
+Benjamin Minixhofer,[],[],[],,,0,,[],,,2018-07-11 17:48:04,bminixhofer/a-different-validation-technique,,A different validation technique,75
+Miha Skalic,[],[],[],,,0,,[],,,2018-07-04 22:53:01,mihaskalic/classifier-as-a-bounding-box-predictor,,Classifier as a bounding-box predictor,75
+Salil Gautam,[],[],[],,,0,,[],,,2018-05-23 20:25:22,salil007/world-of-eda-andrews-curves-tutorial-donorchoose,,World of EDA+Andrews Curves Tutorial: DonorChoose,75
+DavidCoxon,[],[],[],,,0,,[],,,2018-06-03 12:02:03,davidcoxon/titanic-practice-by-davidcoxon,,Titanic practice by Davidcoxon,75
+Siddharth Yadav,[],[],[],,,0,,[],,,2018-06-08 13:23:12,thebrownviking20/intro-to-keras-with-breast-cancer-data-ann,,Intro to Keras with breast cancer data[ANN],65
+ZFTurbo,[],[],[],,,0,,[],,,2017-12-24 19:49:12,zfturbo/happiness-vs-gift-popularity-v2-0-89,,Happiness vs Gift popularity v2 [0.89],75
+Rachael Tatman,[],[],[],,,0,,[],,,2018-01-09 00:10:21,rtatman/visualizing-data-with-ggplot2,,Visualizing data with ggplot2,75
+William Horton,[],[],[],,,0,,[],,,2018-08-01 00:28:07,hortonhearsafoo/fast-ai-lesson-1,,fast.ai lesson 1,64
+Shanth,[],[],[],,,0,,[],,,2018-05-24 15:06:43,shanth84/rnn-detailed-explanation-0-2246,,RNN_Detailed Explanation_[0.2246],74
+Duo An,[],[],[],,,0,,[],,,2018-04-25 16:11:16,classtag/extract-avito-image-features-via-keras-vgg16,,Extract avito image features via keras VGG16,74
+Submarineering,[],[],[],,,0,,[],,,2018-01-07 18:40:13,submarineering/submarineering-even-better-public-score-until-now,,Submarineering.EVEN BETTER PUBLIC SCORE until now.,74
+Kueipo J. H.,[],[],[],,,0,,[],,,2017-11-11 04:10:29,kueipo/simple-eda-geo-data-time-series,,Simple EDA Geo Data & Time Series,74
+wti200,[],[],[],,,0,,[],,,2017-08-17 18:14:33,wti200/exploratory-analysis-nyc-taxi-trip,,Exploratory Analysis - NYC Taxi Trip ,74
+Fred Navruzov,[],[],[],,,0,,[],,,2017-06-01 18:53:30,frednavruzov/instacart-exploratory-data-analysis,,Instacart-Exploratory-Data-Analysis,74
+SRK,[],[],[],,,0,,[],,,2016-11-20 18:23:00,sudalairajkumar/when-less-is-more,,When Less is More.!,74
+Mir Henglin,[],[],[],,,0,,[],,,2016-01-22 22:58:00,mircat/violent-crime-mapping,,Mapping and Visualizing Violent Crime,74
+Aafrin Dabhoiwala,[],[],[],,,0,,[],,,2018-10-25 20:45:39,aafrin/cnn-for-absolute-beginner-in-deep-learning-99-12,,CNN for absolute beginner in Deep Learning-99.12%,2
+MJ Bahmani,[],[],[],,,0,,[],,,2018-10-24 07:16:29,mjbahmani/data-science-toolbox,,Data Science Toolbox,58
+Prashant,[],[],[],,,0,,[],,,2018-10-26 11:11:26,prashantfb65/two-sigma,,Two Sigma,0
+Julián Peller,[],[],[],,,0,,[],,,2018-10-20 18:16:41,julian3833/2-quick-study-lgbm-xgb-and-catboost-lb-1-66,,"2 - Quick study: LGBM, XGB and Catboost [LB: 1.66]",63
+DATAI,[],[],[],,,0,,[],,,2018-07-24 14:38:51,kanncaa1/recommendation-systems-tutorial,,Recommendation Systems Tutorial,73
+Denis Larionov,[],[],[],,,0,,[],,,2018-07-03 14:04:02,dlarionov/feature-engineering-xgboost,,"Feature engineering, xgboost",73
+Ashwini Swain,[],[],[],,,0,,[],,,2018-07-13 04:51:09,ash316/what-is-the-rock-cooking-ensembling-network,,What Is The Rock Cooking??(Ensembling & Network),63
+Misha Lisovyi,[],[],[],,,0,,[],,,2018-08-24 13:03:08,mlisovyi/lightgbm-hyperparameter-optimisation-lb-0-761,,LightGBM hyperparameter optimisation (LB: 0.761),73
+def me(x),[],[],[],,,0,,[],,,2018-04-17 06:33:22,ruslankl/airplane-crashes-data-visualization,,Airplane Crashes [Data Visualization],73
+Max Schumacher,[],[],[],,,0,,[],,,2018-02-12 13:15:44,mschumacher/using-fasttext-models-for-robust-embeddings,,Using FastText models for robust embeddings,73
+Omri Goldstein,[],[],[],,,0,,[],,,2018-01-14 08:03:20,drgilermo/a-tutorial-for-complete-beginners,,A tutorial for COMPLETE BEGINNERS ,73
+HyungsukKang,[],[],[],,,0,,[],,,2017-10-20 13:20:30,sudosudoohio/stratified-kfold-xgboost-eda-tutorial-0-281,,Stratified KFold+XGBoost+EDA Tutorial(0.281),73
+Claire Longo,[],[],[],,,0,,[],,,2017-07-25 13:27:34,statinstilettos/neural-network-approach,,Neural Network Approach,73
+Erik Bruin,[],[],[],,,0,,[],,,2018-10-24 12:00:19,erikbruin/text-mining-the-clinton-and-trump-election-tweets,,Text mining the Clinton and Trump election Tweets,65
+kxx,[],[],[],,,0,,[],,,2018-10-16 19:37:36,kailex/group-xgb-for-gstore-1-42,,Group xGb for GStore [1.42],62
+Tian Xia,[],[],[],,,0,,[],,,2018-09-03 12:52:40,drt2290078/mask-rcnn-sample-starter-code,,Mask-RCNN Sample Starter Code ,72
+DanB,[],[],[],,,0,,[],,,2018-05-11 21:16:03,dansbecker/running-kaggle-kernels-with-a-gpu,,Running Kaggle Kernels with a GPU,72
+Gábor Vecsei,[],[],[],,,0,,[],,,2017-12-14 15:01:10,gaborvecsei/plant-seedlings-fun-with-computer-vision,,Plant Seedlings Fun with Computer Vision,72
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-04-16 22:19:53,residentmario/subplots,,Subplots,72
+Sergei Neviadomski,[],[],[],,,0,,[],,,2017-11-20 00:00:10,neviadomski/data-exploration-porto-seguro-s-safe-driver,,Data Exploration Porto Seguro's Safe Driver,72
+AmberThomas,[],[],[],,,0,,[],,,2017-10-30 05:27:43,amberthomas/kaggle-2017-survey-results,,Kaggle 2017 Survey Results,72
+mlandry,[],[],[],,,0,,[],,,2015-10-08 14:21:06,mlandry/random-forest-example,,H2O Random Forest Example (0.11578),72
+Bruno G. do Amaral,[],[],[],,,0,,[],,,2018-10-26 12:52:22,bguberfain/lab-7-an-lise-de-sentimento-com-cnn,,LAB 7 - Análise de Sentimento com CNN,1
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-26 21:48:31,kerneler/starter-packages-used-in-public-a2e08124-9,,Starter: Packages Used in Public a2e08124-9,0
+Ann Antonova,[],[],[],,,0,,[],,,2018-08-30 12:31:32,aantonova/practical-eda-on-numerical-data,,Practical EDA on numerical data,61
+Jiazhen Xi,[],[],[],,,0,,[],,,2018-07-21 09:00:16,johnfarrell/baseline-with-lag-select-fake-rows-dropped,,Baseline with Lag Select Fake Rows Dropped,71
+Lathwal,[],[],[],,,0,,[],,,2018-03-31 10:31:31,codename007/a-very-extensive-freesound-exploratory-analysis,,A Very Extensive Freesound Exploratory Analysis ✓✓,71
+Jonathan Bouchet,[],[],[],,,0,,[],,,2017-12-09 03:36:26,jonathanbouchet/f1-data-analysis,,F1 Data analysis,71
+ReiiNakano,[],[],[],,,0,,[],,,2017-08-22 07:16:55,reiinakano/basic-nlp-bag-of-words-tf-idf-word2vec-lstm,,"Basic NLP: Bag of Words, TF-IDF, Word2Vec, LSTM",71
+PhilipBall,[],[],[],,,0,,[],,,2017-07-18 16:16:00,fiorenza2/journey-to-the-top-10,,Journey to the top 10%,71
+VamsiKrishna,[],[],[],,,0,,[],,,2018-01-04 17:21:31,vamsikrishna/exploratory-data-analysis-of-ipl-data,,Exploratory data analysis of IPL data,71
+dmi3kno,[],[],[],,,0,,[],,,2016-10-10 21:12:10,dmi3kno/allstate-eda,,Allstate EDA,71
+Ashish Patel(阿希什),[],[],[],,,0,,[],,,2018-10-08 10:57:41,ashishpatel26/future-is-here,,Future is here :),60
+krishna,[],[],[],,,0,,[],,,2018-04-11 02:06:09,krishnakesavan/r-lgbm-single-model-40m-rows-lb-0-9736,,R lgbm Single Model 40M rows  (LB 0.9736),70
+Ravi Teja Gutta,[],[],[],,,0,,[],,,2018-03-15 14:35:36,rteja1113/lightgbm-with-count-features,,LightGBM with count features,70
+Emil,[],[],[],,,0,,[],,,2018-03-06 15:46:31,bonlime/train-test-image-mosaic,,Train & Test Image Mosaic,70
+olivier,[],[],[],,,0,,[],,,2018-03-05 16:12:55,ogrellier/things-you-need-to-be-aware-of-before-stacking,,Things you need to be aware of before stacking,70
+ZFTurbo,[],[],[],,,0,,[],,,2018-01-10 08:16:58,zfturbo/infinite-probabilistic-improver-0-931,,Infinite Probabilistic Improver [>0.931],70
+Kamil Kaczmarek,[],[],[],,,0,,[],,,2017-10-22 23:24:07,kamilkk/i-have-to-say-this,,I have to say this...,70
+Julien Heiduk,[],[],[],,,0,,[],,,2018-05-09 14:10:20,zoupet/neural-network-model-for-house-prices-tensorflow,,Neural Network Model for House Prices (TensorFlow),70
+Weikai,[],[],[],,,0,,[],,,2017-08-18 12:16:05,wikaiqi/titaniclearningqi,,TitanicLearningQI,70
+threeplusone,[],[],[],,,0,,[],,,2017-04-04 22:39:03,threeplusone/sea-lion-coordinates,,Sea Lion Coordinates,70
+Manish Kumar,[],[],[],,,0,,[],,,2017-05-30 15:30:40,gargmanish/how-to-handle-imbalance-data-study-in-detail,,How To handle Imbalance Data :  Study in Detail,70
+den3b,[],[],[],,,0,,[],,,2017-03-02 11:18:17,den3b81/improve-perfomances-using-manager-features,,Improve perfomances using manager features!,70
+Niraj Verma,[],[],[],,,0,,[],,,2017-02-24 01:41:38,nirajvermafcb/support-vector-machine-detail-analysis,,Support Vector Machine detail analysis,70
+gingerman | Chris,[],[],[],,,0,,[],,,2016-10-10 21:45:17,gingerman/shopfloor-visualization,,Shopfloor Visualization,70
+Andrey,[],[],[],,,0,,[],,,2016-10-06 00:24:39,andreyg/explore-user-base-by-geo,,Explore user base by GEO,70
+Jason,[],[],[],,,0,,[],,,2015-11-22 02:08:21,jasonm/large-families-not-good-for-survival,,Large families not good for Survival,70
+Iafoss,[],[],[],,,0,,[],,,2018-09-10 20:56:00,iafoss/unet34-dice-0-87,,Unet34 (dice 0.87+),59
+Andrii Sydorchuk,[],[],[],,,0,,[],,,2018-06-30 17:20:14,asydorchuk/save-98-of-ram,,Save 98% of RAM with this trick,69
+Troy Walters,[],[],[],,,0,,[],,,2017-10-24 18:37:57,captcalculator/r-xgboost-with-caret-tuning-and-gini-score,,R xgboost with caret tuning and gini score,69
+Poonam Ligade,[],[],[],,,0,,[],,,2018-02-23 10:04:08,poonaml/last-cab-to-new-york-animated-heatmap-trips-folium,,Last Cab to New York!Animated Heatmap&Trips Folium,69
+Donyoe,[],[],[],,,0,,[],,,2017-09-29 10:34:30,donyoe/santander-quick-first-view,,Santander quick first view,69
+BeyondBeneath,[],[],[],,,0,,[],,,2016-05-13 05:22:07,beyondbeneath/data-exploration-and-visualisations,,Data exploration and visualisations,69
+Guillaume Payen,[],[],[],,,0,,[],,,2016-02-03 10:26:54,gpayen/building-a-prediction-model,,Building a prediction model,69
+rejasupotaro,[],[],[],,,0,,[],,,2018-10-09 18:13:10,rejasupotaro/cheaters-and-zombies,,Cheaters??? and Zombies!!!,68
+YouHan Lee,[],[],[],,,0,,[],,,2018-09-28 02:14:03,youhanlee/which-encoding-is-good-for-time-validation-1-4417,,Which encoding is good for time-validation?-1.4417,68
+Emmanuel Perry,[],[],[],,,0,,[],,,2018-08-01 17:41:33,mannyelk/an-honest-approach,,An Honest Approach,68
+oskird,[],[],[],,,0,,[],,,2018-06-30 18:43:24,sz8416/6-ways-for-feature-selection,,6 Ways for Feature Selection,68
+Will Koehrsen,[],[],[],,,0,,[],,,2018-06-17 01:30:16,willkoehrsen/tuning-automated-feature-engineering-exploratory,,Tuning Automated Feature Engineering (Exploratory),68
+tito,[],[],[],,,0,,[],,,2018-03-26 18:36:23,its7171/ip-encoding-looks-ok-data-is-clean,,IP encoding looks OK. data is clean!,68
+Ahmed Youssef,[],[],[],,,0,,[],,,2018-01-20 20:13:51,ahmedyoussef/the-beautiful-game-analysis-of-football-events,,The Beautiful Game - Analysis of Football Events,68
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-06-28 16:41:42,residentmario/grammar-of-graphics-with-plotnine-optional,,Grammar of graphics with plotnine (Optional),68
+Rachael Tatman,[],[],[],,,0,,[],,,2018-04-04 18:15:21,rtatman/nlp-in-r-topic-modelling,,NLP in R: Topic Modelling,68
+Andy Harless,[],[],[],,,0,,[],,,2017-09-22 12:40:44,aharless/xgboost-lightgbm-and-ols,,"XGBoost, LightGBM, and OLS",68
+Rafal Plis,[],[],[],,,0,,[],,,2017-12-11 21:06:54,rafalplis/my-approach-to-titanic-competition,,My approach to Titanic competition,68
+Y.C. Lu,[],[],[],,,0,,[],,,2016-10-09 20:32:07,arthurlu/exploratory-tutorial-titanic,,Exploratory Tutorial - Titanic ,68
+anokas,[],[],[],,,0,,[],,,2016-06-10 12:34:59,anokas/exploratory-data-analysis,,Exploratory Data Analysis,68
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-26 21:34:42,kerneler/starter-planos-de-governo-elei-es-cc10422b-a,,Starter: Planos de Governo - Eleições cc10422b-a,0
+AdhokshajaPradeep,[],[],[],,,0,,[],,,2018-10-25 17:10:13,adhok93/understanding-age-wise-sentiments-using-k-means,,Understanding Age Wise Sentiments using k-means,3
+Jonathan Schnabel,[],[],[],,,0,,[],,,2018-10-10 12:53:25,jschnab/exploring-the-human-protein-atlas-images,,Exploring the human protein atlas images,67
+Henrique Mello,[],[],[],,,0,,[],,,2018-10-08 16:05:56,hrmello/dataset-overview-exploration-and-comments,,Dataset overview - Exploration and comments,46
+Scirpus,[],[],[],,,0,,[],,,2018-07-05 09:22:59,scirpus/santander-gp-clustering-ii,,Santander GP Clustering II,67
+Shivam Bansal,[],[],[],,,0,,[],,,2018-06-17 02:50:57,shivamb/beginners-guide-to-text-generation-using-lstms,,Beginners Guide to Text Generation using LSTMs,67
+Gábor Vecsei,[],[],[],,,0,,[],,,2018-01-20 11:53:37,gaborvecsei/basic-pure-computer-vision-segmentation-lb-0-229,,Basic Pure Computer Vision Segmentation (LB 0.229),67
+SarahG,[],[],[],,,0,,[],,,2018-01-17 01:06:32,sgus1318/titanic-analysis-learning-to-swim-with-python,,Titanic Analysis_Learning to Swim with Python,67
+Aleksey Bilogur,[],[],[],,,0,,[],,,2017-12-11 16:12:10,residentmario/styling-your-plots,,Styling your plots,67
+Hugo Pinto,[],[],[],,,0,,[],,,2018-05-27 01:11:42,huguera/mercari-data-analysis,,Mercari Data Analysis,67
+RochelleSilva,[],[],[],,,0,,[],,,2018-08-13 15:16:21,rochellesilva/simple-tutorial-for-beginners,,Simple tutorial for Beginners,67
+Buddhini W,[],[],[],,,0,,[],,,2016-12-05 07:11:54,buddhiniw/breast-cancer-prediction,,Breast cancer prediction,67
+Alexandru Papiu,[],[],[],,,0,,[],,,2016-04-28 23:27:24,apapiu/exploring-kobe-s-shots,,Exploring Kobe's Shots,67
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-26 21:29:57,kerneler/starter-2018-inc-5000-europe-2ae095a1-4,,Starter: 2018 Inc 5000 Europe 2ae095a1-4,0
+JohnM,[],[],[],,,0,,[],,,2018-10-17 22:48:49,jpmiller/image-based-cnn,,Image-Based CNN,66
+Giba,[],[],[],,,0,,[],,,2018-07-12 22:46:22,titericz/giba-countvectorizer-d-lb-1-43,,Giba CountVectorizer :-D   -  LB: 1.43,66
+MPWARE,[],[],[],,,0,,[],,,2018-03-21 21:46:20,mpware/ensembling-on-instance-segmentation-lb-0-419,,Ensembling on Instance Segmentation (LB 0.419),66
+Julia Elliott,[],[],[],,,0,,[],,,2018-02-13 00:11:14,juliaelliott/basic-starter-kernel-ncaa-women-s-dataset,,Basic Starter Kernel - NCAA Women's Dataset,66
+Chris Bartel,[],[],[],,,0,,[],,,2017-12-23 21:41:27,cbartel/random-forest-using-elemental-properties,,Random forest using elemental properties,66
+JohanvandenHeuvel,[],[],[],,,0,,[],,,2018-03-07 11:53:19,johanvandenheuvel/lstm-model-of-stockdata,,LSTM model of StockData,56
+0rangutan,[],[],[],,,0,,[],,,2017-10-03 20:27:02,orangutan/keras-vgg19-starter,,Keras VGG19 Starter,66
+Omar Essam,[],[],[],,,0,,[],,,2017-08-09 16:49:07,omarito/word2vec-for-products-analysis-0-01-lb,,Word2Vec for products analysis + 0.01 LB,66
+Konrad Banachewicz,[],[],[],,,0,,[],,,2017-05-03 20:20:23,konradb/adversarial-validation-and-other-scary-terms,,Adversarial validation and other scary terms,66
+MorsiliAmine,[],[],[],,,0,,[],,,2017-04-12 22:03:49,amorsili/fast-exploratory-data-analysis-in-r,,Fast Exploratory Data Analysis in R,66
+Selfish Gene,[],[],[],,,0,,[],,,2017-09-22 09:37:18,selfishgene/visualizing-pca-with-leaf-dataset,,Visualizing PCA with Leaf Dataset,66
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-26 21:24:25,kerneler/starter-2018-inc-5000-companies-list-d01fc225-5,,Starter: 2018 Inc 5000 Companies List d01fc225-5,0
+Leonardo Ferreira ,[],[],[],,,0,,[],,,2018-10-21 22:22:38,kabure/financial-hedging-eda-interactive-plots,,Financial Hedging [EDA] - Interactive Plots,65
+Madhuri Sivalenka,[],[],[],,,0,,[],,,2018-08-07 08:10:53,madhurisivalenka/cleansing-eda-modelling-lgbm-xgboost-starters,,Cleansing+EDA+Modelling(LGBM + XGBoost starters)  ,65
+Bruce,[],[],[],,,0,,[],,,2018-07-17 20:31:42,moizzz/eda-and-clustering,,EDA and Clustering,65
+Grzegorz Sionkowski,[],[],[],,,0,,[],,,2018-06-14 06:37:08,sionek/bayesian-optimization,,Bayesian Optimization,65
+Duo An,[],[],[],,,0,,[],,,2018-04-26 00:50:00,classtag/lightgbm-with-mean-encode-feature-0-233,,LightGBM with mean encode feature 0.233,65
+Jonathan Bouchet,[],[],[],,,0,,[],,,2018-04-25 03:01:59,jonathanbouchet/goooooaaaaallllll,,GOOOOOAAAAALLLLLL !!!!!!!!!!!!,65
+anttip,[],[],[],,,0,,[],,,2018-03-12 08:20:43,anttip/wordbatch-1-3-3-fm-ftrl-lb-0-9812,,Wordbatch 1.3.3 FM_FTRL LB 0.9812,65
+giim,[],[],[],,,0,,[],,,2018-03-23 00:43:19,gimunu/data-augmentation-with-keras-into-cnn,,Data augmentation with keras into CNN,65
+Niyamat Ullah,[],[],[],,,0,,[],,,2018-01-18 09:16:52,niyamatalmass/what-you-need-to-get-a-job-at-google,,What you need to get a job at Google,65
+Selfish Gene,[],[],[],,,0,,[],,,2017-11-25 18:54:02,selfishgene/exploring-youtube-faces-with-keypoints-dataset,,Exploring YouTube Faces with Keypoints Dataset,65
+DLao,[],[],[],,,0,,[],,,2018-09-06 02:24:33,laowingkin/netflix-movie-recommendation,,Netflix - Movie recommendation,65
+Damiano,[],[],[],,,0,,[],,,2017-12-04 16:57:39,damianpanek/data-exploration-in-r,,Data Exploration in R,65
+Mamy Ratsimbazafy,[],[],[],,,0,,[],,,2017-10-04 16:13:30,mratsim/starting-kit-for-pytorch-deep-learning,,Starting Kit for PyTorch Deep Learning,65
+Niraj Verma,[],[],[],,,0,,[],,,2017-10-12 12:30:28,nirajvermafcb/comparing-various-ml-models-roc-curve-comparison,,Comparing Various ML models(ROC curve comparison),65
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-26 21:17:21,kerneler/starter-new-york-city-tech-startups-28ce4861-2,,Starter: New York City Tech Startups 28ce4861-2,0
+Vaibhav Sagar,[],[],[],,,0,,[],,,2018-10-23 15:49:24,vaibhavsagar/titanic-by-a-beginner,,Titanic by a beginner,64
+Scirpus,[],[],[],,,0,,[],,,2018-06-06 11:25:23,scirpus/hybrid-jeepy-and-lgb-ii,,Hybrid Jeepy and LGB II,64
+Rachael Tatman,[],[],[],,,0,,[],,,2018-04-29 14:39:41,rtatman/data-cleaning-challenge-json-txt-and-xls,,"Data Cleaning Challenge: .json, .txt and .xls",64
+Poonam Ligade,[],[],[],,,0,,[],,,2018-04-03 16:33:17,poonaml/kiva-in-2-minutes-animated-story,,Kiva in 2 minutes Animated Story,64
+Mhamed Jabri,[],[],[],,,0,,[],,,2018-03-12 13:18:32,mhajabri/salary-and-purchasing-power-parity,,Salary  and Purchasing Power Parity ,64
+bsivavenu,[],[],[],,,0,,[],,,2018-08-10 10:24:29,bsivavenu/lsa-model-on-spooky-author-data,,LSA model on Spooky Author Data,64
+Shaoyinger,[],[],[],,,0,,[],,,2018-01-31 01:21:45,shaoyingzhang/data-exploration-and-prediction-of-house-price,,Data Exploration and Prediction of House Price ,64
+Chris Crawford,[],[],[],,,0,,[],,,2017-09-27 22:14:17,crawford/humble-intro-to-analysis-with-pandas-and-seaborn,,Humble Intro to Analysis with Pandas and Seaborn,64
+Adam Smith,[],[],[],,,0,,[],,,2017-06-26 08:33:55,smitad/bitcoin-trading-strategy-simulation,,Bitcoin Trading Strategy Simulation,64
+Aditya Soni,[],[],[],,,0,,[],,,2018-04-04 07:28:48,adityaecdrid/mnist-with-keras-for-beginners-99457,,MNIST with Keras for Beginners(.99457),64
+Ranjeet Jain,[],[],[],,,0,,[],,,2018-10-23 17:08:45,ranjeetjain3/visualization-machine-learning-deep-learning,,Visualization -> Machine learning -> Deep learning,62
+kkiriyama,[],[],[],,,0,,[],,,2018-10-23 14:15:05,kazuokiriyama/tuning-hyper-params-in-lgbm-achieve-0-66-in-lb,,Tuning hyper-params in LGBM achieve >0.66 in LB,22
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-26 21:12:11,kerneler/starter-new-york-city-digital-media-95e9a6b3-5,,Starter: New York City Digital Media 95e9a6b3-5,0
+AhmetErdem,[],[],[],,,0,,[],,,2018-09-05 11:53:36,divrikwicky/u-net-with-simple-resnet-blocks-forked,,U-net with simple ResNet Blocks (Forked),63
+Prashant Kikani,[],[],[],,,0,,[],,,2018-06-25 03:44:51,prashantkikani/ensembling-has-always-been-the-answer,,Ensembling has always been the answer,63
+FrankHerfert,[],[],[],,,0,,[],,,2018-05-18 21:37:07,frankherfert/region-and-city-details-with-lat-lon-and-clusters,,"Region and City Details with Lat, Lon and Clusters",63
+Oleg Panichev,[],[],[],,,0,,[],,,2018-03-27 13:38:12,opanichev/lightgbm-and-tf-idf-starter,,LightGBM and Tf-idf Starter,63
+Vladimir Demidov,[],[],[],,,0,,[],,,2017-12-06 17:39:56,yekenot/explore-ts-with-lstm,,Explore TS with LSTM,63
+Somrik Banerjee,[],[],[],,,0,,[],,,2017-02-28 05:25:14,somrikbanerjee/predicting-show-up-no-show,,Predicting Show-Up/No-Show,63
+Peter Nagy,[],[],[],,,0,,[],,,2018-05-22 21:21:50,ngyptr/lstm-sentiment-analysis-keras,,LSTM Sentiment Analysis | Keras ,63
+Umesh,[],[],[],,,0,,[],,,2016-11-01 01:05:30,umeshnarayanappa/explore-911-data,,Explore 911 Data,63
+Georgi Gospodinov,[],[],[],,,0,,[],,,2016-06-05 06:59:52,ggospodinov/tweet-analysis2,,Isis_tweet_network_analysis,63
+bubblride,[],[],[],,,0,,[],,,2018-10-25 22:46:35,bubblride/house-px-9-gbm-decisiontree,,"house px 9, gbm decisiontree",3
+Talha Çelik,[],[],[],,,0,,[],,,2018-10-26 10:13:02,tlhcelik/starter-website-phishing-dataset-2457bb15-a,,Starter: Website Phishing Dataset 2457bb15-a,0
+Sri Kainkaryam,[],[],[],,,0,,[],,,2018-07-19 21:54:07,skainkaryam/basic-data-visualization-using-pytorch-dataset,,Basic data visualization using PyTorch Dataset,62
+Bruno G. do Amaral,[],[],[],,,0,,[],,,2018-05-03 16:00:22,bguberfain/vgg16-train-features,,VGG16 Train features,62
+def me(x),[],[],[],,,0,,[],,,2018-05-20 18:49:24,ruslankl/dementia-prediction-w-tree-based-models,,Dementia Prediction w/ Tree-based Models,62
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-09-26 20:06:34,residentmario/indexing-selecting-assigning,,"Indexing, Selecting & Assigning",62
+Francisco Mendez,[],[],[],,,0,,[],,,2017-12-23 04:40:21,fcostartistican/don-t-mess-with-my-mothjer,,"Don't mess with my ""mothjer""",62
+asmita vikas,[],[],[],,,0,,[],,,2017-11-12 18:10:13,asmitavikas/feature-engineered-0-68310,,Feature Engineered : 0.68310,62
+Abdelwahed Assklou,[],[],[],,,0,,[],,,2017-10-14 14:19:56,abdelwahedassklou/only-cat-boost-lb-0-0641-939,,Only_Cat boost (LB : 0.0641 939),62
+Brian Farrar,[],[],[],,,0,,[],,,2017-10-18 11:01:35,jbfarrar/preprocessing-pipeline-and-convnet-trainer,,Preprocessing Pipeline and Convnet Trainer,62
+Alex,[],[],[],,,0,,[],,,2017-06-07 10:16:29,rethfro/1d-cnn-single-model-score-0-14-0-16-or-0-23,,"1D CNN (single model score: 0.14, 0.16 or 0.23)",62
+Aurelio Agundez,[],[],[],,,0,,[],,,2017-10-10 00:06:23,aagundez/pikachu-vs-bulbasaur-matchup,,Pikachu vs Bulbasaur Matchup,62
+OttoP,[],[],[],,,0,,[],,,2015-09-25 11:21:54,operdeck/fix-up-city-names,,Fix-up city names (VAR_0200),62
+Arnav Ramamoorthy,[],[],[],,,0,,[],,,2018-10-26 08:54:39,arnavramamoorthy/digit-recognition,,Digit Recognition,1
+Yicheng Chen,[],[],[],,,0,,[],,,2018-08-28 20:09:18,chenyc15/mean-average-precision-metric,,Mean Average Precision Metric,51
+GaneshN,[],[],[],,,0,,[],,,2018-05-29 06:25:33,ganeshn88/simple-exploration-of-all-200-variables,,Simple  Exploration of All 200  Variables,61
+Vishal Kumar,[],[],[],,,0,,[],,,2018-01-19 14:35:37,vishalyo990/prediction-of-quality-of-wine,,Prediction of quality of Wine,61
+Tilii,[],[],[],,,0,,[],,,2017-12-17 16:48:43,tilii7/cross-validation-weighted-linear-blending-errors,,"Cross-validation, weighted linear blending, errors",61
+Jeff Groff,[],[],[],,,0,,[],,,2017-12-07 18:37:05,jgroff/despeckling-synthetic-aperture-radar-sar-images,,Despeckling Synthetic Aperture Radar (SAR) Images ,61
+Peatle,[],[],[],,,0,,[],,,2017-11-03 08:07:46,peatle/eda-investigating-trends,,EDA: Investigating trends,61
+Dima Rudov,[],[],[],,,0,,[],,,2018-05-14 03:39:16,dimarudov/data-analysis-using-sql,,Data Analysis using SQL,61
+VamsiKrishna,[],[],[],,,0,,[],,,2018-08-29 14:02:42,vamsikrishna/happiness-index-and-terrorism,,Happiness Index and Terrorism!,61
+Reynaldo,[],[],[],,,0,,[],,,2017-04-30 16:04:39,reynaldo/naive-xgb,,naive XGB,61
+Airback,[],[],[],,,0,,[],,,2017-02-02 08:48:06,airback/match-outcome-prediction-in-football,,Match Outcome Prediction in Football,62
+Ashish Patel(阿希什),[],[],[],,,0,,[],,,2018-10-07 05:32:30,ashishpatel26/updated-bayesian-lgbm-xgb-cat-fe-kfold-cv,,Updated Bayesian + LGBM_XGB_CAT+ FE + Kfold + CV,60
+Hyun woo kim,[],[],[],,,0,,[],,,2018-09-26 15:45:05,chocozzz/two-sigma-news-simple-eda-prophet-nlp,,Two Sigma News : Simple EDA + Prophet + NLP,50
+Ian Lin,[],[],[],,,0,,[],,,2018-08-20 01:05:56,ianlini/find-the-data-leak-from-scratch,,Find the data leak from scratch,60
+DATAI,[],[],[],,,0,,[],,,2018-07-24 14:37:37,kanncaa1/logistic-regression-implementation,,Logistic Regression Implementation,60
+Jonathan Bouchet,[],[],[],,,0,,[],,,2018-07-16 15:16:15,jonathanbouchet/another-world-cup-2018-predictions-kernel,,another World Cup  2018 predictions kernel,60
+Samrat P,[],[],[],,,0,,[],,,2018-08-10 09:04:20,samratp/aggregates-sumvalues-sumzeros-k-means-pca,,Aggregates + SumValues + SumZeros + K-Means + PCA,60
+Dieter,[],[],[],,,0,,[],,,2018-05-16 07:16:11,christofhenkel/using-train-active-for-training-word-embeddings,,Using train_active for training word embeddings,60
+Aleksandrs Gehsbargs,[],[],[],,,0,,[],,,2018-04-18 23:04:34,agehsbarg/top-10-0-10943-stacking-mice-and-brutal-force,,"Top 10 (0.10943): stacking, MICE and brutal force",60
+Xavier,[],[],[],,,0,,[],,,2018-05-14 21:30:48,xvivancos/analyzing-a-pok-mon-data-set-my-first-kernel,,Analyzing a Pokémon data set (My first kernel),60
+Vladimir Demidov,[],[],[],,,0,,[],,,2018-03-12 19:44:33,yekenot/textcnn-2d-convolution,,TextCNN (2D Convolution),60
+ymlai87416,[],[],[],,,0,,[],,,2017-08-20 15:26:23,ymlai87416/web-traffic-time-series-forecast-with-4-model,,Web traffic time series forecast with 4 model,60
+Rachael Tatman,[],[],[],,,0,,[],,,2017-11-09 15:42:52,rtatman/getting-started-in-r-load-data-into-r,,Getting staRted in R: Load Data Into R,60
+Philipp Spachtholz,[],[],[],,,0,,[],,,2017-06-07 13:52:54,philippsp/exploratory-analysis-sberbank,,Exploratory Analysis - Sberbank,60
+Tuatini GODARD,[],[],[],,,0,,[],,,2017-01-20 02:06:37,ekami66/detailed-exploratory-data-analysis-with-python,,Detailed exploratory data analysis with python,60
+Amandeep Rathee,[],[],[],,,0,,[],,,2016-12-07 05:26:00,arathee2/achieving-100-accuracy,,Achieving 100% accuracy,60
+Achal,[],[],[],,,0,,[],,,2016-10-13 04:04:10,achalshah/allstate-feature-analysis-python,,Allstate Feature Analysis - Python,60
+Moomin,[],[],[],,,0,,[],,,2016-01-21 18:32:26,wenxuanchen/sklearn-random-forest,,sklearn_random_forest,60
+Samrat P,[],[],[],,,0,,[],,,2018-08-10 09:04:18,samratp/santander-value-prediction-xgb-and-lightgbm,,Santander Value Prediction - XGB and LightGBM,59
+NanoMathias,[],[],[],,,0,,[],,,2018-07-11 20:39:11,nanomathias/predicting-r-vs-python,,Predicting R vs. Python,59
+Nick Brooks,[],[],[],,,0,,[],,,2018-05-24 07:51:57,nicapotato/simple-catboost,,Simple CatBoost,59
+Siddharth Yadav,[],[],[],,,0,,[],,,2018-07-12 03:42:06,thebrownviking20/in-depth-eda-and-k-means-clustering,,In-depth EDA and K-Means Clustering,59
+Bukun,[],[],[],,,0,,[],,,2018-03-09 20:05:24,ambarish/a-very-extensive-data-analysis-of-yelp,,A Very Extensive Data Analysis of Yelp,59
+ekstasis,[],[],[],,,0,,[],,,2017-12-17 15:32:08,jeremiespagnolo/beginner-s-guide-to-mercari-in-r-0-50586,,BEGINNER'S GUIDE TO MERCARI IN R - [0.50586],59
+Kueipo J. H.,[],[],[],,,0,,[],,,2017-10-30 09:23:26,kueipo/base-on-froza-pascal-single-xgb-lb-0-284,,Base on Froza & Pascal single XGB LB(0.284),59
+Jagan,[],[],[],,,0,,[],,,2017-11-25 08:03:37,jagangupta/memory-optimization-and-eda-on-entire-dataset,,Memory optimization and EDA on entire dataset,59
+Ragnar,[],[],[],,,0,,[],,,2017-08-21 22:04:29,davidfumo/boosted-trees-lb-0-0643707,,Boosted Trees LB ~ 0.0643707,59
+flnr,[],[],[],,,0,,[],,,2018-01-23 10:06:57,flennerhag/ml-ensemble-scikit-learn-style-ensemble-learning,,ML-Ensemble: Scikit-learn style ensemble learning ,59
+Chippy,[],[],[],,,0,,[],,,2017-05-19 20:46:20,nigelcarpenter/recreating-the-products-by-hour-chart,,Recreating the Products by Hour Chart,59
+Oleg Medvedev,[],[],[],,,0,,[],,,2016-12-17 03:19:22,torrinos/exploration-and-plotting,,Exploration and Plotting,59
+omolluska,[],[],[],,,0,,[],,,2016-12-23 14:26:35,sankhamukherjee/when-why-are-stocks-bought-and-sold,,When/why are stocks bought and sold,59
+Julien Heiduk,[],[],[],,,0,,[],,,2018-05-11 12:34:03,zoupet/exploratory-data-analysis,,Exploratory Data Analysis,59
+beluga,[],[],[],,,0,,[],,,2016-10-11 20:30:46,gaborfodor/69-failure-rate,,69% failure rate,59
+dune_dweller,[],[],[],,,0,,[],,,2016-07-10 18:09:14,dvasyukova/scripty-mcscriptface-the-lazy-kaggler,,Scripty McScriptface the Lazy Kaggler,59
+Kaggle Kerneler,[],[],[],,,0,,[],,,2018-10-26 20:47:24,kerneler/starter-cifar10-comp-5d01d96a-d,,Starter: cifar10-Comp 5d01d96a-d,0
+Jack (Jiaxin) Shao,[],[],[],,,0,,[],,,2018-09-23 08:00:53,shaojiaxin/u-net-resnet-v3-stratifiedkfold,,U-net resnet v3-StratifiedKFold,58
+Richard Allen,[],[],[],,,0,,[],,,2018-08-24 19:42:10,bigironsphere/did-drought-cause-the-war-in-syria-an-r-tutorial,,Did Drought Cause the War in Syria? An R Tutorial,58
+DAndres,[],[],[],,,0,,[],,,2018-06-26 15:45:36,dandres/best-public-blend-0-2204,,BEST PUBLIC BLEND  - 0.2204,58
+Samrat P,[],[],[],,,0,,[],,,2018-08-13 11:44:56,samratp/beginner-guide-to-eda-and-modeling,,Beginner Guide to EDA and Modeling,58
+oskird,[],[],[],,,0,,[],,,2018-06-21 14:46:13,sz8416/eda-baseline-model-using-application,,EDA + baseline model using application,58
+Dieter,[],[],[],,,0,,[],,,2018-05-24 17:46:46,christofhenkel/text2image-top-1,,text2image_top_1,58
+Andrii Sydorchuk,[],[],[],,,0,,[],,,2018-06-30 17:43:34,asydorchuk/nextclick-calculation-without-hashing-trick,,NextClick calculation without hashing trick,58
+TrietChau,[],[],[],,,0,,[],,,2018-03-08 02:29:40,minhtriet/a-beginner-guide-for-sale-data-prediction,,A beginner guide for sale data prediction,58
+MPWARE,[],[],[],,,0,,[],,,2018-01-29 21:37:09,mpware/stage1-eda-microscope-image-types-clustering,,Stage1 EDA: Microscope image types clustering,58
+Kevin Mader,[],[],[],,,0,,[],,,2018-04-11 13:44:51,kmader/attention-on-pretrained-vgg16-for-bone-age,,Attention on Pretrained-VGG16 for Bone Age,58
+Leonardo Ferreira ,[],[],[],,,0,,[],,,2018-07-05 17:22:23,kabure/auto-ml-pipeline-predicting-cannabis-species,,[AUTO-ML pipeline]-Predicting Cannabis Species,58
+Pranav Pandya,[],[],[],,,0,,[],,,2017-12-30 02:25:15,pranav84/surprise-me-h2o-automl-version,,Surprise me! H2O autoML version,58
+Neerja Doshi,[],[],[],,,0,,[],,,2017-11-20 01:08:36,neerjad/class-wise-regex-functions-l-b-0-995,,Class-wise Regex Functions (L.B.:0.995+),58
+Sachin Shelar,[],[],[],,,0,,[],,,2018-01-12 01:33:41,shelars1985/unveiling-the-power-of-superheroes-of-21st-century,,Unveiling the power of superheroes of 21st Century,58
+Scirpus,[],[],[],,,0,,[],,,2017-10-23 08:01:33,scirpus/big-gp,,Big GP,58
+Adam Blazek,[],[],[],,,0,,[],,,2017-09-29 08:34:07,blazeka/multi-gpu-tensorflow-convnet-0-65,,Multi-GPU tensorflow convnet [0.65],58
+vfdev,[],[],[],,,0,,[],,,2017-10-13 20:11:45,vfdev5/data-visualization-and-analysis,,Data visualization and analysis,58
+fujisan,[],[],[],,,0,,[],,,2017-05-10 06:00:05,fujisan/use-keras-pre-trained-vgg16-acc-98,,use Keras pre-trained VGG16  acc 98%,58
+fahd09,[],[],[],,,0,,[],,,2017-04-24 22:29:23,fahd09/eda-of-crime-in-chicago-2005-2016,,EDA of Crime in Chicago (2005 - 2016),58
+ZFTurbo,[],[],[],,,0,,[],,,2016-11-05 08:58:31,zfturbo/seizure-boost-0-6-lb,,Seizure Boost (~0.6 LB),58
+Allunia,[],[],[],,,0,,[],,,2018-10-24 13:17:23,allunia/hidden-treasures-in-our-groceries,,Hidden treasures in our groceries,52
+Paulo Pinto,[],[],[],,,0,,[],,,2018-10-25 14:04:22,paulorzp/mask-cnn-coco-lung-opacity-classif-lb-1-66,,mask-cnn-coco & lung-opacity-classif LB:1.66,4
+Siddhartha,[],[],[],,,0,,[],,,2018-10-19 14:53:25,meaninglesslives/getting-0-87-on-private-lb-using-kaggle-kernel,,Getting 0.87+ on Private LB using Kaggle Kernel,57
+Xavier,[],[],[],,,0,,[],,,2018-10-12 14:51:21,xvivancos/analyzing-the-lord-of-the-rings-data,,Analyzing The Lord of the Rings data,57
+Vitaly Byrachonok,[],[],[],,,0,,[],,,2018-10-07 12:36:30,byrachonok/pretrained-inceptionresnetv2-base-classifier,,Pretrained InceptionResNetV2 base classifier,57
+Prashant Kikani,[],[],[],,,0,,[],,,2018-09-23 05:28:30,prashantkikani/rstudio-lgb-single-model-lb1-6607,,rstudio LGB Single model LB1.6607 ,47
+Meyk,[],[],[],,,0,,[],,,2018-08-25 09:14:35,meykds/leaderboard-progression-animation,,Leaderboard Progression Animation,57
+Dandelion,[],[],[],,,0,,[],,,2018-10-11 10:19:17,hely333/explore-avocados-from-all-sides,,Explore avocados from all sides!,47
+Peter,[],[],[],,,0,,[],,,2018-08-11 07:06:36,pestipeti/fake-incorrect-training-masks,,Fake / incorrect training masks?,57
+SRK,[],[],[],,,0,,[],,,2018-08-10 11:52:55,sudalairajkumar/getting-started-with-h2o,,Getting started with H2O,57
+RishiH,[],[],[],,,0,,[],,,2018-07-05 10:02:48,rishih/present-sir,,Present Sir !!!,57
+Lathwal,[],[],[],,,0,,[],,,2018-05-04 10:10:19,codename007/a-very-extensive-eda-of-physics-particles-plotly,,A Very Extensive EDA of Physics Particles : Plotly,57
+Siddharth Yadav,[],[],[],,,0,,[],,,2018-06-09 05:28:57,thebrownviking20/who-said-this-line-eda-classification-keras-ann,,Who said this line[EDA/Classification/Keras/ANN],57
+Sanders Kleinfeld,[],[],[],,,0,,[],,,2018-03-08 23:12:28,skleinfeld/getting-started-with-the-donorschoose-data-set,,Getting Started with the DonorsChoose Data Set,57
+deja vu,[],[],[],,,0,,[],,,2018-10-23 05:40:09,dejavu23/titanic-eda-to-ml-beginner,,Titanic : EDA to ML (Beginner),57
+Vladimir Demidov,[],[],[],,,0,,[],,,2018-01-31 13:43:06,yekenot/toxic-regression,,Toxic Regression,57
+TimLee,[],[],[],,,0,,[],,,2017-12-02 10:00:40,timolee/feeling-hungry-a-beginner-s-guide-to-arima-models,,Feeling Hungry? A Beginner's Guide to ARIMA models,57
+Dany Majard,[],[],[],,,0,,[],,,2018-05-15 08:53:55,thepathofd/a-first-kaggle-part-1-forecasting-store-47,,A first Kaggle - Part 1 - Forecasting store #47,57
+Bukun,[],[],[],,,0,,[],,,2018-02-24 05:58:36,ambarish/tutorial-detailed-spooky-fun-eda-and-modelling,,Tutorial:Detailed Spooky Fun EDA and Modelling,57
+Anton Aksyonov,[],[],[],,,0,,[],,,2017-11-06 15:30:53,antonaks/mass-shooting-in-us-using-plotly,,Mass Shooting in US (using plotly),57
+Jacob Boysen,[],[],[],,,0,,[],,,2017-09-27 20:47:08,jboysen/quick-tutorial-flatten-nested-json-in-pandas,,Quick Tutorial: Flatten Nested JSON in Pandas,47
+Pranav Pandya,[],[],[],,,0,,[],,,2017-09-15 17:15:44,pranav84/the-most-dangerous-places-to-work-in-the-usa,,The Most Dangerous Places to Work in the USA,57
+beluga,[],[],[],,,0,,[],,,2017-09-25 13:25:50,gaborfodor/augmentation-methods,,Augmentation methods,57
+Victor Ambonati,[],[],[],,,0,,[],,,2017-08-04 12:14:10,victorambonati/unsupervised-anomaly-detection,,Unsupervised Anomaly Detection,57
+Megan Risdal,[],[],[],,,0,,[],,,2018-07-17 17:48:50,mrisdal/happiness-and-open-data,,Happiness and Open Data,57
+Oleg Panichev,[],[],[],,,0,,[],,,2017-06-11 05:26:34,opanichev/xgb-starter,,XGB Starter,57
+David Thaler,[],[],[],,,0,,[],,,2017-04-18 21:33:44,davidthaler/duplicates-of-duplicates,,Duplicates of Duplicates,57
+Puneet Singh Ludu,[],[],[],,,0,,[],,,2017-03-28 04:58:49,puneetsl/unusual-meaning-map,,Unusual meaning map,57
+Aki Vehtari,[],[],[],,,0,,[],,,2018-05-27 09:31:39,avehtari/bayesian-logistic-regression-with-rstanarm,,Bayesian Logistic Regression with rstanarm ,57
+Anastasya Rysmyatova,[],[],[],,,0,,[],,,2016-10-12 15:58:40,anastasya/visualization-and-analysis,,Visualization and analysis,57
+Yoni Lev,[],[],[],,,0,,[],,,2016-07-24 22:27:31,yonilev/the-most-predictable-league,,The Most Predictable League ,57
+FanZhang,[],[],[],,,0,,[],,,2018-08-11 14:01:03,fanzzz/understand-variables-in-chinese,,Understand Variables in Chinese,56
+kxx,[],[],[],,,0,,[],,,2018-07-11 09:37:04,kailex/xgb-features-1-4,,xgb +  features [1.4],56
+Shanth,[],[],[],,,0,,[],,,2018-05-30 20:33:53,shanth84/credit-card-balance-feature-engineering,,CREDIT CARD BALANCE - FEATURE ENGINEERING,56
+Andrew Lukyanenko,[],[],[],,,0,,[],,,2018-08-26 11:19:33,artgor/eda-basic-fe-and-lgb,,"EDA, basic FE and LGB",56
+YeongTaek Oh,[],[],[],,,0,,[],,,2018-05-13 02:42:01,dhznsdl/nn-model-adding-variables-step-by-step,,NN Model adding variables step by step,56
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-09-26 20:07:43,residentmario/summary-functions-and-maps-workbook,,Summary functions and maps workbook,46
+Hunter McGushion,[],[],[],,,0,,[],,,2018-02-06 06:15:43,huntermcgushion/exhaustive-weather-eda-file-overview,,Exhaustive Weather EDA/File Overview,56
+Raoul,[],[],[],,,0,,[],,,2018-02-08 13:49:41,raoulma/mnist-image-class-tensorflow-cnn-99-51-test-acc,,MNIST Image Class. TensorFlow CNN 99.51% Test Acc.,56
+0rangutan,[],[],[],,,0,,[],,,2017-03-05 22:13:41,orangutan/exploring-mmlm2017,,Exploring MMLM2017,56
+ArmanUygur,[],[],[],,,0,,[],,,2017-01-07 21:45:30,auygur/step-by-step-house-price-prediction-r-2-0-77,,Step by Step House Price Prediction (R^2=0.77),56
+CPMP,[],[],[],,,0,,[],,,2017-01-09 12:55:58,cpmpml/optimal-expected-submission-value,,Optimal Expected Submission Value,56
+Hugo SECHIER,[],[],[],,,0,,[],,,2016-11-22 12:50:53,narae78/fish-detection,,Fish detection,56
+Boris Klyus,[],[],[],,,0,,[],,,2016-09-19 06:43:58,klyusba/lasso-model-for-regression-problem,,Lasso model for regression problem,56
+Giuseppe Casalicchio,[],[],[],,,0,,[],,,2016-01-29 22:05:46,casalicchio/use-the-mlr-package-scores-0-649,,Use the mlr Package (scores 0.649),56
+Ritesh Saluja,[],[],[],,,0,,[],,,2018-10-26 09:29:04,ritesaluja/halloweenspecial,,HalloweenSpecial ,0
+Leonardo Ferreira ,[],[],[],,,0,,[],,,2018-10-23 18:28:51,kabure/kickstarter-interactive-explanatory-exploration,,Kickstarter Interactive Explanatory Exploration,54
+adityapatil,[],[],[],,,0,,[],,,2018-07-22 02:00:35,adityapatil673/visual-analysis-of-apps-on-applestore,,Visual Analysis of Apps on AppleStore,55
+hungfei,[],[],[],,,0,,[],,,2018-07-30 09:19:31,hungfei/passnyc-the-magic-of-data-science,,PASSNYC: The Magic of Data Science ,55
+NAIN,[],[],[],,,0,,[],,,2018-06-12 18:17:37,aakashnain/beating-everything-with-depthwise-convolution,,Beating everything with Depthwise Convolution,55
+Francis Paul Flores,[],[],[],,,0,,[],,,2018-10-04 09:55:06,grosvenpaul/regression-eda-and-statistics-tutorial,,"Regression, EDA, and Statistics Tutorial",55
+Andy Harless,[],[],[],,,0,,[],,,2018-04-17 03:59:21,aharless/kaggle-runnable-version-of-baris-kanber-s-lightgbm,,Kaggle-runnable version of Baris Kanber's LightGBM,55
+Giba,[],[],[],,,0,,[],,,2018-03-09 19:03:59,titericz/giba-darragh-ftrl-rerevisited,,Daragh FTRL rerevisited ,55
+Ashwini Swain,[],[],[],,,0,,[],,,2018-09-17 06:48:17,ash316/hackerrank-s-hackers-and-developers,,HackerRank's Hackers and Developers,55
+Leonardo Ferreira ,[],[],[],,,0,,[],,,2018-06-07 17:37:10,kabure/lending-club-extensive-eda,,Lending Club - Extensive EDA,55
+Jagan,[],[],[],,,0,,[],,,2018-03-18 06:58:18,jagangupta/understanding-the-topic-of-toxicity,,"Understanding the ""Topic"" of toxicity",55
+Ashwini Swain,[],[],[],,,0,,[],,,2018-06-16 11:37:09,ash316/what-s-my-score,,What's my Score?? ,55
+Reza Javidi,[],[],[],,,0,,[],,,2018-01-30 14:18:31,javidimail/h-1b-wage-distribution,,H-1B Wage Distribution,55
+Aleksey Bilogur,[],[],[],,,0,,[],,,2018-03-16 17:57:35,residentmario/introduction-to-plotly-optional,,Introduction to plotly (Optional),55
+Kunal Kotian,[],[],[],,,0,,[],,,2017-11-20 08:58:39,kunalkotian/easily-load-train-csv-w-o-crash-save-feather-file,,"Easily Load train.csv w/o Crash, Save Feather File",55
+See--,[],[],[],,,0,,[],,,2017-10-06 12:34:04,seesee/concise-catboost-starter-ensemble-plb-0-06435,,Concise catboost starter ensemble (PLB: 0.06435),55
+Philipp Schmidt,[],[],[],,,0,,[],,,2017-04-02 20:45:29,philschmidt/sea-lion-correlations-cv2-template-matching,,Sea Lion Correlations & CV2 Template matching,55
+den3b,[],[],[],,,0,,[],,,2017-02-14 23:46:11,den3b81/do-managers-matter-some-insights-on-manager-id,,"Do managers matter? Some insights on ""manager_id""",55
+meikegw,[],[],[],,,0,,[],,,2017-01-19 19:58:32,meikegw/filling-up-missing-values,,Filling up missing values,55
+Norman Secord,[],[],[],,,0,,[],,,2015-10-21 14:23:05,nsecord/filling-gaps-in-the-training-set,,Filling Gaps in the Training Set,55
+Shivam Bansal,[],[],[],,,0,,[],,,2018-10-23 05:10:29,shivamb/analyse-your-kaggle-profile-framework,,Analyse Your Kaggle Profile - Framework !!,54
+Amit Kumar,[],[],[],,,0,,[],,,2018-10-26 10:22:21,flubber/lda-linear-discriminant-analysis,,LDA (Linear Discriminant Analysis),0
+Mayur Naik,[],[],[],,,0,,[],,,2018-10-26 09:18:44,mayurnike/work1,,work1,0
+dgg32,[],[],[],,,0,,[],,,2018-10-26 09:22:27,dgg321982/same-otu-cross-sample,,same otu cross sample,0
+Dandelion,[],[],[],,,0,,[],,,2018-10-10 21:09:10,hely333/eda-regression,,EDA + Regression,54
+inversion,[],[],[],,,0,,[],,,2018-09-26 17:47:26,inversion/getting-started-viewing-quick-draw-doodles-etc,,"Getting Started: Viewing Quick, Draw! Doodles, etc",54
+Randi H Griffin,[],[],[],,,0,,[],,,2018-07-27 09:44:14,heesoo37/olympic-history-data-a-thorough-analysis,,Olympic history data: thorough analysis,54
+Dan Emery,[],[],[],,,0,,[],,,2018-05-14 11:10:20,demery/lightgbm-with-ridge-feature,,LightGBM with Ridge Feature,54
+Pavan Raj,[],[],[],,,0,,[],,,2018-07-09 15:26:16,pavanraj159/predicting-pulsar-star-in-the-universe,,predicting pulsar star in the universe,54
+Faraz Rahman,[],[],[],,,0,,[],,,2018-06-12 05:57:09,farazrahman/are-we-producing-enough-food-simple-time-series,,Are we producing enough FOOD?? Simple Time Series,54
+Samrat P,[],[],[],,,0,,[],,,2018-05-14 03:41:39,samratp/kiva-beginner-guide-to-eda-and-data-visualization,,Kiva -Beginner Guide to EDA and Data Visualization,54
+Lathwal,[],[],[],,,0,,[],,,2018-04-29 11:52:56,codename007/top-funding-startups-in-india,,Top Funding Startups in India,54
+Sudhir Kumar,[],[],[],,,0,,[],,,2018-08-27 15:52:37,sudhirnl7/simple-logistic-model-porto,,Simple logistic model - PORTO,54
+DLao,[],[],[],,,0,,[],,,2018-07-27 15:21:34,laowingkin/fifa-18-find-the-best-squad,,FIFA 18 - Find the best squad,54
+Dave Fisher-Hickey,[],[],[],,,0,,[],,,2017-09-23 16:03:18,daveianhickey/how-to-folium-for-maps-heatmaps-time-analysis,,"How to: Folium for maps, heatmaps & time analysis",54
+Bruno G. do Amaral,[],[],[],,,0,,[],,,2017-07-28 11:12:00,bguberfain/naive-keras,,Naive Keras,54
+ZhiboYang,[],[],[],,,0,,[],,,2017-05-17 23:20:32,zhiboyang/feature-selection-and-prediction,,Feature Selection and Prediction,54
+Alexandru Papiu,[],[],[],,,0,,[],,,2018-04-08 05:53:51,apapiu/manifold-learning-and-autoencoders,,Manifold Learning And Autoencoders,54
+Pierre-Yves,[],[],[],,,0,,[],,,2017-04-27 14:28:42,pylablanche/meteorite-landings-simple-analysis,,Meteorite Landings simple analysis,54
+dmi3kno,[],[],[],,,0,,[],,,2016-10-21 23:49:46,dmi3kno/allstate-fingerprints-eda,,Allstate Fingerprints (EDA),54
+CPMP,[],[],[],,,0,,[],,,2016-09-26 04:33:48,cpmpml/optimizing-probabilities-for-best-mcc,,Optimizing probabilities for best MCC,54
+Anisotropic,[],[],[],,,0,,[],,,2018-09-23 09:39:21,arthurtok/spooky-nlp-and-topic-modelling-tutorial,,Spooky NLP and Topic Modelling tutorial,526
+Dmitry Pukhov,[],[],[],,,0,,[],,,2018-10-12 00:31:20,dmitrypukhov/honey-bee-health-detection-with-cnn,,Honey Bee health detection with CNN,53
+Danilo da Silva,[],[],[],,,0,,[],,,2018-10-20 14:49:30,danilodiogo/the-astronomical-complete-eda-plasticc-dataset,,The Astronomical (complete) EDA - PLAsTiCC dataset,53
+Giulia Savorgnan,[],[],[],,,0,,[],,,2018-09-09 17:44:40,giuliasavorgnan/start-here-beginner-intro-to-lung-opacity-s1,,START HERE: Beginner Intro to Lung Opacity S1,53
+Dmitry Dryomov,[],[],[],,,0,,[],,,2018-07-27 19:41:41,dremovd/goto-pytorch-baseline,,GoTo - PyTorch - Baseline ,53
+VK_ds,[],[],[],,,0,,[],,,2018-08-08 19:58:26,vinothan/titanic-model-with-90-accuracy,,Titanic Model with 90% accuracy,53
+Andreas Salzburger,[],[],[],,,0,,[],,,2018-08-14 06:56:06,asalzburger/pixel-detector-cells,,Pixel Detector: Cells,53
+Peter Hurford,[],[],[],,,0,,[],,,2018-03-05 19:13:53,peterhurford/lgb-gru-lr-lstm-nb-svm-average-ensemble,,LGB + GRU + LR + LSTM + NB-SVM Average Ensemble,53
+LiamKirwin,[],[],[],,,0,,[],,,2018-03-11 15:34:31,lpkirwin/fivethirtyeight-elo-ratings,,FiveThirtyEight_Elo_ratings,53
+whitebird,[],[],[],,,0,,[],,,2018-02-22 09:14:02,whitebird/mercari-price-3rd-0-3905-cv-at-pb-in-3300-s,,Mercari Price:3rd  0.3905 CV at Pb in 3300 s,53
+NitinSurya,[],[],[],,,0,,[],,,2018-02-06 08:03:48,nitinsurya/surprise-me-2-neural-networks-keras,,Surprise Me 2! Neural Networks(keras),53
+Chia-Ta Tsai,[],[],[],,,0,,[],,,2017-10-31 07:01:13,cttsai/ensembling-gbms-lb-203,,Ensembling GBMs (LB .203~,53
+PavelTroshenkov,[],[],[],,,0,,[],,,2017-10-24 19:15:19,pavetr/stacking-lb-0-285,,Stacking - LB 0.285,53
+Liling Tan,[],[],[],,,0,,[],,,2017-11-29 14:19:50,alvations/basic-nlp-with-nltk,,Basic NLP with NLTK,43
+Eike Dehling,[],[],[],,,0,,[],,,2017-10-17 09:13:49,eikedehling/tune-and-compare-xgb-lightgbm-rf-with-hyperopt,,"Tune and compare XGB, LightGBM, RF with Hyperopt",53
+Kevin,[],[],[],,,0,,[],,,2017-10-05 06:03:33,kevinbonnes/xgboost-starter-0-280,,XGBoost starter [0.280],53
+Sana Rasheed,[],[],[],,,0,,[],,,2017-11-03 16:53:25,sanarasheed/exploratory-analysis-of-mass-shooting-in-usa,,Exploratory Analysis of Mass Shooting in USA,53
+Bukun,[],[],[],,,0,,[],,,2018-03-12 17:48:23,ambarish/fun-in-text-mining-with-simpsons,,Fun in Text Mining with Simpsons,53
+Jarvis Yang,[],[],[],,,0,,[],,,2017-08-05 13:27:53,chuanguy/titanic-data-processing-with-python-0-813,,Titanic Data Processing with Python(0.813),53
+Becky Wang,[],[],[],,,0,,[],,,2017-04-07 01:59:49,beiqiwang/predictive-analysis-of-survival-rate-on-titanic,,Predictive Analysis of Survival Rate on Titanic,53
+Eliot Barril,[],[],[],,,0,,[],,,2017-06-15 21:36:55,eliotbarr/text-mining-with-sklearn-keras-mlp-lstm-cnn,,"Text Mining with Sklearn /Keras (MLP, LSTM, CNN)",53
+Alexandru Papiu,[],[],[],,,0,,[],,,2017-01-14 05:21:14,apapiu/exploratory-analysis-visualization,,Exploratory Analysis + Visualization,53
+VeereshElango,[],[],[],,,0,,[],,,2017-01-02 18:24:15,veereshelango/celebrity-death-analysis,,Celebrity Death Analysis,53
+Yunfeng Zhu,[],[],[],,,0,,[],,,2016-12-20 16:42:06,ymcdull/ridge-lb-0-0100659,,Ridge (LB: 0.0100659),53
+Jack (Japan),[],[],[],,,0,,[],,,2017-05-19 00:25:32,rsakata/3rd-place-solution-simple-version,,3rd Place Solution (simple version),53
+Robert,[],[],[],,,0,,[],,,2018-10-25 20:43:17,robertkag/fast-image-loading,,Fast image loading,3
+Anisotropic,[],[],[],,,0,,[],,,2018-09-24 22:53:26,arthurtok/interactive-intro-to-dimensionality-reduction,,Interactive Intro to Dimensionality Reduction,497
+Michal Haltuf,[],[],[],,,0,,[],,,2018-10-25 12:32:01,rejpalcz/focalloss-for-keras,,FocalLoss for Keras,4
+Deepak Singh Rawat,[],[],[],,,0,,[],,,2018-10-08 14:39:35,deepaksinghrawat/introduction-to-u-net-with-simple-resnet-blocks,,Introduction to U-net with simple Resnet Blocks,52
+Prashant Kikani,[],[],[],,,0,,[],,,2018-09-30 15:03:37,prashantkikani/teach-lightgbm-to-sum-predictions-fe,,Teach_LightGBM_to_Sum_Predictions + FE,52
+Rachael Tatman,[],[],[],,,0,,[],,,2018-08-23 19:04:27,rtatman/reproducible-research-best-practices-jupytercon,,Reproducible research best practices @JupyterCon,52
+Ashish Patel(阿希什),[],[],[],,,0,,[],,,2018-06-08 03:12:24,ashishpatel26/home-credit-default-analysis,,Home Credit Default Analysis,52
+Ankur Singh,[],[],[],,,0,,[],,,2018-06-14 18:20:37,ankur310794/stackoverflow2018-drilldown-network-decisiontree,,StackOverflow2018: drilldown+Network+decisionTree,52
+Dieter,[],[],[],,,0,,[],,,2018-05-13 18:03:26,christofhenkel/fasttext-starter-description-only,,Fasttext starter (description only),52
+anokas,[],[],[],,,0,,[],,,2018-04-16 19:23:11,anokas/python3-dataset-downloader-with-progress-bar,,Python3 Dataset Downloader with progress bar,52
+Janio Alexander Bachmann,[],[],[],,,0,,[],,,2018-06-24 00:58:49,janiobachmann/in-depth-analysis-exploring-stacking,,  In-Depth Analysis: Exploring || Stacking,52
