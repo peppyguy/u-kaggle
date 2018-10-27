@@ -1,0 +1,1192 @@
+---
+title: "PASSNYC"
+author: "Bruce Wayne"
+date: "June 26, 2018"
+output:
+  html_document:
+    toc: true
+    fig_width: 7
+    fig_height: 4.5
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+**Before we begin please note anything bolded is either a finding or an important comment**
+
+*Also please remember to upvote if you liked this analysis and found it useful. Hope you enjoy going through it as much as I enjoyed tackling the problem*
+
+## Introduction {#intro}
+
+PASSNYC and its partners provide outreach services that improve the chances of students taking the SHSAT and receiving placements in these specialized high schools. **The current process of identifying schools is effective, but PASSNYC could have an even greater impact with a more informed, granular approach to quantifying the potential for outreach at a given school.** Proxies that have been good indicators of these types of schools include data on English Language Learners, Students with Disabilities, Students on Free/Reduced Lunch, and Students with Temporary Housing.
+
+Part of this challenge is to assess the needs of students by using publicly available data to quantify the challenges they face in taking the SHSAT.**The best solutions will enable PASSNYC to identify the schools where minority and underserved students stand to gain the most from services like after school programs, test preparation, mentoring, or resources for parents.**
+
+## Libraries and Functions {#libraries}
+
+Let's begin by loading the libraries and functions
+
+```{r}
+
+load.libraries <- c('plyr', 'dplyr','data.table', 'readxl', 'reshape2', 'stringr', 'stringi', 'ggplot2', 'tidyverse', 'gridExtra','matrixStats','lubridate','corrplot','e1071','xgboost','caret','zoo','factoextra','plotly','DT','rpart')
+install.lib <- load.libraries[!load.libraries %in% installed.packages()]
+for(libs in install.lib) install.packages(libs, dependences = TRUE)
+sapply(load.libraries, require, character = TRUE)
+
+library("corrplot")
+library("Hmisc")
+library("PerformanceAnalytics")
+library("NbClust")
+library("fpc")
+library("factoextra")
+library("RColorBrewer")
+library("flexclust")
+library('ggdendro')
+library("dendextend")
+library('rgdal')
+
+#Function to change index to column
+index_to_col <- function(data, Column_Name){
+          data <- cbind(newColName = rownames(data), data)
+          rownames(data) <- 1:nrow(data)
+          colnames(data)[1] <- Column_Name
+          return (data)
+        }
+
+#Loading all the plotting functions
+plotHist <- function(data_in, i) {
+  data <- data.frame(x=data_in[[i]])
+  p <- ggplot(data=data, aes(x=x)) + geom_histogram(bins=100, fill="#0072B2", alpha = .9) + xlab(colnames(data_in)[i]) + theme_light() + 
+    theme(axis.text.x = element_text(angle = 90, hjust =1))
+  return (p)
+}
+
+plotCorr <- function(data_in, list1,list2,i){
+  data <- data.frame(x = data_in[[list1[i]]], y = data_in[[list2[i]]])
+  p <- ggplot(data, aes(x = x, y = y)) + geom_smooth(method = lm ) + geom_point(aes(x = x, y = y)) +
+  geom_jitter(width = 0.1, height = 0.1)  + xlab(paste0(list1[i], '\n', 'R-Squared: ', round(cor(data_in[[list1[i]]], data_in[[list2[i]]], use = 'pairwise.complete.obs'), 3))) + theme_light() + ylab(paste0(list2[i]))
+  return(suppressWarnings(p))
+}
+
+doPlotsCorr <- function(data_in, fun, list1,list2,ii, ncol=3) {
+  pp <- list()
+  for (i in ii) {
+    p <- fun(data_in=data_in, list1,list2,i=i)
+    pp <- c(pp, list(p))
+  }
+  do.call("grid.arrange", c(pp, ncol=ncol))
+}
+
+doPlots <- function(data_in, fun, ii, ncol=3) {
+  pp <- list()
+  for (i in ii) {
+    p <- fun(data_in=data_in, i=i)
+    pp <- c(pp, list(p))
+  }
+  do.call("grid.arrange", c(pp, ncol=ncol))
+}
+
+```
+
+## Data Overview {#dataoverview}
+
+Loading both the datasets given in the competition
+
+```{r echo=FALSE}
+dt1 <- fread('../input/data-science-for-good/2016 School Explorer.csv', showProgress = FALSE)
+dt2 <- fread('../input/data-science-for-good/D5 SHSAT Registrations and Testers.csv', showProgress = FALSE)
+#dt3 <- fread('../input/zip-code-breakdowns.csv', showProgress = FALSE)
+#dt4 <- fread('school-district-breakdowns.csv', showProgress = FALSE)
+#dt5 <- fread('2010-2011-school-attendance-and-enrollment-statistics-by-district.csv', showProgress = FALSE)
+
+dt6 <- fread('../input/ny-school-demographics-and-accountability-snapshot/2006-2012-school-demographics-and-accountability-snapshot.csv', showProgress = FALSE)
+dt7 <- fread('../input/nyc-class-size/February2017_Avg_ClassSize_School_all.csv', showProgress = FALSE)
+dt8 <- fread('../input/nyc-shsat/nytdf.csv', showProgress = FALSE)
+dt9 <- fread('../input/nycdemo/2013_-_2018_Demographic_Snapshot_School.csv', showProgress = FALSE)
+counties <- readOGR("../input/nyc-map", "nybb")
+setnames(dt2, "School name","School Name")
+```
+The first dataset (School information) has `r dim(dt1)[1]` rows and `r dim(dt1)[2]` columns  
+The second dataset (SHSAT) has `r dim(dt2)[1]` rows and `r dim(dt2)[2]` columns  
+The third dataset (School Demographics) has `r dim(dt6)[1]` rows and `r dim(dt6)[2]` columns  
+The fourth dataset (School Class Size) has `r dim(dt7)[1]` rows and `r dim(dt7)[2]` columns  
+The fifth dataset (School SHSAT TestTakers - parsed) has `r dim(dt8)[1]` rows and `r dim(dt8)[2]` columns 
+
+## Cleaning the data
+
+Rule1: Dropping the first and third column since they have little to no data
+```{r}
+dt1 <- dt1[,-c(1,3)]
+```
+
+Rule2: Changing the column names to have no blanks and "%" to "pec"
+```{r}
+
+colnames(dt1) <- str_replace_all(colnames(dt1)," ","_")
+colnames(dt1) <- str_replace_all(colnames(dt1),"%","per")
+colnames(dt1)[14] <- 'Community_School'
+
+colnames(dt2) <- str_replace_all(colnames(dt2)," ","_")
+colnames(dt2)[1] <- 'Location_Code'
+
+#colnames(dt3) <- str_replace_all(colnames(dt3)," ","_")
+#colnames(dt3)[1] <- 'Zip'
+#colnames(dt4) <- str_replace_all(colnames(dt4)," ","_")
+#colnames(dt5) <- str_replace_all(colnames(dt5)," ","_")
+
+colnames(dt6)[1] <- 'Location_Code'
+
+colnames(dt7) <- str_replace_all(colnames(dt7)," ","_")
+
+colnames(dt9) <- str_replace_all(colnames(dt9)," ","_")
+colnames(dt9) <- str_replace_all(colnames(dt9),"%","per")
+```
+
+Rule3: Changing the variables to numeric that were incorrectly loaded as char
+```{r}
+#Changing the variables to numeric
+dt1$Economic_Need_Index <- as.numeric(dt1$Economic_Need_Index)
+dt1$Average_ELA_Proficiency <- as.numeric(dt1$Average_ELA_Proficiency)
+dt1$Average_Math_Proficiency <- as.numeric(dt1$Average_Math_Proficiency)
+dt1$School_Income_Estimate <- as.numeric(gsub("[\\$,]", "", dt1$School_Income_Estimate))
+
+dt1$District <- as.character(dt1$District)
+```
+
+Rule4: Removing the % from the Percent cols and changing them to numeric
+```{r}
+#Changing it for dt1
+col_per <- colnames(as.data.frame(dt1)[,grepl("Percent|per|Rate",colnames(dt1))])
+dt1_Percent <- as.data.frame(dt1)[, (colnames(dt1) %in% col_per)]
+dt1_Percent <- apply(dt1_Percent,2, function(x) as.numeric(gsub("%", "", x))/100)
+
+dt1 <- as.data.frame(dt1)[, !(colnames(dt1) %in% col_per)]
+dt1 <- cbind(dt1, dt1_Percent)
+
+#Changing it for dt8
+col_per <- colnames(as.data.frame(dt8)[,grepl("OffersPerStudent|PctBlackOrHispanic",colnames(dt8))])
+dt8_Percent <- as.data.frame(dt8)[, (colnames(dt8) %in% col_per)]
+dt8_Percent <- apply(dt8_Percent,2, function(x) as.numeric(gsub("%", "", x))/100)
+
+dt8 <- as.data.frame(dt8)[, !(colnames(dt8) %in% col_per)]
+dt8 <- cbind(dt8, dt8_Percent)
+
+#Changing it for dt9
+col_per <- colnames(as.data.frame(dt9)[,grepl("per",colnames(dt9))])
+dt9_Percent <- as.data.frame(dt9)[, (colnames(dt9) %in% col_per)]
+dt9_Percent <- apply(dt9_Percent,2, function(x) as.numeric(gsub("%", "", x))/100)
+
+dt9 <- as.data.frame(dt9)[, !(colnames(dt9) %in% col_per)]
+dt9 <- cbind(dt9, dt9_Percent)
+```
+
+Rule5: Making the District column to match for other datasets
+```{r}
+regexp <- "[[:digit:]]+"
+# dt5$District <- str_extract(as.character(dt5$District), regexp)
+# dt5$District <- as.character(as.numeric(dt5$District))
+# dt4$District <- str_extract(as.character(dt4$JURISDICTION_NAME), regexp)
+# dt4$District <- as.character(as.numeric(dt4$District))
+
+#dt3$Zip <- as.character(dt3$Zip)
+
+dt1$District <- as.character(dt1$District)
+```
+
+Rule6: Using the latest year for the school demographics data
+```{r}
+dt6_tran <- mutate(dt6[,c(1:20,35:38)], Latestyear = substr(schoolyear,5,8))
+dt6_latest <- setDT(dt6_tran)[,. (maxyear = max(Latestyear)), by =list(Location_Code)]
+dt6_tran <- left_join(dt6_tran,dt6_latest, by = "Location_Code")
+dt6_tran <- mutate(dt6_tran, YearFitler = ifelse(maxyear == Latestyear,TRUE,FALSE))
+dt6_tran <- setDT(dt6_tran)[YearFitler == TRUE]
+```
+
+Rule7: Transforming class data
+```{r}
+#Removing the Core Course Column since it has 27 categories
+dt7 <- dt7[,-11]
+
+#Taking out the average for all the numeric variables
+dt7_numeric_list <- unlist(lapply(dt7, is.numeric))
+dt7_numeric <- setDT(dt7)[,..dt7_numeric_list]
+
+dt7_numeric <- cbind(dt7_numeric,dt7[,1])
+dt7_numeric <- dt7_numeric[, lapply(.SD, function (x) mean(x, na.rm = T)), by=DBN]
+
+#Making the % of total for the Products
+ dt7_char_list <- unlist(lapply(dt7, is.character))
+ dt7_char <- setDT(dt7)[,..dt7_char_list]
+ 
+ dt7_char <- dt7_char[,c(3:5)]
+ 
+ datalist <- list()
+ dt7_char_list_new <- colnames(dt7_char)
+ for (i in 1:length(dt7_char_list_new)){
+ dt7_char2 <- setDT(dt7_char)[,dt7_char_list_new[i],with=FALSE]
+ dmy <- dummyVars(" ~ .", data = dt7_char2,fullRank = T)
+ dt7_char_transformed <- data.frame(predict(dmy, newdata = dt7_char))
+ 
+ dt7_char_transformed <- cbind(dt7[,1],dt7_char_transformed)[, lapply(.SD, sum), by = DBN]
+ 
+ dt7_char_transformed <- dt7_char_transformed[,2:ncol(dt7_char_transformed)]
+ 
+ dt7_char_transformed <- setDT(dt7_char_transformed)[, .SD/rowSums(dt7_char_transformed)]
+ colnames(dt7_char_transformed) <- paste(colnames(dt7_char_transformed),'_per', sep="")
+ dt7_char_transformed[is.na(dt7_char_transformed)] <- 0
+ datalist[[i]] <- dt7_char_transformed
+}
+ 
+dt7_char <-do.call(cbind,datalist) 
+dt7_tran <- cbind(dt7_numeric,dt7_char)
+
+```
+
+Rule8: Extracting only the Disability%, ELL% and Poverty% data, changing the % to numeric and using the latest information 
+```{r}
+dt9_tran <- mutate(dt9[,c(1,3,37,38,39)], Latestyear = substr(Year,6,8))
+dt9_latest <- setDT(dt9_tran)[,. (maxyear = max(Latestyear)), by =list(DBN)]
+dt9_tran <- left_join(dt9_tran,dt9_latest, by = "DBN")
+dt9_tran <- mutate(dt9_tran, YearFitler = ifelse(maxyear == Latestyear,TRUE,FALSE))
+dt9_tran <- setDT(dt9_tran)[YearFitler == TRUE]
+```
+
+
+## New Variables
+
+Making an ordinal value for the Rating columns (e.g. Not Meeting Target = 1, Approaching Target = 2 .. etc)
+```{r}
+col_rat <- colnames(as.data.frame(dt1)[,grepl("Rating",colnames(dt1))])
+dt1_Rating <- as.data.frame(dt1)[, (colnames(dt1) %in% col_rat)]
+colnames(dt1_Rating) <- paste(colnames(dt1_Rating),'_score',sep = "")
+dt1_Rating <- apply(dt1_Rating,2, function(x) ifelse(x=="Not Meeting Target",1,
+                                                     ifelse(x=="Approaching Target",2,
+                                                            ifelse(x=="Meeting Target",3,
+                                                                   ifelse(x=="Exceeding Target",4,0)))))
+dt1_Rating <- cbind(dt1_Rating, Ttl_Rating = rowSums(dt1_Rating))
+
+dt1 <- cbind(dt1, dt1_Rating)
+```
+
+Making the count of number of grades (Number of grades a school has)
+```{r}
+dt1 <- mutate(dt1, Grd_count = count.fields(textConnection(dt1$Grades), sep = ","))
+```
+
+```{r}
+dt2 <- mutate(dt2, per_reg = Number_of_students_who_registered_for_the_SHSAT/`Enrollment_on_10/31`,per_SHSAT = Number_of_students_who_took_the_SHSAT/Number_of_students_who_registered_for_the_SHSAT)
+
+```
+
+**Joining tables**
+
+**For the first phase, I will be joining the 2016 School Explorer table and the School Demographics table**
+```{r}
+#dt2_rshp <- reshape(setDT(dt2)[Year_of_SHST == 2016], direction="wide", idvar=c("Location_Code", "School_Name"), timevar="Year_of_SHST")
+
+dt1_len <- length(unique(dt1$Location_Code))
+
+dt1 <- left_join(dt1,dt6_tran, by = "Location_Code")
+
+dt1 <- setDT(dt1)[!is.na(dt1$schoolyear)]
+
+```
+
+**For the second phase, I will be joining the Class Size table**
+
+```{r}
+
+setnames(dt7_tran, "DBN","Location_Code")
+dt1 <- left_join(dt1,dt7_tran, by = "Location_Code")
+
+```
+
+**For the third phase, I will be joining the School SHSAT TestTakers - parsed table**
+
+
+```{r}
+setnames(dt8, "DBN","Location_Code")
+dt1 <- inner_join(dt1,dt8, by = "Location_Code")
+```
+
+One thing to note here is that even though, the number of rows decreases by ~ 60%, **the pattern of the clusters DO NOT change.** I can look into whether the new sample is representiative of the entire population, but I would look into that another time.
+
+**For the fourth phase, I will be joining the Disability,ELL and Poverty% data**
+
+```{r}
+setnames(dt9_tran,"DBN","Location_Code")
+dt1 <- left_join(dt1, dt9_tran, by = "Location_Code")
+```
+
+
+### EDA and Data Transformation
+
+```{r echo=FALSE}
+col_grade <- colnames(as.data.frame(dt1)[,grepl("Grade",colnames(dt1))])
+dt1_nograde <- as.data.frame(dt1)[, !(colnames(dt1) %in% col_grade)]
+
+numeric_list <- unlist(lapply(dt1_nograde, is.numeric))
+dt1_num <- setDT(dt1_nograde)[,..numeric_list]
+
+non_numeric_list <- unlist(lapply(dt1, is.character))
+dt1_non_num <- setDT(dt1)[,..non_numeric_list]
+```
+Out of `r dim(dt1)[2]`, there are `r ncol(dt1_num)` numeric columns in the data  and `r ncol(dt1_non_num)` non numeric columns
+
+##### Exploratory Data Analysis {.tabset .tabset-fade .tabset-pills}
+
+Lets see the distribution of all `r ncol(dt1_num)` numeric columns in the data
+
+**A few things to note:**  
+
+**1) As the grade number progresses the mean of the distribution starts to decrease especially after grade 5-6 and 7-8 **  
+**2) The distribution of male and female % has a very low standard deviation so most of the schools are very balanced in terms of gender ratio**  
+
+
+###### Plots1
+```{r fig1, fig.height = 20, fig.width = 10}
+doPlots(dt1_num, plotHist, ii = 1:20)
+```
+
+###### Plots2
+```{r fig2, fig.height = 20, fig.width = 10}
+doPlots(dt1_num, plotHist, ii = 21:41)
+```
+
+###### Plots3
+```{r fig3, fig.height = 15, fig.width = 10}
+doPlots(dt1_num, plotHist, ii = 42:62)
+```
+
+###### Plots4
+```{r fig4, fig.height = 15, fig.width = 10}
+doPlots(dt1_num, plotHist, ii = 63:ncol(dt1_num))
+```
+
+#####Data Manipulation
+
+Since there is a clear difference in pattern between grade 5-6 and 7-8 I will **make 3 variables**:  
+
+1) Average of all the grades  
+2) Percentage increase/decrease between grade 5 and grade 6  
+3) Percentage increase/decrease between grade 7 and grade 8  
+
+```{r}
+col_grade2 <- colnames(as.data.frame(dt1_num)[,grepl("grade",colnames(dt1_num))])
+dt1_num_grade <- as.data.frame(dt1_num)[, (colnames(dt1_num) %in% col_grade2)]
+
+grade_mean <- rowMeans(dt1_num_grade, na.rm = TRUE)
+
+dt1_num <- cbind(dt1_num, grade_mean)
+
+dt1_num <- mutate(dt1_num, perc_g5to6 = (grade6 - grade5)/grade5)
+dt1_num <- mutate(dt1_num, perc_g7to8 = (grade8 - grade7)/grade7)
+
+dt1_num <- as.data.frame(dt1_num)[, !(colnames(dt1_num) %in% col_grade2)]
+
+```
+
+### Handling Missing Values
+
+Finding the % of missing values for all columns
+```{r figmv, fig.height = 5, fig.width = 10}
+mv <- as.data.frame(apply(dt1_num, 2, function(col)sum(is.na(col))/length(col)))
+colnames(mv)[1] <- "missing_values"
+mv <- index_to_col(mv,'Column')
+mv <- setDT(mv)[order (missing_values, decreasing = TRUE)]
+
+ggplot (mv[1:15,], aes (reorder(Column, missing_values), missing_values)) + geom_bar (position = position_dodge(), stat = "identity") + coord_flip () + xlab('Columns') + ylab('Missing Value %')
+```
+
+**Following was how the missing values were treated:**  
+
+**1) Anything with the column name *grade* and with NAs has been forced to zero**  
+**2) Columns greater than 40% NAs have been removed**  
+**3) The rest of the NAs have been dealt with using the mean of that column** 
+
+```{r echo=FALSE}
+#Replacig na to zeros for the columns below
+col_grade2 <- c('perc_g5to6','perc_g7to8')
+for (col in col_grade2) setDT(dt1_num)[is.na(get(col)), (col) := 0]
+
+#Removing columns greater than 40% of missing values
+col_to_rm <- index_to_col(as.data.frame(dt1_num[, -which(colMeans(is.na(dt1_num)) > 0.4)]),1)[,1]
+dt1_num <- as.data.frame(dt1_num)[, !(colnames(dt1_num) %in% col_to_rm)]
+
+#Rest of the missing values being dealt with the mean of that column
+dt1_num <- na.aggregate(dt1_num)
+```
+
+#### Zero Variance Predictors
+
+```{r}
+nzv <- nearZeroVar(dt1,saveMetrics= TRUE)
+nzv <- index_to_col(nzv,"Column")
+nzv_tb <- setDT(nzv)[zeroVar ==TRUE]
+nzv_tb[sample(1:nrow(nzv_tb), size = nrow(nzv_tb)),] %>% 
+  datatable(filter = 'top', options = list(
+    pageLength = 10, autoWidth = T
+  ))
+
+#Saving columns with nzv
+rm_col_nzv <- as.character(setDT(nzv)[nzv == TRUE | zeroVar ==TRUE]$Column)
+rm_col_zv <- as.character(setDT(nzv)[zeroVar ==TRUE]$Column)
+
+dt1_num <- as.data.frame(dt1_num)[, !(colnames(dt1_num) %in% rm_col_zv)]
+
+```
+
+**There are `r length(rm_col_zv)` columns that have been identified with zero variance and will be removed**
+
+#### Between Predictor-Correlations
+
+```{r echo=FALSE}
+dt1_num_corr <- dt1_num
+colnames(dt1_num_corr)[1:ncol(dt1_num_corr)] <- c(1:ncol(dt1_num_corr))
+
+correlations <- cor(na.omit(dt1_num_corr))
+corrplot(correlations, method="square",type = "upper")
+```
+
+**Visually on a quick glance, we can see that there is a portion of predictors that are highly correlated (the big blue box in the top left)**
+
+```{r}
+df_corr = cor(dt1_num, use = "pairwise.complete.obs")
+hc = findCorrelation(df_corr, cutoff=0.7)
+hc = sort(hc)
+dt1_num3 = as.data.frame(dt1_num)[,-c(hc)]
+
+rm_col_hc <- setdiff(colnames(dt1_num),colnames(dt1_num3))
+```
+
+There are `r length(rm_col_hc)` columns that have been identified with high correlation with a cutoff set at 0.70
+
+Below is the table showing the variables that have a correlation abs > 0.7
+
+```{r}
+#Highly correlated vairables table format
+df_corr2 <- df_corr %>%
+  as.data.frame() %>%
+  mutate(var1 = rownames(.)) %>%
+  gather(var2, value, -var1) %>%
+  arrange(desc(value)) %>%
+  group_by(value)
+
+corr_tb <- setDT(df_corr2)[abs(value) > 0.7 & var1 != var2 & var1 != "Ttl_Rating"  & var2 != "Ttl_Rating"]
+corr_tb <- corr_tb[!duplicated(corr_tb$value),]
+
+l1 <- corr_tb$var1
+l2 <- corr_tb$var2
+
+corr_tb[sample(1:nrow(corr_tb), size = nrow(corr_tb)),] %>% 
+  datatable(filter = 'top', options = list(
+    pageLength = 5, autoWidth = T
+  ))
+```
+
+**I will not be removing ALL the columns identified as highly correlated and/or nzv since PCA already takes that into account. However, I will remove some highly correlated ones as it makes the clustering analysis easier to interpret**
+
+##### Scatter Plots (Highly Correlated Variables) {.tabset .tabset-fade .tabset-pills}
+
+Lets see the scatter plot of all `r length(l1)` numeric columns in the data
+
+**A few things to note from the correlation analysis**
+
+1) Most of the columns with "Score" in their name are highly correlated  
+2) Asian Percent, English Percent, Avg Math Proficiency, Avg ELA Proficiency are negatively correlated with Black/Hipsanic Percent  
+3) White Percent is negatively correlated with Economic Need Index while positively correlated with School Income Estimate  
+
+###### Scatter1
+```{r fig s1, fig.height = 15, fig.width = 10}
+doPlotsCorr(dt1_num,plotCorr,l1,l2,1:12)
+```
+
+###### Scatter2
+```{r fig s2, fig.height = 10, fig.width = 10}
+doPlotsCorr(dt1_num,plotCorr,l1,l2,13:24)
+```
+
+###### Scatter3
+```{r fig s3, fig.height = 10, fig.width = 10}
+doPlotsCorr(dt1_num,plotCorr,l1,l2,25:36)
+```
+
+###### Scatter4
+```{r fig s4, fig.height = 10, fig.width = 10}
+doPlotsCorr(dt1_num,plotCorr,l1,l2,37:48)
+```
+
+###### Scatter5
+```{r fig s5, fig.height = 10, fig.width = 10}
+doPlotsCorr(dt1_num,plotCorr,l1,l2,49:62)
+```
+
+## Clustering Analysis
+
+```{r echo=FALSE}
+dt1_num2 <- dt1_num
+ProjectData <- as.data.frame(dt1_num2)[,c(3:ncol(dt1_num2))]
+```
+
+```{r echo=FALSE}
+segmentation_attributes_used = c(1:ncol(ProjectData)) 
+
+profile_attributes_used = c(1:ncol(ProjectData)) 
+
+numb_clusters_used = 4# 
+
+profile_with = "hclust" #  "hclust" or "kmeans"
+
+distance_used="euclidean"
+
+hclust_method = "ward.D"
+
+kmeans_method = "Lloyd"
+
+MIN_VALUE=0.5
+max_data_report = 10
+
+segmentation_attributes_used = unique(sapply(segmentation_attributes_used,function(i) min(ncol(ProjectData), max(i,1))))
+profile_attributes_used = unique(sapply(profile_attributes_used,function(i) min(ncol(ProjectData), max(i,1))))
+
+ProjectData_segment <- ProjectData[,segmentation_attributes_used]
+ProjectData_profile <- ProjectData[,profile_attributes_used]
+# this is the file name where the CLUSTER_IDs of the observations will be saved
+# cluster_file = paste(paste(local_directory,"data", sep="/"),paste(paste(datafile_name,"cluster", sep="_"), "csv", sep="."), sep="/")
+
+```
+
+
+```{r echo=FALSE}
+# let's make the data into data.matrix classes so that we can easier visualize them
+ProjectData = data.matrix(ProjectData)
+```
+
+```{r, echo=FALSE}
+ProjectData_scaled <- scale(ProjectData)
+```
+
+### Hierarchical Clustering
+
+#### Part 1: Dendogram
+
+##### Various Methods {.tabset .tabset-fade .tabset-pills}
+
+Lets see the dendrogram by using different methods like 'ward.D','complete','average' etc
+
+###### Ward.D Method
+```{r fig dd1, fig.height = 5, fig.width = 10}
+Hierarchical_Cluster_distances <- dist(ProjectData_scaled, method=distance_used)
+Hierarchical_Cluster <- hclust(Hierarchical_Cluster_distances, method=hclust_method)
+as.dendrogram(Hierarchical_Cluster) %>% color_branches(k=4) %>% plot(horiz=FALSE, main = "Hierarchical Cluster") 
+```
+
+###### Complete Method
+```{r fig dd2, fig.height = 5, fig.width = 10}
+Hierarchical_Cluster_distances <- dist(ProjectData_scaled, method=distance_used)
+Hierarchical_Cluster_Complete <- hclust(Hierarchical_Cluster_distances, method="complete")
+as.dendrogram(Hierarchical_Cluster_Complete) %>% color_branches(k=4) %>% plot(horiz=FALSE, main = "Hierarchical Cluster") 
+```
+
+###### Average Method
+```{r fig dd3, fig.height = 5, fig.width = 10}
+Hierarchical_Cluster_distances <- dist(ProjectData_scaled, method=distance_used)
+Hierarchical_Cluster_Average <- hclust(Hierarchical_Cluster_distances, method="average")
+as.dendrogram(Hierarchical_Cluster_Complete) %>% color_branches(k=4) %>% plot(horiz=FALSE, main = "Hierarchical Cluster") 
+```
+
+According to the dendrogram, I can either **choose 2 or 4** as the number for the cut off for the cluster
+
+#### Part 2: Distances
+
+```{r fig elb1, fig.height = 5, fig.width = 10}
+num <- nrow(ProjectData) - 1
+df1 <- cbind(as.data.frame(Hierarchical_Cluster$height[length(Hierarchical_Cluster$height):1]), c(1:num))
+colnames(df1) <- c("distances","index")
+ggplot(df1[c(1:20),], aes(x=index, y=distances)) + geom_line() + xlab("Number of Components") +ylab("Distances") + theme_bw()
+```
+
+**The elbow curve starts at 2 or 4**. This suggest that the cutoff for Hierarchical Clustering should be 2 or 4. I will keep it at 4 going forward.
+
+#### Part 3: Cluster mapping
+```{r}
+cluster_memberships_hclust <- as.vector(cutree(Hierarchical_Cluster, k=numb_clusters_used)) # cut tree into 3 clusters
+cluster_ids_hclust=unique(cluster_memberships_hclust)
+
+ProjectData_with_hclust_membership <- cbind(1:length(cluster_memberships_hclust),cluster_memberships_hclust)
+colnames(ProjectData_with_hclust_membership)<-c("Observation Number","Cluster_Membership")
+dt1_num2 <- cbind(dt1_num2, hc_clusters = ProjectData_with_hclust_membership[,2])
+
+knitr::kable(round(head(ProjectData_with_hclust_membership, max_data_report), 2))
+```
+
+
+### Kmean Clustering
+
+#### Part 1: Elbow Curve
+
+```{r fig elb2, fig.height = 5, fig.width = 10}
+wss <- 0
+NofK <- 15
+for (i in 1:NofK){
+  wss[i] <-
+    sum(kmeans(ProjectData_scaled, centers=i)$withinss)
+}
+plot(1:15,
+     wss,
+     type="b",
+     xlab="Number of Clusters",
+     ylab="Within groups sum of squares")
+
+```
+
+There does **not seem to be a clear elbow curve** in Kmeans as compared to what we saw in Hierarchical Clustering
+
+#### Part 2: Running K means
+
+```{r}
+set.seed(28)
+kmeans_clusters <- kmeans(ProjectData_scaled,centers= numb_clusters_used, iter.max=2000, algorithm=kmeans_method)
+
+ProjectData_with_kmeans_membership <- cbind(1:length(kmeans_clusters$cluster),kmeans_clusters$cluster)
+colnames(ProjectData_with_kmeans_membership)<-c("Observation Number","Cluster_Membership")
+
+knitr::kable(round(head(ProjectData_with_kmeans_membership, max_data_report), 2))
+```
+
+#### Part 3: Kmeans Cluster Variance
+
+```{r echo=FALSE}
+ dat = list()
+ iter = 150
+ datalist = list()
+     for (i in 1:iter){
+     kmeans_iter_df <- kmeans(ProjectData_scaled,centers= numb_clusters_used, iter.max=2000, algorithm=kmeans_method, nstart=1)
+     
+     dat <- as.data.frame(table(kmeans_iter_df$cluster))
+     dat <- arrange(dat, desc(Freq))
+     dat <- as.data.frame(t(dat))
+     dat <- dat[2,]
+     dat$iter <- i
+     datalist[[i]] <- dat
+     }
+ 
+ bigtable <- do.call(rbind, datalist)
+ for (i in 1:numb_clusters_used){
+   colnames(bigtable)[i] <- paste('Cluster',i,sep = "")
+ }
+ 
+indx <- sapply(bigtable, is.factor)
+bigtable[indx] <- lapply(bigtable[indx], function(x) as.numeric(as.character(x)))
+
+bigtable <- as.data.frame(bigtable)
+
+p1 <- plot_ly(bigtable, x = ~iter, y = ~Cluster1, mode = 'lines') %>% add_lines(name = ~"Cluster1")
+p2 <- plot_ly(bigtable, x = ~iter, y = ~Cluster2) %>% add_lines(name = ~"Cluster2")
+p3 <- plot_ly(bigtable, x = ~iter, y = ~Cluster3) %>% add_lines(name = ~"Cluster3")
+p4 <- plot_ly(bigtable, x = ~iter, y = ~Cluster4) %>% add_lines(name = ~"Cluster4")
+```
+
+
+##### Variance {.tabset .tabset-fade .tabset-pills}
+
+Lets see the variance of the clusters. The more they fluctuate, the more unstable they are
+
+**Looks like the clusters are not at all stable for kmeans**
+
+###### Cluster 1 Variance
+```{r fig cl1, fig.height = 3, fig.width = 5}
+p1
+```
+
+###### Cluster 2 Variance
+```{r fig cl2, fig.height = 3, fig.width = 5}
+p2
+```
+
+###### Cluster 3 Variance
+```{r fig cl3, fig.height = 3, fig.width = 5}
+p3
+```
+
+###### Cluster 4 Variance
+```{r fig cl4, fig.height = 3, fig.width = 5}
+p4
+```
+
+
+#### Part 4: Checking K-means with HC
+
+**There does not seem to be much difference in the allocation of clusters for hclust and kmeans even though kmeans has very unstable clusters**
+
+```{r}
+dt1_num2 <- cbind(dt1_num2, kmean_clusters = kmeans_clusters$cluster)
+```
+```{r}
+knitr::kable(table(dt1_num2$kmean_clusters, dt1_num2$hc_clusters))
+```
+
+
+
+### Visualizing PCA Components
+
+```{r}
+regexp <- "[[:digit:]]+"
+res.pca <- prcomp(ProjectData_scaled,  scale = TRUE)
+eig_tb <- cbind(Dimensions = rownames(get_eig(res.pca)), get_eig(res.pca))
+ts <- setDT(eig_tb)[cumulative.variance.percent > 80][1,1]
+ts <- str_extract(as.character(ts[[1]]), regexp)
+
+paste('No of PCA:',ts,sep = "")
+
+n <- as.numeric(ts)
+col_list <- list()
+for (i in 1:n){ 
+ col_list[i]<-paste('rotation.PC',i, sep="") 
+} 
+
+pca_df <- as.data.frame(res.pca[2])
+pca_df <- pca_df[,colnames(pca_df) %in% col_list]
+pca_df <- cbind(Features = rownames(pca_df), pca_df)
+pca_df <- setDT(pca_df)[order (rotation.PC1, decreasing = TRUE)]
+
+threshold <- 0.20
+
+pca_df[pca_df < threshold]<-NA
+
+pca_df[sample(1:nrow(pca_df), size = nrow(pca_df)),] %>% 
+  datatable(filter = 'top', options = list(
+    pageLength = 5, autoWidth = T
+  ))
+
+fviz_eig(res.pca)
+
+comp <- data.frame(res.pca$x[,1:4])
+```
+
+There are **ten PCs that capture 80% of the variance in the data.**
+
+The scree plot shows that **PC1 captured ~ 20% of the variance**
+
+### Visualizing Clusters using various PCAs
+
+```{r testgl1, echo=FALSE, webgl=TRUE}
+if (profile_with == "hclust"){
+  cluster_type <- dt1_num2$hc_clusters
+}
+if (profile_with == "kmeans"){
+  cluster_type <- dt1_num2$kmean_clusters
+}
+```
+
+```{r testgl4, webgl=TRUE}
+plot_ly(comp, x = ~PC1, y = ~PC2, z = ~PC3, color = cluster_type, colors = c('red', 'green','blue','magenta'))
+```
+
+**PC1, PC2 and PC3 capture 45% of the variance in the data.**
+
+**It is important to note here that there arent any CLEAR CLUSTERS but it is still worthwhile to run it since it provides clusters from a directional perspective**
+
+# Cluster means
+
+**I will be using hclust for the grouping of the clusters since that seems to perform better as compared to kmeans**
+
+```{r}
+cluster_memberships_kmeans <- kmeans_clusters$cluster 
+cluster_ids_kmeans <- unique(cluster_memberships_kmeans)
+
+if (profile_with == "hclust"){
+  cluster_memberships <- cluster_memberships_hclust
+  cluster_ids <-  cluster_ids_hclust  
+}
+if (profile_with == "kmeans"){
+  cluster_memberships <- cluster_memberships_kmeans
+  cluster_ids <-  cluster_ids_kmeans
+}
+
+# SAVE THE DATA in the cluster file
+NewData = matrix(cluster_memberships,ncol=1)
+#write.csv(NewData,file=cluster_file)
+population_average = matrix(apply(ProjectData_profile, 2, mean), ncol=1)
+colnames(population_average) <- "Population"
+Cluster_Profile_mean <- sapply(sort(cluster_ids), function(i) apply(ProjectData_profile[(cluster_memberships==i), ], 2, mean))
+if (ncol(ProjectData_profile) <2)
+  Cluster_Profile_mean=t(Cluster_Profile_mean)
+colnames(Cluster_Profile_mean) <- paste("Mean Cluster", 1:length(cluster_ids), sep=" ")
+cluster.profile <- cbind (population_average,Cluster_Profile_mean)
+cluster.profile <- round(cluster.profile, 2)
+
+cluster.profile[sample(1:nrow(cluster.profile), size = nrow(cluster.profile)),] %>% 
+  datatable(filter = 'top', options = list(
+    pageLength = 5, autoWidth = T
+  ))
+```
+
+### Snake Plots
+
+The Snake Plots help to visualize which features are the most important for making up the individual cluster
+
+```{r fisp, fig.height = 5, fig.width = 10}
+profile_attributes_used = unique(sapply(profile_attributes_used,function(i) min(ncol(ProjectData_scaled), max(i,1))))
+ProjectData_scaled_profile = ProjectData_scaled[, profile_attributes_used,drop=F]
+
+Cluster_Profile_standar_mean <- sapply(sort(cluster_ids), function(i) apply(ProjectData_scaled_profile[(cluster_memberships==i), ,drop = F], 2, mean))
+if (ncol(ProjectData_scaled_profile) < 2)
+  Cluster_Profile_standar_mean = t(Cluster_Profile_standar_mean)
+colnames(Cluster_Profile_standar_mean) <- paste("Segment", 1:length(cluster_ids), sep="")
+
+Cluster_Profile_standar_mean2 <- cbind(Feature = rownames(Cluster_Profile_standar_mean), Cluster_Profile_standar_mean)
+rownames(Cluster_Profile_standar_mean2) <- 1:nrow(Cluster_Profile_standar_mean2)
+Cluster_Profile_standar_mean2 <- as.data.frame(Cluster_Profile_standar_mean2)
+Cluster_Profile_standar_mean2$ID <- seq.int(nrow(Cluster_Profile_standar_mean2))
+
+Cluster_Profile_standar_mean2$Feature <- as.character(Cluster_Profile_standar_mean2$Feature)
+
+indx <- sapply(Cluster_Profile_standar_mean2, is.factor)
+Cluster_Profile_standar_mean2[indx] <- lapply(Cluster_Profile_standar_mean2[indx], function(x) as.numeric(as.character(x)))
+
+Cluster_Profile_standar_mean2_melt <- melt(Cluster_Profile_standar_mean2, id=c("Feature"))
+
+plot_ly(as.data.frame(Cluster_Profile_standar_mean2), x = ~ID, y = ~Segment1, name = 'Segment1', type = 'scatter', mode = 'lines+markers',line = list(color = 'red', width = 2),text = ~paste('Feature: ', Feature)) %>%
+  add_trace(y = ~Segment2, name = 'Segment2', mode = 'lines+markers',line = list(color = 'black', width = 2)) %>% 
+  add_trace(y = ~Segment3, name = 'Segment3', mode = 'lines+markers',line = list(color = 'green', width = 2)) %>% 
+  add_trace(y = ~Segment4, name = 'Segment4', mode = 'lines+markers',line = list(color = 'magenta', width = 2))
+```
+
+Looks like the four clusters with the following behaviour
+
+**Cluster 1:** High economic need, Average math/ELA proficiency, high black/hipsanic and  high ratings except in student achievement score and low offers per student  
+**Cluster 2:** High economic need, low math/ELA proficiency, high black/hipsanic, lower ratings and low offers per student   
+**Cluster 3:** Low economic need, high math/ELA proficiency, low black/hipsanic, high ratings and high offers per student  
+**Cluster 4:** Low economic need, high math/ELA proficiency, high Asian, high student-pupil teacher ratio, high student achivement rating score but other ratings are average and high offers per student
+
+
+#Geomapping
+
+Credit goes to the following link:
+http://zevross.com/blog/2014/07/16/mapping-in-r-using-the-ggplot2-package/
+
+##### GeoMapping by Variables {.tabset .tabset-fade .tabset-pills}
+
+**A few things to note on the geomapping:**  
+
+**1) Most of the Cluster 4 falls in the region where there is a lower population of white/asian**  
+**2) Cluster 2 has a high relationship with the number of students/seats filled and the Percent Asian**  
+**3) The male percentage for most schools pretty much the same i.e. around 50%**  
+
+```{r echo=FALSE, message=FALSE}
+mapdata <- dt1_num2
+#shapefile_df <- fortify(area)
+proj4string(counties)
+
+class(mapdata)
+coordinates(mapdata)<-~Longitude+Latitude
+class(mapdata)
+
+proj4string(mapdata)
+proj4string(mapdata) <- CRS("+proj=longlat +datum+NAD83")
+
+mapdata <-spTransform(mapdata, CRS(proj4string(counties)))
+
+identical(proj4string(mapdata),proj4string(counties))
+
+mapdata <-data.frame(mapdata)
+
+names(mapdata)[names(mapdata)=="Longitude"]<-"x"
+names(mapdata)[names(mapdata)=="Latitude"]<-"y"
+
+mapdata <- cbind(mapdata,dt1_non_num[,11])
+
+p1 <- ggplot() +  
+    geom_polygon(data=counties, aes(x=long, y=lat, group=group), fill=NA, 
+        colour="gray29", alpha=1)+
+    labs(x="", y="")+ 
+    theme(axis.ticks.y = element_blank(),axis.text.y = element_blank(), 
+          axis.ticks.x = element_blank(),axis.text.x = element_blank(), 
+          plot.title = element_text(lineheight=.8, face="bold", vjust=1)) +
+    geom_point(aes(x=x, y=y, color=as.factor(hc_clusters)), data=mapdata, alpha=0.8, size=2) +
+      coord_equal(ratio=1) +   scale_colour_manual(name="", values = c("1"="firebrick1", "2"="gray13", "3"="green4","4"="magenta")) +   ggtitle("") + theme(plot.title = element_text(hjust = 0.5))
+
+p2 <- ggplot() +  
+    geom_polygon(data=counties, aes(x=long, y=lat, group=group), fill=NA, 
+        colour="gray29", alpha=1)+
+    labs(x="", y="")+ 
+    theme(axis.ticks.y = element_blank(),axis.text.y = element_blank(), 
+          axis.ticks.x = element_blank(),axis.text.x = element_blank(), 
+          plot.title = element_text(lineheight=.8, face="bold", vjust=1)) +
+    geom_point(aes(x=x, y=y, color=Percent_White), data=mapdata, alpha=1, size=3, color="grey20") +
+    geom_point(aes(x=x, y=y, color=Percent_White), data=mapdata, alpha=1, size=2)+
+    scale_colour_gradientn("Percent_White", 
+        colours=c( "#f9f3c2","#660000"))+ # change color scale
+    coord_equal(ratio=1)
+
+p3 <- ggplot() +  
+    geom_polygon(data=counties, aes(x=long, y=lat, group=group), fill=NA, 
+        colour="gray29", alpha=1)+
+    labs(x="", y="")+ 
+    theme(axis.ticks.y = element_blank(),axis.text.y = element_blank(), 
+          axis.ticks.x = element_blank(),axis.text.x = element_blank(), 
+          plot.title = element_text(lineheight=.8, face="bold", vjust=1)) +
+    geom_point(aes(x=x, y=y, color=male_per), data=mapdata, alpha=1, size=3, color="grey20") +
+    geom_point(aes(x=x, y=y, color=male_per), data=mapdata, alpha=1, size=2)+
+    scale_colour_gradientn("Male Percentage", 
+        colours=c( "#f9f3c2","#660000"))+ # change color scale
+    coord_equal(ratio=1)
+
+p4 <- ggplot() +  
+    geom_polygon(data=counties, aes(x=long, y=lat, group=group), fill=NA, 
+        colour="gray29", alpha=1)+
+    labs(x="", y="")+ 
+    theme(axis.ticks.y = element_blank(),axis.text.y = element_blank(), 
+          axis.ticks.x = element_blank(),axis.text.x = element_blank(), 
+          plot.title = element_text(lineheight=.8, face="bold", vjust=1)) +
+    geom_point(aes(x=x, y=y, color=OffersPerStudent), data=mapdata, alpha=1, size=3, color="grey20") +
+    geom_point(aes(x=x, y=y, color=OffersPerStudent), data=mapdata, alpha=1, size=2)+
+    scale_colour_gradientn("Number of Students/Seats Filled", 
+        colours=c( "#f9f3c2","#660000"))+ # change color scale
+    coord_equal(ratio=1)
+
+```
+
+
+###### Clusters
+```{r fig g1, fig.height = 8, fig.width = 10}
+p1
+```
+
+###### White Percentage
+```{r fig g2, fig.height = 8, fig.width = 10}
+p2
+```
+
+###### Male Percentage
+```{r fig g3, fig.height = 8, fig.width = 10}
+p3
+```
+
+###### Class Size
+```{r fig g4, fig.height = 8, fig.width = 10}
+p4
+```
+
+# SHSAT Analysis
+
+## EDA Entire Dataset
+
+**Mean of the varibles:**
+
+Number_of_students_who_registered_for_the_SHSAT: 19.07  
+Number_of_students_who_took_the_SHSAT: 9.66  
+Registration for SHSTAT%: 0.24  
+Participation for SHSTAT%: 0.61  
+
+```{r}
+dt2_new <- dt2
+
+a = round(mean(dt2_new$Number_of_students_who_registered_for_the_SHSAT, na.rm = T),2)
+
+d1 <- ggplot(dt2_new, aes(x=Number_of_students_who_registered_for_the_SHSAT, fill=as.factor(Year_of_SHST))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= a),linetype="dashed") + geom_text(aes(x=a-1.5,label=a, y=0.03), colour="black", angle=90, text=element_text(size=11)) + xlab("Number_of_students_who_registered_for_the_SHSAT") + guides(fill=guide_legend(title="Year"))
+
+b = round(mean(dt2_new$Number_of_students_who_took_the_SHSAT, na.rm = T),2)
+
+d2 <- ggplot(dt2_new, aes(x=Number_of_students_who_took_the_SHSAT, fill=as.factor(Year_of_SHST))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= b),linetype="dashed") + geom_text(aes(x=b+1,label=b, y=0.05), colour="black", angle=90, text=element_text(size=11)) + xlab("Number_of_students_who_took_the_SHSAT") + guides(fill=guide_legend(title="Year"))
+
+c = round(mean(dt2_new$per_reg, na.rm = T),2)
+
+d3 <- ggplot(dt2_new, aes(x=per_reg, fill=as.factor(Year_of_SHST))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= c),linetype="dashed") + geom_text(aes(x=c-0.02,label=c, y=2), colour="black", angle=90, text=element_text(size=11)) + xlab("Registration of SHSAT %") + guides(fill=guide_legend(title="Year"))
+
+d = round(mean(dt2_new$per_SHSAT, na.rm = T),2)
+
+d4 <- ggplot(dt2_new, aes(x=per_SHSAT, fill=as.factor(Year_of_SHST))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= d),linetype="dashed") + geom_text(aes(x=d-0.02,label=d, y=2), colour="black", angle=90, text=element_text(size=11)) + xlab("Participation of SHSAT %") + guides(fill=guide_legend(title="Year"))
+
+p1 <- ggplot (data=setDT(dt2_new)[Grade_level == 8], aes (reorder(School_Name, per_reg), per_reg)) + facet_wrap(~Year_of_SHST) + geom_bar (position = position_dodge(), stat = "identity", fill='#0072B2') + coord_flip () + ylab('Registration of SHSAT %') + xlab('Schools')
+
+dSummary1 <- setDT(dt2_new)[Grade_level == 8][,. (obs_reg = .N, mean_reg = mean(per_reg)), by = list(School_Name, Location_Code)][order (mean_reg, decreasing = T)]
+
+p2 <- ggplot (data=setDT(dt2_new)[Grade_level == 8], aes (reorder(School_Name, per_SHSAT), per_SHSAT)) + facet_wrap(~Year_of_SHST) + geom_bar (position = position_dodge(), stat = "identity", fill='#0072B2') + coord_flip () + ylab('Participation of SHSAT %') + xlab('Schools')
+
+dSummary2 <- setDT(dt2_new)[Grade_level == 8][,. (obs_prt = .N, mean_prt = mean(per_SHSAT)), by = list(School_Name, Location_Code)][order (mean_prt, decreasing = T)]
+
+dSummary1 <- mutate(dSummary1, bin1 = ifelse(dSummary1$mean_reg > mean(dSummary1$mean_reg), 1,0))
+dSummary2 <- mutate(dSummary2, bin2 = ifelse(dSummary2$mean_prt > mean(dSummary2$mean_prt), 2,1))
+
+dSummary_total <- inner_join(dSummary1, dSummary2, by=c("Location_Code","School_Name"))
+
+dSummary_total <- mutate(dSummary_total, score = bin1 + bin2)
+dSummary_total[,-1:-2] <-round(dSummary_total[,-1:-2],2)
+dSummary_total <- setDT(dSummary_total)[order (score, decreasing = TRUE)]
+```
+
+```{r fig D1, fig.height = 8, fig.width = 10}
+grid.arrange(d1,d2,d3,d4)
+```
+
+```{r fig pp1, fig.height = 20, fig.width = 10}
+grid.arrange(p1,p2)
+```
+
+I have created a scoring for the schools where the mean of the registration% and the participation% is compared to the mean of all schools. If for a certain school, the registration% is greater than the mean then the school gets a score of 1 otherwise 0. 
+
+**The higher the score, the higher the registration rate AND the participation rate in the SHSAT**
+
+```{r}
+dSummary_total[sample(1:nrow(dSummary_total), size = nrow(dSummary_total)),] %>% 
+  datatable(filter = 'top', options = list(
+    pageLength = 5, autoWidth = T
+  ))
+```
+
+## EDA after joining with Clusters Table
+
+There were only 52 rows that joined with Clusters Table out of 140 in the SHSAT table
+Lets see how different they are from the entire dataset
+
+**Mean of the varibles:**
+
+Number_of_students_who_registered_for_the_SHSAT: 23.50  
+Number_of_students_who_took_the_SHSAT: 11.81  
+Registration of SHSAT%: 0.30  
+Participation of SHSAT%: 0.55  
+
+The means have changed by abs 5bps but the change is not drastic
+
+```{r}
+#Removing the Location Codes that are not available in the School Information dataset
+rm_lc <- setdiff(unique(dt2$Location_Code),unique(dt1$Location_Code))
+dt2_new <- dt2[- grep(paste(rm_lc,collapse = "|"), dt2$Location_Code),]
+
+
+a = round(mean(dt2_new$Number_of_students_who_registered_for_the_SHSAT, na.rm = T),2)
+
+d1 <- ggplot(dt2_new, aes(x=Number_of_students_who_registered_for_the_SHSAT, fill=as.factor(Year_of_SHST))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= a),linetype="dashed") + geom_text(aes(x=a-1.5,label=a, y=0.10), colour="black", angle=90, text=element_text(size=11)) + xlab("Number_of_students_who_registered_for_the_SHSAT") + guides(fill=guide_legend(title="Year"))
+
+b = round(mean(dt2_new$Number_of_students_who_took_the_SHSAT, na.rm = T),2)
+
+d2 <- ggplot(dt2_new, aes(x=Number_of_students_who_took_the_SHSAT, fill=as.factor(Year_of_SHST))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= b),linetype="dashed") + geom_text(aes(x=b+1,label=b, y=0.08), colour="black", angle=90, text=element_text(size=11)) + xlab("Number_of_students_who_took_the_SHSAT") + guides(fill=guide_legend(title="Year"))
+
+c = round(mean(dt2_new$per_reg, na.rm = T),2)
+
+d3 <- ggplot(dt2_new, aes(x=per_reg, fill=as.factor(Year_of_SHST))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= c),linetype="dashed") + geom_text(aes(x=c+0.02,label=c, y=2.7), colour="black", angle=90, text=element_text(size=11)) + xlab("Registration of SHSAT %") + guides(fill=guide_legend(title="Year"))
+
+d = round(mean(dt2_new$per_SHSAT, na.rm = T),2)
+
+d4 <- ggplot(dt2_new, aes(x=per_SHSAT, fill=as.factor(Year_of_SHST))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= d),linetype="dashed") + geom_text(aes(x=d+0.02,label=d, y=2), colour="black", angle=90, text=element_text(size=11)) + xlab("Participation of SHSAT %") + guides(fill=guide_legend(title="Year"))
+
+p1 <- ggplot (data=setDT(dt2_new)[Grade_level == 8], aes (reorder(School_Name, per_reg), per_reg)) + facet_wrap(~Year_of_SHST) + geom_bar (position = position_dodge(), stat = "identity", fill='#0072B2') + coord_flip () + ylab('Registration of SHSAT %') + xlab('Schools')
+
+dSummary1 <- setDT(dt2_new)[Grade_level == 8][,. (obs_reg = .N, mean_reg = mean(per_reg)), by = list(School_Name, Location_Code)][order (mean_reg, decreasing = T)]
+
+p2 <- ggplot (data=setDT(dt2_new)[Grade_level == 8], aes (reorder(School_Name, per_SHSAT), per_SHSAT)) + facet_wrap(~Year_of_SHST) + geom_bar (position = position_dodge(), stat = "identity", fill='#0072B2') + coord_flip () + ylab('Participation of SHSAT %') + xlab('Schools')
+
+dSummary2 <- setDT(dt2_new)[Grade_level == 8][,. (obs_prt = .N, mean_prt = mean(per_SHSAT)), by = list(School_Name, Location_Code)][order (mean_prt, decreasing = T)]
+
+dSummary1 <- mutate(dSummary1, bin1 = ifelse(dSummary1$mean_reg > mean(dSummary1$mean_reg), 1,0))
+dSummary2 <- mutate(dSummary2, bin2 = ifelse(dSummary2$mean_prt > mean(dSummary2$mean_prt), 2,1))
+
+dSummary_total <- inner_join(dSummary1, dSummary2, by=c("Location_Code","School_Name"))
+
+dSummary_total <- mutate(dSummary_total, score = bin1 + bin2)
+dSummary_total[,-1:-2] <-round(dSummary_total[,-1:-2],2)
+dSummary_total <- setDT(dSummary_total)[order (score, decreasing = TRUE)]
+```
+
+```{r fig D2, fig.height = 8, fig.width = 10}
+grid.arrange(d1,d2,d3,d4)
+```
+
+**Renaissance Leadership Academy and Colombia Seconday School have the highest Registration and Participation for SHSAT**
+
+```{r fig pp2, fig.height = 10, fig.width = 10}
+grid.arrange(p1,p2)
+```
+
+```{r}
+dSummary_total[sample(1:nrow(dSummary_total), size = nrow(dSummary_total)),] %>% 
+  datatable(filter = 'top', options = list(
+    pageLength = 5, autoWidth = T
+  ))
+```
+
+## Clusters for each of the schools
+
+Even though the sample size is very small, looks like **there is a trend behind clusters and scores**. **The higher the score, the more it is in a better cluster(Low economic need, high income generating, high white% etc.)**
+
+```{r}
+dt1_num2 <- cbind(dt1_num2, Location_Code = dt1$Location_Code)
+dt2_join <- inner_join(dSummary_total,dt1_num2, by = "Location_Code")
+
+
+table(dt2_join$hc_clusters,dt2_join$score)
+```
+
+# SHSAT Analysis (Parsed data)
+
+The following data has been parsed from the link below and from the help of Richard. Please upvote his kernel. 
+
+Article: https://www.nytimes.com/interactive/2018/06/29/nyregion/nyc-high-schools-middle-schools-shsat-students.html?rref=collection%2Fbyline%2Fjasmine-c.-lee&action=click&contentCollection=undefined&region=stream&module=stream_unit&version=latest&contentPlacement=1&pgtype=collection
+
+Kernel: https://www.kaggle.com/rdisalv2/parsing-nyt-shsat-table
+
+## EDA
+
+**A few things to note here:**  
+
+**1) All the graphs are extremely skewed which means that there is a big discrepency in schools in terms of Number of SHSAT Test Takers to even BlackorHipsanic Percentage**
+
+```{r}
+doPlots(dt8,plotHist, i = 5:8)
+```
+
+## Clusters by School
+
+```{r echo=FALSE}
+dt1_num2 <- mutate(dt1_num2, Test_Takers_per_Seats = NumSHSATTestTakers/Number_of_Students)
+
+a = round(mean(setDT(dt1_num2)$NumSHSATTestTakers, na.rm = T),2)
+
+d1 <- ggplot(setDT(dt1_num2), aes(x=NumSHSATTestTakers, fill=as.factor(hc_clusters))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= a),linetype="dashed") + geom_text(aes(x=a+5,label=b, y=0.03), colour="black", angle=90, text=element_text(size=11)) + xlab("NumSHSATTestTakers") + guides(fill=guide_legend(title="Clusters"))
+
+b = round(mean(setDT(dt1_num2)[Test_Takers_per_Seats <=1]$Test_Takers_per_Seats, na.rm = T),2)
+
+d2 <- ggplot(setDT(dt1_num2)[Test_Takers_per_Seats <=1], aes(x=Test_Takers_per_Seats, fill=as.factor(hc_clusters))) +
+  geom_density(alpha=0.4) + theme_light() + geom_vline(aes(xintercept= b),linetype="dashed") + geom_text(aes(x=b+0.02,label=b, y=0.08), colour="black", angle=90, text=element_text(size=11)) + xlab("Test_Takers_per_Seats") + guides(fill=guide_legend(title="Clusters"))
+
+```
+
+**This attests what we saw earlier that is Cluster 3 and 4 have higher number of SHSAT Test Takers** 
+
+```{r df1 ,fig.height = 6, fig.width = 8}
+d1
+
+```
+
+**This is the most important graph from an insight perspective and to answer the burning question. Following are my thoughts.**   
+
+*1) Cluster 1 has high rating but low student performance along with high ELL and Disability%. It is interesting that even with a high rating the offers are low for this group. This group could be a strong target for PASSNYC to benefit from their services*   
+
+*2) There are schools in Cluster 4 that have low Test_Takers_per_Seats. Cluster 4 is a high performing group and its worth investigating further why there are some schools in Cluster 4 that have low Test Takers per Seat*   
+
+*3) There are schools in Cluster 2 that have low Test_Takers_per_Seats. Cluster 2 is a low performing group but there might be anomalies in the cluster where some schools have high performance/rating but low Test Takers per Seat*  
+
+
+```{r df2 ,fig.height = 6, fig.width = 8}
+d2
+```
+
+Coming up:  
+
+Adding Library and Crime data to the School level dataset.  
+I think a scoring model with unsupervised learning would be one of the techniques that can be used to solve the problem. 
+
+**Once again, feel free to leave a comment and/or upvote if you liked this analysis**

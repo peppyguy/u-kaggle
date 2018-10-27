@@ -1,0 +1,431 @@
+---
+title: "A Very Extensive Recruit Exploratory Analysis"
+author: "Troy Walters"
+date: "December 2, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, width = 100)
+```
+
+* [Introduction](#intro)
+* [Libraries](#libraries)
+* [Import Data](#import)
+* [Target variable (visits)](#visits)
+* [Reservations](#reservations)
+* [Stores](#stores)
+
+
+## Introduction {#intro}
+
+
+Another time series forecasting competition! In this competition we are required to forecast restaurant visits for establishments in Japan based on historical visits and reservation data from two websites - Hot Pepper Gourmet and AirREGI. We are also given some additional metadata on the restaurants such as genre and location. 
+
+## Libraries {#libraries}
+
+```{r}
+
+library(data.table)
+library(magrittr)
+library(ggplot2)
+library(lubridate)
+library(xts)
+library(forecast)
+library(DT)
+library(gridExtra)
+library(leaflet)
+library(htmltools)
+library(mapdata)
+library(maptools)
+library(sp)
+
+theme_set(theme_bw())
+
+```
+
+## Import Data {#import}
+
+Let's read all of the data in at once using `data.table`. I'm importing everything except the sample submission file. 
+
+```{r}
+
+visits <- fread('../input/air_visit_data.csv')
+air_res <- fread('../input/air_reserve.csv')
+hpg_res <- fread('../input/hpg_reserve.csv')
+dates <- fread('../input/date_info.csv')
+hpg_store <- fread('../input/hpg_store_info.csv')
+air_store <- fread('../input/air_store_info.csv')
+store_id_rel <- fread('../input/store_id_relation.csv')
+
+```
+
+Let's get a quick summary of the size of these files. 
+
+```{r}
+
+files <- list(visits, air_res, hpg_res, dates, hpg_store, air_store, store_id_rel)
+
+data.frame(
+    File = c('visits', 'air_res', 'hpg_res', 'dates', 'hpg_store', 'air_store', 'store_id_rel'),
+    Nrows = sapply(files, nrow),
+    Ncols = sapply(files, ncol),
+    Size = sapply(files, function(x) { format(object.size(x), units = 'Mb')})
+) %>%
+    datatable(
+        rownames = FALSE, 
+        options = list(
+            'paging' = FALSE, 
+            'searching' = FALSE,
+            columnDefs = list(list(width = '160px', className = 'dt-left', targets = '_all'))))
+
+```
+We are definitely working with small data here. The reservation data from HPG is the largest file at 55.8 Mb. The visits and the AirREGI reservation data are the next largest at 4.9 Mb and 3.3 Mb. The remaining files are of negligible size. 
+
+## Target Variable (Visits) {#visits}
+
+```{r}
+
+summary(visits)
+
+```
+
+
+The target variable is the number of daily visits by store and date. What is the distribution of total daily visits?
+
+```{r}
+
+visits[, .(total_visits = sum(visitors)), by = visit_date] %>%
+    ggplot(aes(x = total_visits)) +
+    geom_histogram(fill = 'steelblue') +
+    labs(x = 'Daily visits', title = 'Distribution of daily visits')
+```
+
+Now let's look at total daily visits over time. 
+
+```{r, fig.width = 10, fig.height = 10}
+
+visits[, visit_date := as.Date(visit_date)]
+
+holidays <- dates[holiday_flg == 1, ]
+
+p1 <- visits[, .(total_visit = sum(visitors)), by = visit_date] %>%
+    ggplot(aes(x = visit_date, y = total_visit)) + 
+    geom_line(color = 'steelblue') + 
+    geom_vline(data = holidays, aes(xintercept = as.Date(calendar_date)), alpha = 0.4) + 
+    scale_x_date(date_breaks = "1 month") + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+    labs(x = '', y = 'Total visits', title = 'Visits by day (with holidays)')
+
+p2 <- visits[order(wday(visit_date)), .(mean_visits = mean(visitors)), by = weekdays(visit_date)] %>%
+    ggplot(aes(x = reorder(weekdays, seq(1,7)), y = mean_visits)) + 
+    geom_bar(stat = 'identity', fill = 'steelblue') +
+    labs(x = '', y = "Mean visits", title = "Average visits by day of week")
+
+p3 <- visits[, .(total_visitors = sum(visitors)), by = visit_date] %>% 
+    as.xts() %>% 
+    ggAcf() +
+    labs(title = 'Autocorrelation plot of total visitors')
+
+p4 <- visits[, .(total_visitors = sum(visitors)), by = visit_date] %>% 
+    as.xts() %>% 
+    ggPacf() +
+    labs(title = 'Partial Autocorrelation plot of total visitors')
+    
+
+    
+grid.arrange(p1, p2, p3, p4, nrow = 4)
+```
+
+There is an interesting level shift in the number of visits around July of 2016. It's unclear as of yet what the reason for this might be. Within each month there appear to be four spikes, indicating that foot traffic in restaurants picks up on weekends. Looking at the mean visits by day of week show that Saturday and Sunday have the highest foot traffic followed by Friday. The holidays, marked as grey vertical lines, do not appear to disrupt the weekly pattern that much. The one exception is New Year's Day, where traffic drops off considerably. The autocorrelation plot shows that there is a very high correlation between visits on a given day and previous days, with the strongest correlation at lags that are factors of 7. 
+
+
+
+Let's take a closer look at the level shift around July 1, 2017. Not only does the level shift upward at this time, but there appears to be an increase in variance as well. Let's look at density plots for the period before July 1 2016 and after. 
+
+
+```{r, fig.width = 10}
+
+visits[, .(visitors = sum(visitors), s = ifelse(visit_date < as.Date('2016-07-01'), 0, 1)), by = visit_date] %>%
+    ggplot(aes(x = visitors)) + 
+    geom_density(fill = 'steelblue') +
+    facet_grid(~s) + 
+    labs(title = 'Distribution of total daily visits before and after July 1, 2016')
+
+```
+
+We can see that prior to July 1, 2016 the average number of daily visits was just over 5,000. After that date, the average number of visits is around 13,000 with a much wider distribution. 
+
+
+## Reservations {#reservations}
+
+```{r}
+
+summary(air_res)
+summary(hpg_res)
+
+```
+
+The two reservations datasets have the same structure, with a time of reservation, time of visit, and number of visitors for which the reservation was made. 
+
+```{r}
+
+# convert time columns to datetime
+dt_cols <- c('visit_datetime', 'reserve_datetime')
+
+air_res[, (dt_cols) := lapply(.SD, as_datetime), .SDcols = dt_cols]
+hpg_res[, (dt_cols) := lapply(.SD, as_datetime), .SDcols = dt_cols]
+
+
+```
+
+
+
+```{r, fig.width = 10}
+
+p1 <- air_res[, .(number_reservations = .N), by = .(date = as.Date(reserve_datetime))] %>%
+    ggplot(aes(x = date, y = number_reservations)) + 
+    geom_line(color = 'steelblue') + 
+    geom_vline(data = holidays, aes(xintercept = as.Date(calendar_date)), alpha = 0.4) + 
+    scale_x_date(date_breaks = "1 month") + 
+    labs(x = '', y = 'Number of reservations', title = 'AirREGI') + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+p2 <- hpg_res[, .(number_reservations = .N), by = .(date = as.Date(reserve_datetime))] %>%
+    ggplot(aes(x = date, y = number_reservations)) + 
+    geom_line(color = 'steelblue') +
+    geom_vline(data = holidays, aes(xintercept = as.Date(calendar_date)), alpha = 0.4) + 
+    scale_x_date(date_breaks = "1 month") + 
+    labs(x = '', y = 'Number of reservations', title = 'Hot Pepper Gourmet') + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+grid.arrange(p1, p2)
+
+```
+
+Many more reservations are made through Hot Pepper Gourmet than AirREGI. There is a dramatic increase in reservations starting in late October in the HPG data that tapers back off around the 1st of the year. 
+
+```{r, fig.width = 10}
+
+p1 <- air_res[, .(total_visitors = sum(reserve_visitors)), by = .(date = as.Date(visit_datetime))] %>%
+    ggplot(aes(x = date, y = total_visitors)) + 
+    geom_line(color = 'steelblue') + 
+    geom_vline(data = holidays, aes(xintercept = as.Date(calendar_date)), alpha = 0.4) + 
+    scale_x_date(date_breaks = "1 month") + 
+    labs(x = '', y = 'total visitors', title = 'AirREGI') + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+p2 <- hpg_res[, .(total_visitors = sum(reserve_visitors)), by = .(date = as.Date(visit_datetime))] %>%
+    ggplot(aes(x = date, y = total_visitors)) + 
+    geom_line(color = 'steelblue') + 
+    geom_vline(data = holidays, aes(xintercept = as.Date(calendar_date)), alpha = 0.4) + 
+    scale_x_date(date_breaks = "1 month") + 
+    labs(x = '', y = 'total visitors', title = 'Hot Pepper Gourmet') + 
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+grid.arrange(p1, p2)
+
+```
+
+Looking at the reservation-based visitor data shows a weird blackout between the end of July 2016 and the end of October 2016 in the AirREGI data. The Hot Pepper Gourmet data show a more expected pattern with an increase at the end of the year near the holidays. 
+
+Let's look at the reservation party size over time. 
+
+```{r, fig.width = 10}
+
+p1 <- air_res[, .(avg_size = sum(reserve_visitors) / .N), by = .(date = as.Date(reserve_datetime))] %>%
+    ggplot(aes(x = date, y = avg_size)) + 
+    geom_line(color = 'steelblue') +
+    geom_vline(data = holidays, aes(xintercept = as.Date(calendar_date)), alpha = 0.4) + 
+    labs(x = '', y = 'Average reservations size', title = 'AirREGI')
+
+p2 <- hpg_res[, .(avg_size = sum(reserve_visitors) / .N), by = .(date = as.Date(reserve_datetime))] %>%
+    ggplot(aes(x = date, y = avg_size)) + 
+    geom_line(color = 'steelblue') + 
+    geom_vline(data = holidays, aes(xintercept = as.Date(calendar_date)), alpha = 0.4) + 
+    labs(x = '', y = 'Average reservations size', title = 'Hot Pepper Gourmet')
+
+grid.arrange(p1, p2)
+    
+```
+
+In both cases, average reservation size hovers around 5. In the AirREGI data, there is an extremity of variance near the middle of the training data range. 
+
+Finally, we can examine the difference between the reservation time and the visit time. How far ahead of time do people make reservations?
+
+```{r, fig.width = 10}
+
+# calculate difference between reservation and visit
+air_res[, res_diff := difftime(visit_datetime, reserve_datetime, units = 'days')]
+hpg_res[, res_diff := difftime(visit_datetime, reserve_datetime, units = 'days')]
+
+p1 <- air_res[, .(mean_res_diff = mean(res_diff)), by = .(date = as.Date(reserve_datetime))] %>%
+    ggplot(aes(x = date, y = mean_res_diff)) + 
+    geom_line(color = 'steelblue') + 
+    geom_vline(data = holidays, aes(xintercept = as.Date(calendar_date)), alpha = 0.4) + 
+    labs(x = '', y = 'Mean reservation days ahead', title = 'Reservation days ahead (AirREGI)')
+
+p2 <- hpg_res[, .(mean_res_diff = mean(res_diff)), by = .(date = as.Date(reserve_datetime))] %>%
+    ggplot(aes(x = date, y = mean_res_diff)) + 
+    geom_line(color = 'steelblue') + 
+    geom_vline(data = holidays, aes(xintercept = as.Date(calendar_date)), alpha = 0.4) + 
+    labs(x = '', y = 'Mean reservation days ahead', title = 'Reservation days ahead (Hot Pepper Gourmet)')
+
+grid.arrange(p1, p2)
+
+```
+
+In both cases, it appears that people make reservations one week ahead of time on average. In the Hot Pepper Gourmet data, we see that number surges to around 11 days during the holidays. Once again we see significant variability from the end of July 2016 to the end of October 2016. This is because the number of reservations in AirREGI over this time is near zero and so the sample size is very small. So we can largely ignore this artifact in the AirREGI data. 
+
+## Stores {#stores}
+
+```{r}
+
+n_air <- length(unique(air_store$air_store_id))
+n_hpg <- length(unique(hpg_store$hpg_store_id))
+
+print(paste('The AirREGI data has', n_air, 'stores', 'and the Hot Pepper Gourmet data has', n_hpg, 'stores.'))
+
+```
+
+```{r, fig.width = 10}
+
+p1 <- air_store[, .N, by = air_genre_name] %>%
+    ggplot(aes(x = reorder(air_genre_name, N), y = N)) +
+    geom_bar(stat = 'identity', fill = 'steelblue') +
+    labs(x = '', y = 'Number of stores', title = 'AirREGI') + 
+    coord_flip()
+
+p2 <- hpg_store[, .N, by = hpg_genre_name] %>%
+    ggplot(aes(x = reorder(hpg_genre_name, N), y = N)) +
+    geom_bar(stat = 'identity', fill = 'steelblue') +
+    labs(x = '', y = 'Number of stores', title = 'Hot Pepper Gourmet') + 
+    coord_flip()
+
+grid.arrange(p1, p2, ncol = 2)
+```
+
+Hot Pepper Gourmet has many more categories than AirREGI. The most common restaurant in the AirREGI data is 'Izayaka'. The most common in the Hot Pepper Gourmet is 'Japanese Style'.
+
+Number of stores by area. 
+
+```{r, fig.width = 10}
+
+p1 <- air_store[, .N, by = air_area_name][order(N, decreasing = TRUE)] %>%
+    head(25) %>%
+    ggplot(aes(x = reorder(air_area_name, N), y = N)) +
+    geom_bar(stat = 'identity', fill = 'steelblue') +
+    labs(x = '', y = 'Number of stores', title = 'AirREGI') + 
+    coord_flip()
+
+p2 <- hpg_store[, .N, by = hpg_area_name][order(N, decreasing = TRUE)] %>%
+    head(25) %>%
+    ggplot(aes(x = reorder(hpg_area_name, N), y = N)) +
+    geom_bar(stat = 'identity', fill = 'steelblue') +
+    labs(x = '', y = 'Number of stores', title = 'Hot Pepper Gourmet') + 
+    coord_flip()
+
+grid.arrange(p1, p2, ncol = 2)
+
+```
+
+In the stores data, the first part of the `air_area_name` and `hpg_area_name` appear at first glance to be the prefecture. Let's split out this first piece and put it into a new column called `prefecture`. Then we can plot total daily visits faceted by prefecture. 
+
+```{r, fig.width = 10}
+
+air_store[, pref := tstrsplit(air_area_name, split = " ", keep = 1)]
+hpg_store[, pref := tstrsplit(hpg_area_name, split = " ", keep = 1)]
+
+setkey(visits, air_store_id)
+setkey(air_store, air_store_id)
+setkey(hpg_store, hpg_store_id)
+
+visits[air_store][, .(total_visitors = sum(visitors)), by = c('visit_date', 'pref')] %>%
+    ggplot(aes(x = visit_date, y = total_visitors, color = pref)) + 
+    geom_line() + 
+    geom_smooth(method = 'loess') + 
+    facet_wrap(~pref, scales = 'free_y') + 
+    labs(x = '', title = 'Total daily visits by Prefecture') + 
+    theme(legend.position = "none")
+```
+
+If we want to map all of the stores, we can do so using leaflet. Here I create a cluster map of all the stores in the AirREGI service and add custom labels with the store id, genre, and prefecture location. 
+
+```{r, fig.width = 10}
+
+# create the labels
+labels <- sprintf(
+    "Store ID: %s</br>Prefecture:%s</br>Genre: %s", air_store$air_store_id, air_store$pref, air_store$air_genre_name) %>%
+    lapply(HTML)
+
+
+air_store %>%
+    leaflet() %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    addCircleMarkers(~ longitude,
+    ~ latitude,
+    radius = 4,
+    label = labels,
+    clusterOptions = markerClusterOptions())
+```
+
+
+This is helpful but the competition page states that the longitude and latitude data are not exact so as to avoid being able to pinpoint individual restaurants. We can also map the stores by prefecture. 
+
+```{r}
+
+# get the japan and prefecture shapes
+japan_map <- map("japan", fill = TRUE, col = 1, plot = FALSE)
+
+japan_map_ids <- sapply( strsplit( japan_map$names, ':' ), function(x) x[1] )
+
+# convert to a SpatialPolygon
+japan_sp <- map2SpatialPolygons(japan_map, IDs=japan_map_ids, proj4string=CRS("+proj=longlat +datum=WGS84"))
+
+# get the names of the countries from japan_sp
+tmp_id_df <- data.frame(ID = names(japan_sp))
+
+# make the rownames the prefecture name as well
+rownames(tmp_id_df) <- names(japan_sp)
+
+# make the SpatialPolygonDataFrame
+japan_spdf <- SpatialPolygonsDataFrame(japan_sp, tmp_id_df)
+
+
+hpg_store[, pref := gsub('-ken', '', pref)]
+hpg_store[, pref := gsub('-fu', '', pref)]
+hpg_store[, pref := gsub('-to', '', pref)]
+hpg_store[, pref := chartr('Ōō', 'Oo', pref)]
+store_counts <- hpg_store[, .N, by = pref]
+
+# merge with the spatial dataframe by prefecture name
+dd <- merge(japan_spdf, store_counts, by.x = 'ID', by.y = 'pref')
+
+# create the choropleth palette
+bins <- c(0, 50, 100, 200, 500, 1000, 2000, Inf)
+pal <- colorBin("YlOrRd", domain = dd$density, bins = bins)
+
+# create the prefecture labels
+labels <- sprintf(
+    "%s</br>Number of stores: %g", dd$ID, dd$N) %>%
+    lapply(HTML)
+
+# build the map
+leaflet(dd) %>%
+    addProviderTiles("CartoDB.Positron") %>%
+    addPolygons(data = dd, weight = 1, fillColor = ~pal(dd$N), fillOpacity = 0.5,
+                    highlight = highlightOptions(
+                        weight = 5,
+                        color = "#666",
+                        dashArray = "",
+                        fillOpacity = 0.7,
+                    bringToFront = TRUE),
+                    label = labels) %>%
+    addLegend(pal = pal, values = ~ N, opacity = 0.7, title = NULL, position = 'bottomright')
+
+```
+
+Assuming that I've correctly parsed the area names in the HPG data, it seems that we have stores located in 12 of Japan's prefectures. You can hover over each prefecture to get the name and the number of stores within. Tokyo prefecture has the most restaurants at 2, 076.
+Most of the prefectures do not have restaurants covered by the HPG system. 
+
+More to come...

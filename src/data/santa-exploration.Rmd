@@ -1,0 +1,173 @@
+---
+title: "Santa data explorations"
+author: "Nigel Carpenter"
+date: "2 December 2015"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+This is a simple exploration of the Santa’s Stolen Sleigh data which can be found [here](https://www.kaggle.com/c/santas-stolen-sleigh/data)
+
+Include libraries for spatial manipulation, plotting and displaying DataTables:
+
+```{r}
+library(spdep)
+library(geosphere)
+library(threejs)
+library(rworldmap)
+library(leaflet)
+library(rgeos)
+library(raster)
+library(geojsonio) #include geojsonio if running locally to plot routes in leaflet
+
+library(ggplot2)
+library(DT)
+
+```
+
+Read in the data and convert it to spatial objects:
+
+```{r}
+gifts <- read.csv("../input/gifts.csv")
+
+gifts_coord <- cbind(gifts$Longitude, gifts$Latitude)  # set spatial coordinates
+gifts_sp <- SpatialPoints(gifts_coord, proj4string=CRS("+proj=longlat"))
+gifts_spdf <- SpatialPointsDataFrame(gifts_sp, data = gifts)
+```
+
+Define a few useful variables such as the North Pole and the number of sample gifts to analyse:
+
+```{r}
+sample_rows <- 1000
+
+north_pole <- data.frame(Latitude=90,Longitude=0,Weight=0,r=1)
+coordinates(north_pole) <- c("Longitude", "Latitude")  # set spatial coordinates
+north_pole_sp <- SpatialPoints(north_pole,  proj4string=CRS("+proj=longlat"))
+```
+
+Now we can create some new features using the [geosphere](https://cran.r-project.org/web/packages/geosphere/geosphere.pdf) library.
+So I'll create the distance and bearing of each gift location from the north pole using the distHaversine and bearing functions.
+
+Display the results in an interactive DataTable. Restrict DataTable to first 1000 (sample_Rows) for speed.
+
+```{r}
+gifts_spdf$dist_north_pole <- distHaversine(gifts_sp,north_pole_sp)
+gifts_spdf$bearing_north_pole <- bearing(north_pole_sp,gifts_sp)
+
+datatable(gifts_spdf@data[1:sample_rows,], rownames = FALSE)
+```
+
+Thinking ahead to route planning, can get an idea of gift density by bearing by plotting bearing histogram. 
+
+```{r}
+hist(gifts_spdf$bearing_north_pole, main = "Count of gifts by bearing from North Pole")
+```
+
+A quick plot of a sample of gift locations looks reassuringly familiar
+
+```{r}
+plot(gifts_sp[1:sample_rows,])
+```
+
+By using the rworldmap package and ggplot2 with a few extra lines of code a much better map can be created. Credit to [Ewen Gallic](http://egallic.fr/maps-with-r/) for the idea and coding. 
+
+```{r}
+worldMap <- getMap()
+world.points <- fortify(worldMap)
+world.points$region <- world.points$id
+
+world.df <- world.points[,c("long","lat","group", "region")]
+
+worldmap <- ggplot() + 
+  geom_polygon(data = world.df, aes(x = long, y = lat, group = group)) +
+  geom_point(aes(x=gifts[1:sample_rows,3], y=gifts[1:sample_rows,2]),color="yellow", size=1) + 
+  scale_y_continuous(breaks = (-2:2) * 30) +
+  scale_x_continuous(breaks = (-4:4) * 45)
+
+worldmap
+
+```
+
+By adding the coord_map line to the ggplot call we can transform the map projection to a globe.
+
+```{r}
+worldmap +coord_map("ortho", orientation=c(40, 0, 0))
+
+```
+
+By changing the parameters of the coord_map function we can change the map projection. Lots of information about map projections can be found [here](http://www.progonos.com/furuti/MapProj/Normal/CartProp/Geodesic/geodesic.html).
+
+The azimuthal equidistant projection is of particular interest to this task as it can include the whole world and correctly shows distances and directions. Great circles (shortest paths between two points on a globe) will apear as straight lines on this projection.
+
+Here I plot the sample points on an azimuthal equidistant projection with the North Pole at the centre of the map. (To avoid a polygon rendering difficulty with this particular projection I've removed the Antartica polygon)
+
+```{r}
+worldmap <- ggplot() + 
+  geom_polygon(data = world.df[world.df$region != 'Antarctica',], aes(x = long, y = lat, group = group)) +
+  geom_point(aes(x=gifts[1:sample_rows,3], y=gifts[1:sample_rows,2]),color="yellow", size=1) + 
+  scale_y_continuous(breaks = (-2:2) * 30) +
+  scale_x_continuous(breaks = (-4:4) * 45) +
+  coord_map("azequidist",orientation=c(90, 0, 0))
+worldmap
+```
+
+Now have some fun with a 3d interactive globe of sample gift locations relative to the North Pole.
+
+Use the [threejs](http://bwlewis.github.io/rthreejs/globe/index.html) library to render a 3d globe
+
+```{r}
+earth <- system.file("images/world.jpg",  package="threejs")
+
+test_flights <- data.frame(origin_lat = rep(90,sample_rows), origin_long = rep(0,sample_rows), dest_lat = gifts[1:sample_rows,'Latitude'], dest_long = gifts[1:sample_rows,'Longitude'])
+
+globejs(img=earth, arcs=test_flights,
+        arcsHeight=0.3, arcsLwd=2, arcsColor="#ffff00", arcsOpacity=0.15,
+        atmosphere=TRUE)
+```
+
+Now want to turn to creating solution paths and plotting them on a map. 
+I'll use leaflet for plotting points and paths for USA only to speed rendering.
+
+I'll create example solutions using the simple kmeans script, add the resulting TripId to my SpatialPointsDataFrame and finally create subset clipped to the extent of the USA.
+
+```{r}
+model <- kmeans(gifts[,2:3],5564,iter.max =50)
+
+gifts_spdf <- gifts_spdf[order(gifts_spdf$GiftId),]
+gifts_spdf$TripId <-  model$cluster
+gifts_spdf <- gifts_spdf[order(gifts_spdf$TripId, -gifts_spdf$Latitude),]
+
+clip.extent <- as(extent(-125, -65, 49,24), "SpatialPolygons")
+proj4string(clip.extent) <- CRS(proj4string(gifts_spdf))
+gifts_spdf_subset <- gifts_spdf[clip.extent,]
+
+```
+
+Final step is to split solution into list of individual trips, which are then converted in to a SpatialLines object.
+
+Then convert this into a geojson format which makes it easier to add multiple lines to a leaflet map.
+
+Now you'll have to imagine the trip lines as geojsonio package isn't loaded into Kaggle's scripting environment.
+
+However, if you are able to run this locally and want to see the trips on the leaflet map then uncomment the two marked lines below as well as the library(geojsonio) reference at the begining of the script.
+
+```{r}
+
+trip_split <- split(gifts_spdf_subset@data[,c(3,2)], f = gifts_spdf_subset$TripId, drop = TRUE)
+
+L1 <- sapply(trip_split,Line)
+Ls1 = Lines(L1, ID = "1")
+SL1 = SpatialLines(list(Ls1))
+
+SL1_geojson <- geojson_json(SL1) # uncomment to see lines if running locally
+
+
+m <- leaflet() %>%
+  addTiles() %>%  # Add default OpenStreetMap map tiles
+  setView(-90, 40, 5) %>% # map location
+  addCircles(color = "black", data= gifts_spdf[clip.extent,] ) %>%
+  addGeoJSON(SL1_geojson, weight = 3, color = "red") # uncomment to see lines if running locally
+m 
+
+```

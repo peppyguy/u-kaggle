@@ -1,0 +1,451 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "bf6b7923-a5a0-3e10-2913-161e6a94c458"
+      },
+      "source": [
+        "# Bayesian Logistic Regression with rstanarm \n",
+        "\n",
+        "Original [CRAN vignette][1] by Jonah Gabry and Ben Goodrich\n",
+        "\n",
+        "Experimental port from [CRAN vignette][1] by Aki Vehtari\n",
+        "\n",
+        "***Instead of wells data in CRAN vignette, Pima Indians data is used, and thus the end of this Kernel differs significantly from the CRAN vignette***\n",
+        "\n",
+        "  [1]: https://cran.r-project.org/web/packages/rstanarm/vignettes/binomial.html\n",
+        "\n",
+        "---"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "4917f0a0-98f5-3f0c-5379-a8950a376122"
+      },
+      "source": [
+        "# Introduction\n",
+        "\n",
+        "This vignette explains how to estimate generalized linear models (GLMs) for \n",
+        "binary (Bernoulli) and Binomial response variables using the `stan_glm`\n",
+        "function in the __rstanarm__ package.\n",
+        "\n",
+        "The four steps of a Bayesian analysis are\n",
+        "\n",
+        "1. Specify a joint distribution for the outcome(s) and all the unknowns, which\n",
+        "  typically takes the form of a marginal prior distribution for the unknowns\n",
+        "  multiplied by a likelihood for the outcome(s) conditional on the unknowns.\n",
+        "  This joint distribution is proportional to a posterior distribution of the\n",
+        "  unknowns conditional on the observed data\n",
+        "2. Draw from posterior distribution using Markov Chain Monte Carlo (MCMC).\n",
+        "3. Evaluate how well the model fits the data and possibly revise the model.\n",
+        "4. Draw from the posterior predictive distribution of the outcome(s) given\n",
+        "  interesting values of the predictors in order to visualize how a manipulation\n",
+        "  of a predictor affects (a function of) the outcome(s).\n",
+        "\n",
+        "Steps 3 and 4 are covered in more depth by the vignette entitled [\"How to Use the\n",
+        "__rstanarm__ Package\"][2]. This vignette focuses on Step 1 when the likelihood is\n",
+        "the product of conditionally independent binomial distributions (possibly with\n",
+        "only one trial per observation).\n",
+        "\n",
+        "# Likelihood\n",
+        "\n",
+        "For a binomial GLM the likelihood for one observation $y$ can be written as a\n",
+        "conditionally binomial PMF\n",
+        "$$\\binom{n}{y} \\pi^{y} (1 - \\pi)^{n - y},$$\n",
+        "where $n$ is the known number of trials, $\\pi = g^{-1}(\\eta)$ is the probability\n",
+        "of success and $\\eta = \\alpha + \\mathbf{x}^\\top \\boldsymbol{\\beta}$ is a linear\n",
+        "predictor. For a sample of size $N$, the likelihood of the entire sample is the\n",
+        "product of $N$ individual likelihood contributions.\n",
+        "\n",
+        "Because $\\pi$ is a probability, for a binomial model the _link_ function $g$\n",
+        "maps between the unit interval (the support of $\\pi$) and the set of all real\n",
+        "numbers $\\mathbb{R}$. When applied to a linear predictor $\\eta$ with values in\n",
+        "$\\mathbb{R}$, the inverse link function $g^{-1}(\\eta)$ therefore returns a valid\n",
+        "probability between 0 and 1.\n",
+        "\n",
+        "The two most common link functions used for binomial GLMs are the\n",
+        "[logit](https://en.wikipedia.org/wiki/Logit) and \n",
+        "[probit](https://en.wikipedia.org/wiki/Probit)\n",
+        "functions. With the logit (or log-odds) link function $g(x) =\n",
+        "\\ln{\\left(\\frac{x}{1-x}\\right)}$, the likelihood for a single observation\n",
+        "becomes\n",
+        "\n",
+        "$$\\binom{n}{y}\\left(\\text{logit}^{-1}(\\eta)\\right)^y \n",
+        "\\left(1 - \\text{logit}^{-1}(\\eta)\\right)^{n-y} = \n",
+        "\\binom{n}{y} \\left(\\frac{e^{\\eta}}{1 + e^{\\eta}}\\right)^{y}\n",
+        "\\left(\\frac{1}{1 + e^{\\eta}}\\right)^{n - y}$$\n",
+        "\n",
+        "and the probit link function $g(x) = \\Phi^{-1}(x)$ yields the likelihood\n",
+        "\n",
+        "$$\\binom{n}{y} \\left(\\Phi(\\eta)\\right)^{y}\n",
+        "\\left(1 - \\Phi(\\eta)\\right)^{n - y},$$\n",
+        "\n",
+        "where $\\Phi$ is the CDF of the standard normal distribution. The differences \n",
+        "between the logit and probit functions are minor and -- if, as __rstanarm__ does\n",
+        "by default, the probit is scaled so its slope at the origin matches the logit's \n",
+        "-- the two link functions should yield similar results. With `stan_glm`, \n",
+        "binomial models with a logit link function can typically be fit slightly faster \n",
+        "than the identical model with a probit link because of how the two models are \n",
+        "implemented in Stan. Unless the user has a specific reason to prefer the probit\n",
+        "link, we recommend the logit simply because it will be slightly faster and more\n",
+        "numerically stable.\n",
+        "\n",
+        "In theory, there are infinitely many possible link functions, although in\n",
+        "practice only a few are typically used. Other common choices are the `cauchit`\n",
+        "and `cloglog` functions, which can also be used with `stan_glm` (every link \n",
+        "function compatible with`glm` will work with `stan_glm`).\n",
+        "\n",
+        "A full Bayesian analysis requires specifying prior distributions $f(\\alpha)$ and\n",
+        "$f(\\boldsymbol{\\beta})$ for the intercept and vector of regression coefficients.\n",
+        "When using `stan_glm`, these distributions can be set using the \n",
+        "`prior_intercept` and `prior` arguments. The `stan_glm` function supports a\n",
+        "variety of prior distributions, which are explained in the __rstanarm__\n",
+        "documentation (`help(priors, package = 'rstanarm')`).\n",
+        "\n",
+        "As an example, suppose we have $K$ predictors and believe --- prior to seeing \n",
+        "the data --- that $\\alpha, \\beta_1, \\dots, \\beta_K$ are as likely to be positive\n",
+        "as they are to be negative, but are highly unlikely to be far from zero. These\n",
+        "beliefs can be represented by normal distributions with mean zero and a small\n",
+        "scale (standard deviation). To give $\\alpha$ and each of the $\\beta$s this prior\n",
+        "(with a scale of 1, say), in the call to `stan_glm` we would include the\n",
+        "arguments `prior_intercept = normal(0,1)` and \n",
+        "`prior = normal(0,1)`.\n",
+        "\n",
+        "If, on the other hand, we have less a priori confidence that the parameters will\n",
+        "be close to zero then we could use a larger scale for the normal distribution \n",
+        "and/or a distribution with heavier tails than the normal like the Student t \n",
+        "distribution. __Step 1__ in the \"How to Use the __rstanarm__ Package\" vignette \n",
+        "discusses one such example.\n",
+        "\n",
+        "# Posterior\n",
+        "\n",
+        "With independent prior distributions, the joint posterior distribution for\n",
+        "$\\alpha$ and $\\boldsymbol{\\beta}$ is proportional to the product of the priors \n",
+        "and the $N$ likelihood contributions:\n",
+        "\n",
+        "$$f\\left(\\alpha,\\boldsymbol{\\beta} | \\mathbf{y},\\mathbf{X}\\right) \\propto\n",
+        "  f\\left(\\alpha\\right) \\times \\prod_{k=1}^K f\\left(\\beta_k\\right) \\times\n",
+        "  \\prod_{i=1}^N {\n",
+        "  g^{-1}\\left(\\eta_i\\right)^{y_i} \n",
+        "  \\left(1 - g^{-1}\\left(\\eta_i\\right)\\right)^{n_i-y_i}}.$$\n",
+        "  \n",
+        "This is posterior distribution that `stan_glm` will draw from when using MCMC.\n",
+        "  \n",
+        "# Logistic Regression Example\n",
+        "\n",
+        "When the logit link function is used the model is often referred to as a \n",
+        "logistic regression model (the inverse logit function is the CDF of the standard\n",
+        "logistic distribution). As an example, here we will show how to carry out a \n",
+        "analysis for Pima Indians data set similar to analysis from Chapter 5.4 of \n",
+        "[Gelman and Hill (2007)](http://www.stat.columbia.edu/~gelman/arm/) \n",
+        "using `stan_glm`.\n",
+        "\n",
+        "[2]: https://cran.r-project.org/web/packages/rstanarm/vignettes/rstanarm.html"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "4c4e2470-6611-a082-2f79-ab22de28d7cb"
+      },
+      "outputs": [],
+      "source": [
+        "# file preview shows a header row\n",
+        "diabetes <- read.csv(\"../input/diabetes.csv\", header = TRUE)\n",
+        "\n",
+        "# first look at the data set using summary() and str() to understand what type of data are you working\n",
+        "# with\n",
+        "summary(diabetes)\n",
+        "str(diabetes)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "bc147ee9-e0f5-2e00-b5c6-26d0a2e5b749"
+      },
+      "outputs": [],
+      "source": [
+        "diabetes$Outcome <- factor(diabetes$Outcome)\n",
+        "\n",
+        "# removing those observation rows with 0 in any of the variables\n",
+        "for (i in 2:6) {\n",
+        "      diabetes <- diabetes[-which(diabetes[, i] == 0), ]\n",
+        "}\n",
+        "\n",
+        "# modify the data column names slightly for easier typing\n",
+        "names(diabetes)[7] <- \"dpf\"\n",
+        "names(diabetes) <- tolower(names(diabetes))\n",
+        "\n",
+        "str(diabetes)\n",
+        "print(paste0(\"number of observations = \", dim(diabetes)[1]))\n",
+        "print(paste0(\"number of predictors = \", dim(diabetes)[2]))"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "3fb6dd01-62d6-3033-889d-3cdd36214575"
+      },
+      "outputs": [],
+      "source": [
+        "# preparing the inputs\n",
+        "x <- model.matrix(outcome ~ . - 1, data = diabetes)\n",
+        "y <- diabetes$outcome"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "23aee1f9-e433-82c3-a302-d2d44aec33d1"
+      },
+      "source": [
+        "A Bayesian version of logistic regression model\n",
+        "can be estimated using the `stan_glm` function. Here we'll use a Student t \n",
+        "prior with 7 degrees of freedom and a scale of 2.5, which, as discussed above,\n",
+        "is a reasonable default prior when coefficients should be close to zero but \n",
+        "have some chance of being large. \n",
+        "\n",
+        "The `formula`, `data` and `family` arguments to `stan_glm` are specified in\n",
+        "exactly the same way as for `glm`. We've also added the `seed` \n",
+        "(for reproducibility). You can read about other possible arguments in the\n",
+        "`stan_glm` documentation (`help(stan_glm, package = 'rstanarm')`)."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "4e450676-5d53-f964-f2b5-4753f4d33c76"
+      },
+      "outputs": [],
+      "source": [
+        "library(rstanarm)\n",
+        "t_prior <- student_t(df = 7, location = 0, scale = 2.5)\n",
+        "fit1 <- stan_glm(outcome ~ ., data = diabetes,\n",
+        "                 family = binomial(link = \"logit\"), \n",
+        "                 prior = t_prior, prior_intercept = t_prior,\n",
+        "                 seed = 1)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "2a66a508-db04-78f9-cdcc-362ed2f23659"
+      },
+      "source": [
+        "Posterior median estimates for the coefficients:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "c8b12c7a-1654-74c1-8081-03851d1ec4e4"
+      },
+      "outputs": [],
+      "source": [
+        "(coef_fit1 <- round(coef(fit1), 3))"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "fd1dad20-0e93-9aa3-0f33-88b86ba8733e"
+      },
+      "source": [
+        "\n",
+        "\n",
+        "To get a sense for the uncertainty in our estimates we can use the \n",
+        "`posterior_interval` function to get Bayesian uncertainty intervals. The\n",
+        "uncertainty intervals are computed by finding the relevant quantiles of the\n",
+        "draws from the posterior distribution. For example, to compute 50% intervals we\n",
+        "use:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "dd302f3e-b695-7706-1aeb-6c6a4674bbd6"
+      },
+      "outputs": [],
+      "source": [
+        "round(posterior_interval(fit1, prob = 0.5), 2)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "09bf83ef-007d-e5e9-e747-16d19435f325"
+      },
+      "source": [
+        "For more on `posterior_interval` and interpreting the parameter estimates from a Bayesian\n",
+        "model see Step 2 in the [\"How to Use the __rstanarm__ Package\"][1] vignette.\n",
+        "\n",
+        "[1]: https://cran.r-project.org/web/packages/rstanarm/vignettes/rstanarm.html"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "53dba6a9-08ec-81e0-32ba-2db9bca099ae"
+      },
+      "source": [
+        "__rstanarm__ supports __loo__ package which implements fast Pareto smoothed leave-one-out cross-validation (PSIS-LOO) to compute expected log predictive density (elpd):"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "b6e76ddf-8c00-5b16-1b40-7c447f904a0c"
+      },
+      "outputs": [],
+      "source": [
+        "library(loo)\n",
+        "loo1 <- loo(fit1)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "53cf87d2-9aa9-b95d-af23-37f17d410050"
+      },
+      "source": [
+        "Above we see that PSIS-LOO result is reliable as all Pareto k estimates are small (k< 0.5)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "16ec5d7b-1059-7f57-b782-3a6427d7a4d6"
+      },
+      "source": [
+        "For more easily interpretable predictive performance measures, we next compute posterior predictive probabilities and use them to compute classification errors, ROC and AUC (some of these will be later included in loo package)."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "5ff2d429-97fe-4853-e562-fd1131ff01c4"
+      },
+      "outputs": [],
+      "source": [
+        "# Predicted probabilities\n",
+        "linpred <- posterior_linpred(fit1)\n",
+        "preds <- posterior_linpred(fit1, transform=TRUE)\n",
+        "pred <- colMeans(preds)\n",
+        "pr <- as.integer(pred >= 0.5)\n",
+        "   \n",
+        "library(caret)\n",
+        "# confusion matrix\n",
+        "confusionMatrix(pr, y)[2:3]\n",
+        "# posterior classification accuracy\n",
+        "round(mean(xor(pr,as.integer(y))),3)\n",
+        "# posterior balanced classification accuracy\n",
+        "round((mean(xor(pr[y==0]>0.5,as.integer(y[y==0])))+mean(xor(pr[y==1]>0.5,as.integer(y[y==1]))))/2,3)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "082eaa52-d494-8b2c-7030-fdb5606a9577"
+      },
+      "source": [
+        "The predictive performance above is overoptimistic. To better estimate the predictive performance for new not yet seen data we next use leave-one-out cross-validation:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "cf0904d4-0ebd-6840-61c9-0b937195a42b"
+      },
+      "outputs": [],
+      "source": [
+        "# PSIS-LOO weights\n",
+        "log_lik=log_lik(fit1, parameter_name = \"log_lik\")\n",
+        "psis=psislw(-log_lik)\n",
+        "#plot(psis$pareto_k)\n",
+        "#plot(psis$lw_smooth[,1],linpred[,1])\n",
+        "# LOO predictive probabilities\n",
+        "ploo=colSums(preds*exp(psis$lw_smooth))\n",
+        "# LOO classification accuracy\n",
+        "round(mean(xor(ploo>0.5,as.integer(y))),3)\n",
+        "# LOO balanced classification accuracy\n",
+        "round((mean(xor(ploo[y==0]>0.5,as.integer(y[y==0])))+mean(xor(ploo[y==1]>0.5,as.integer(y[y==1]))))/2,2)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "875a8a54-f1bc-e3ff-1945-b89d165639fa"
+      },
+      "source": [
+        "In this case it happens that all predicted classes are same as with posterior predictions. We can see the small difference in posterior predictive probabilities and LOO proabilities:"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "0975db11-fec0-4aaf-5cf8-0bffb2b04dd6"
+      },
+      "outputs": [],
+      "source": [
+        "plot(pred,ploo)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "d1fc15f5-f0e5-d218-a17d-7c851e66c937"
+      },
+      "source": [
+        "We can also sompute ROC and AUC using posterior or LOO probabilities."
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "16c505c7-82a6-2c38-324b-ab926a8fe8af"
+      },
+      "outputs": [],
+      "source": [
+        "# compute AUCs\n",
+        "library(pROC)\n",
+        "plot.roc(y,pred,percent=TRUE,col=\"#1c61b6\",  print.auc=TRUE)\n",
+        "plot.roc(y,ploo,percent=TRUE,col=\"#008600\",  print.auc=TRUE, print.auc.y=40, add=TRUE)\n",
+        "\n",
+        "legend(\"bottomright\", legend=c(\"Posterior ROC\", \"LOO ROC\"), col=c(\"#1c61b6\", \"#008600\"), lwd=2)"
+      ]
+    }
+  ],
+  "metadata": {
+    "_change_revision": 0,
+    "_is_fork": false,
+    "kernelspec": {
+      "display_name": "R",
+      "language": "R",
+      "name": "ir"
+    },
+    "language_info": {
+      "codemirror_mode": "r",
+      "file_extension": ".r",
+      "mimetype": "text/x-r-source",
+      "name": "R",
+      "pygments_lexer": "r",
+      "version": "3.3.1"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}

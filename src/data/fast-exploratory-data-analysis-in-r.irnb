@@ -1,0 +1,329 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "5367dc14-2844-4aec-70d0-54a0cf8b0ac2"
+      },
+      "source": [
+        "# Fast IRM data analysis using R "
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "3f03cbbb-1d27-1066-8b6c-be15ff9fdb55"
+      },
+      "source": [
+        "## Loading all libraries for the data analysis"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "b50756a8-7209-ba25-74f1-8cd855074f26"
+      },
+      "outputs": [],
+      "source": [
+        "library(oro.nifti)\n",
+        "library(neurobase)\n",
+        "library(ggplot2)\n",
+        "library(fslr)\n",
+        "library(oro.dicom)\n",
+        "library(data.table)\n",
+        "library(imager)\n",
+        "library(plyr)\n",
+        "library(magrittr)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "b53a2dd0-a6e9-7100-cdbe-4c66a1d170e3"
+      },
+      "source": [
+        "As you see we load all the packages that we'll need during this analysis, we use at first the function \"fread\" from the package \"data.table\" in ordre to import in a fast way our data into R. then we'll work with the \"oro.dicom\",\"fslr\",\"oro.nifti\" and \"neurobase\" for the image analysis, also we'll work with \"ggplot2\" to print our data. "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "111fc2f6-b3fd-ceff-7180-352a9fccdcdf"
+      },
+      "outputs": [],
+      "source": [
+        "stage1_labels <- fread(\"../input/stage1_labels.csv\")\n",
+        "head(stage1_labels)\n",
+        "tail(stage1_labels)\n",
+        "dim(stage1_labels)\n",
+        "str(stage1_labels)\n",
+        "summary(stage1_labels)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "8491b144-c6c2-9e1e-64fd-21d0202b0ef6"
+      },
+      "outputs": [],
+      "source": [
+        "system(\"ls ../input/sample_images/\", intern = TRUE)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "16b17e82-72a1-7fcb-f836-a7d658bc30e6"
+      },
+      "outputs": [],
+      "source": [
+        "head(system(\"ls ../input/sample_images/00cba091fa4ad62cc3200a657aeb957e/\", intern = TRUE))"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "caf8f82f-f008-f95d-7bed-59ce39327574"
+      },
+      "source": [
+        "## Load one random file"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "3f9fa961-bcec-0ded-4f3c-99f4a2c29937"
+      },
+      "outputs": [],
+      "source": [
+        "random_dcmfile <- readDICOMFile(\"../input/sample_images/00cba091fa4ad62cc3200a657aeb957e/034673134cbef5ea15ff9e0c8090500a.dcm\")\n",
+        "summary(random_dcmfile)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "352e5a4b-68fc-6a62-0eaa-3119663d5efe"
+      },
+      "source": [
+        "## Load a folder of a patient with all the images"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "95b5b898-5f2d-4696-dfd2-165daa28634e"
+      },
+      "outputs": [],
+      "source": [
+        "one_patient_folder <- readDICOM(\"../input/sample_images/00cba091fa4ad62cc3200a657aeb957e/\")\n",
+        "summary(one_patient_folder)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "a5587f9f-37e1-b373-ee22-34b5a57e4c30"
+      },
+      "source": [
+        "## Plot first image"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "12ba25a8-13aa-ecf6-6916-21005d027952"
+      },
+      "outputs": [],
+      "source": [
+        "frst_image_patient<-image(t(random_dcmfile$img), col = grey(0:70 / 70), axes = FALSE, xlab = \"\", ylab = \"\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "9c45cd56-a639-ab08-e687-99bd594d39cf"
+      },
+      "outputs": [],
+      "source": [
+        "unlist(lapply(one_patient_folder, length))"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "95f125e1-0513-b22a-c31a-24f7b3b69017"
+      },
+      "outputs": [],
+      "source": [
+        "image_folder<-image(t(one_patient_folder$img[[2]]), col = grey.colors(2), axes = FALSE, xlab = \"\", ylab = \"\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "0929a141-5446-3d70-ea09-7e3b3bc1af1b"
+      },
+      "outputs": [],
+      "source": [
+        "noise <- array(runif(5*5*5*3),c(5,5,5,3))\n",
+        "noise <- as.cimg(noise)\n",
+        "sin(noise) + 3*noise \n",
+        "noise[,,,1]"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "b80682b6-da78-f8ba-dbef-21eebdcbd18a"
+      },
+      "outputs": [],
+      "source": [
+        "dim(noise[1:4,,,] )"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "00a55534-12cc-19d2-7801-797cb5a3659b"
+      },
+      "outputs": [],
+      "source": [
+        ""
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "_cell_guid": "f9066184-c65a-8ad5-5ea5-54a1378c5e8a"
+      },
+      "source": [
+        "## Storing header"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "a5158fbf-292f-510c-4632-f5ed15223c44"
+      },
+      "outputs": [],
+      "source": [
+        "fwrite(folder_info, file=\"1st_image_header.csv\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "965526dd-cbfc-5342-97d9-afab91e75c38"
+      },
+      "outputs": [],
+      "source": [
+        "my_folder_good <- dicom2nifti(one_patient_folder)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "2e2aad61-3b72-6718-37c1-99d4c7509427"
+      },
+      "outputs": [],
+      "source": [
+        "str(my_folder_good)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "5986868c-e5c4-608b-8c9d-c2286f790af8"
+      },
+      "outputs": [],
+      "source": [
+        "image(my_folder_good) "
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "2ed71558-e87b-ca3c-e79f-af58ddedb798"
+      },
+      "outputs": [],
+      "source": [
+        "orthographic(my_folder_good, y = NULL, xyz = NULL, w = 1,\n",
+        "col = gray(0:64/64), col.y = hotmetal(), zlim = NULL, zlim.y = NULL,\n",
+        "crosshairs = TRUE, col.crosshairs = \"red\", xlab = \"\", ylab = \"\",\n",
+        "axes = FALSE, oma = rep(0, 4), mar = rep(0, 4), bg = \"black\",\n",
+        "text = NULL, text.color = \"white\", text.cex = 2)\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "f1f66409-83fd-7d7d-beeb-ea698aae1f8f"
+      },
+      "outputs": [],
+      "source": [
+        "library(EBImage)\n",
+        "display((my_folder_good - min(my_folder_good)) / diff(range(mniLR)))"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "7c54b8e5-adf7-c3c9-3027-9e6806805161"
+      },
+      "outputs": [],
+      "source": [
+        "image(my_folder)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "_cell_guid": "018e7f12-7a06-6bfe-8307-1929affe08d9"
+      },
+      "outputs": [],
+      "source": [
+        ""
+      ]
+    }
+  ],
+  "metadata": {
+    "_change_revision": 0,
+    "_is_fork": false,
+    "kernelspec": {
+      "display_name": "R",
+      "language": "R",
+      "name": "ir"
+    },
+    "language_info": {
+      "codemirror_mode": "r",
+      "file_extension": ".r",
+      "mimetype": "text/x-r-source",
+      "name": "R",
+      "pygments_lexer": "r",
+      "version": "3.3.3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}

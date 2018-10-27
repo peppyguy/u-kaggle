@@ -1,0 +1,518 @@
+---
+title: "Exploratory Analysis - Sberbank"
+output:
+  html_document:
+    fig_height: 4
+    fig_width: 7
+    theme: paper
+---
+
+This is a simple EDA for the Sberbank data set. 
+
+The tabbed plotting approach is inspired by 
+[this kernel](https://www.kaggle.com/damianpanek/data-exploration-in-r) from Damiano
+
+```{r include = FALSE}
+
+library(zoo)
+library(dplyr)
+library(xts)
+library(lubridate)
+library(dygraphs)
+library(data.table)
+library(ggplot2)
+library(corrplot)
+library(tidyr)
+
+
+train <- fread('../input/train.csv')
+test <- fread('../input/test.csv')
+
+tmp <- hist(train$price_doc,200)
+plotdf <- data.frame(bins=tmp$mids, counts=tmp$counts)
+outliers <- mean(train$price_doc) + 10*sd(train$price_doc)
+plotdf <- plotdf %>% filter(bins > outliers & counts >= 1)
+
+cplot <- function(data, x, y, xlab=NULL, ylab = NULL){
+  require(grid)
+  require(gridExtra)
+  
+  data[[x]] <- factor(data[[x]],exclude = NULL)
+  
+  summ <- paste0('mean(', y, ',na.rm=T)')  # construct summary method, e.g. mean(mpg)
+  summ2 <- 'n()'
+  summ_names <- c(paste0('m'),paste0('n'))  # construct summary variable name, e.g. mean_mpg
+  
+  meandat <- data %>% group_by_(.dots = x) %>% summarize_(.dots = setNames(list(summ,summ2),summ_names))
+  meandat[[x]] <- as.factor(meandat[[x]])
+  meandat$num <- as.numeric(meandat[[x]])
+  meandat$num <- meandat$num - 0.3
+  
+  plotlims <- quantile(data[[y]],c(0.025,0.975))
+  
+  p1 <- ggplot(data,aes_string(x = x, y = y,fill=x,color=x))+
+    geom_violin(size=1,alpha=0.1, width=1.1)+
+    geom_pointrange(stat="summary",fun.data="mean_se", size=1)+
+    geom_text(mapping=aes_string(x="num",y=plotlims[2],label="n"),data=meandat, hjust="center")+
+    scale_y_continuous(limits=plotlims)+
+    theme_bw()+
+    theme(legend.position="none",
+          axis.title.x = element_blank(),
+          axis.title.y = element_text(size=16),
+          axis.text.x = element_blank(),
+          axis.text.y = element_text(size=14),
+          axis.ticks.x = element_blank())
+  
+  if (!is.null(xlab)) { p1 <- p1 + xlab(xlab)}
+  if (!is.null(ylab)) { p1 <- p1 + ylab(ylab)}  
+  
+  p2 <- ggplot(data,aes_string(x = x, y = y,fill=x,color=x))+
+    geom_errorbar(stat="summary",fun.data="mean_se", size=1, width=0.7)+
+    geom_point(stat="summary",fun.data="mean_se", size=4)+
+    geom_abline(data=meandat,mapping=aes_string(color=x,intercept=meandat$m,slope=0),linetype=2, alpha=0.5)+
+    theme_bw()+
+    theme(legend.position="none",
+          axis.title.x = element_text(size=16),
+          axis.title.y = element_text(size=16),
+          axis.text.x = element_text(size=14),
+          axis.text.y = element_text(size=14),
+          axis.ticks.x = element_blank(),
+          panel.grid = element_blank())
+  
+  if (!is.null(xlab)) { p2 <- p2 + xlab(xlab)}
+  if (!is.null(ylab)) { p2 <- p2 + ylab(ylab)}  
+  
+  gA=ggplot_gtable(ggplot_build(p1))
+  gB=ggplot_gtable(ggplot_build(p2))
+  maxWidth = grid::unit.pmax(gA$widths, gB$widths)
+  gA$widths <- as.list(maxWidth)
+  gB$widths <- as.list(maxWidth)
+  grid.newpage()
+  
+  grid.arrange(
+    arrangeGrob(gA,gB,nrow=2,heights=c(.6,.5))
+  )
+}
+
+```
+
+
+
+## Sale Price {.tabset #saleprice}
+
+### Complete (with Outliers)
+We can see two interesting things: 1) The distribution is skewed and 2) it has quite a long tail. 
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% ggplot(aes(x=price_doc))+
+  geom_histogram(bins=1000, fill="darkblue")+
+  geom_rug(colour="grey60")+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Price")+ylab("Count")
+```
+
+
+
+### Zoomed
+When zooming closer one can clearly see the two spikes on the left side of the distribution. These seem to be faked sale prices to avoid tax and are one
+of the reasons why local CV and LB don't match well.
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% ggplot(aes(x=price_doc))+
+  geom_histogram(bins=200, fill="grey60")+
+  scale_x_continuous(limits=c(0,20000000))+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Price")+ylab("Count")+annotate("segment", x = 1500000, xend = 5000000, y = 900, yend = 900, colour="red", size=1.5, arrow=arrow(ends="first"))+
+annotate("segment", x = 2500000, xend = 6000000, y = 750, yend = 750, colour="red", size=1.5, arrow=arrow(ends="first"))
+
+```
+
+### Log Price
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train$logprice <- log(train$price_doc)
+train %>% ggplot(aes(x=logprice))+
+  geom_histogram(bins=200, fill="grey60")+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Log Price")+ylab("Count")
+
+
+```
+
+## Association of Variables with Sale Price {#association}
+
+### Timestamp {.tabset #timestamp}
+
+Let's first see, whether the sale price varies with the time point when the property was sold.
+
+#### Per Year
+
+We can see a clear upward trend across the recent years. 
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train$year <- make_date(year=year(train$timestamp))
+ggplot(train,aes(x=year,y=price_doc))+
+  geom_line(stat = "summary", color="red", size=1.5)+
+  geom_errorbar(stat="summary", color="grey50", width=50)+
+  geom_point(size=5, color="red", fill="white", shape = 21, stat="summary", stroke=1.5)+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14),panel.grid.minor = element_blank())+xlab("Timestamp_peryear")+ylab("Price")
+```
+
+#### Per Month
+
+The monthly plot does not provide a lot of additional information beyond the trend across years.
+Maybe from 2012 to 2013 there is an effect of month. 
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train$year_month <- make_date(year=year(train$timestamp),month=month(train$timestamp))
+ggplot(train,aes(x=year_month,y=price_doc))+
+  geom_line(stat = "summary", color="red", size=1.5)+
+  geom_point(size=3, color="red", fill="white", shape = 21, stat="summary", stroke=1.5)+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Timestamp_monthperyear")+ylab("Price")
+```
+
+### Per day {#timeplot}
+
+The time series plot is quite spiky so I decided to apply a moving average filter.
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+tmp <- train %>% group_by(timestamp) %>% summarize(m = mean(price_doc,na.rm=T)) %>% mutate(ma = rollapply(m,width = 20,FUN = mean, align = "right", fill = NA, na.rm = T))
+xt <- xts(tmp$ma,as.Date(tmp$timestamp))
+names(xt)<-"Price"
+
+dygraph(xt,xlab="Timestamp") %>% 
+  dySeries("Price", strokeWidth = 3, color="red") %>% 
+  dyAxis("y", label="Price", valueRange = c(5e+06, 9.5e+06)) %>%   
+  dyRangeSelector(dateWindow = c("2014-01-01", "2015-01-01")) %>% 
+  dyOptions(axisLineWidth = 1.5, fillGraph = TRUE, drawGrid = TRUE)
+```
+
+
+### Seasonal effects {.tabset #seasonal}
+
+These plot check the possibility that there might be a trend across the year, e.g. seasonal effects.
+
+#### Per Month
+
+Prices in the first half of the year seem a little higher than in the second half of the year. 
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train$month <- as.numeric(month(train$timestamp))
+ggplot(train,aes(x=month,y=price_doc))+
+  geom_errorbar(stat="summary", color="grey40", width=0.4)+
+  geom_line(stat = "summary", color="red", size=1.5)+geom_point(size=5, color="red", fill="white", shape = 21, stat="summary", stroke=1.5)+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14), panel.grid.minor=element_blank())+xlab("Month")+ylab("Price")+scale_x_continuous(breaks = 1:12)
+```
+
+#### Per Day of Month (without 2012)
+
+The trend of higher prices in the first half of the year might actually be driven by the year 2012, where we saw an effect of month in the "per month"-Plot above. So excluding this year from the plot we see that the monthly trend is not as pronounced as it was before.
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% filter(year != "2012-01-01") %>% 
+ggplot(aes(x=month,y=price_doc))+
+  geom_errorbar(stat="summary", color="grey40", width=0.4)+
+  geom_line(stat = "summary", color="red", size=1.5)+
+  geom_point(size=5, color="red", fill="white", shape = 21, stat="summary", stroke=1.5)+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14), panel.grid.minor=element_blank())+xlab("Month")+ylab("Price")+scale_x_continuous(breaks = 1:12)
+```
+
+
+#### Per Day of Month
+
+Within a month the day does not really have an effect on the sale price. 
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train$day <- as.numeric(day(train$timestamp))
+
+ggplot(train,aes(x=day,y=price_doc))+
+  geom_errorbar(stat="summary", color="grey60")+
+  geom_line(stat = "summary", color="red", size=1.5)+
+  geom_point(size=3, color="red", fill="white", shape = 21, stat="summary", stroke=1.5)+
+  theme_classic()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14),panel.grid.major.y = element_line(colour = "grey95"),panel.grid.minor.y = element_line(colour = "grey95"))+xlab("Day of month")+ylab("Price")+scale_x_continuous(breaks = seq(1,31,by=2))
+```
+
+#### Per Day of Week
+
+It seems like selling a house on a weekend (sunday 1, saturday 7) is not a good idea.
+Thanks for suggesting this idea to [Alexander](https://www.kaggle.com/abogdan). 
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train$wday <- wday(train$timestamp)
+
+ggplot(train,aes(x=wday,y=price_doc))+
+  geom_errorbar(stat="summary", color="grey60", width=0.5)+
+  geom_line(stat = "summary", color="red", size=1.5)+
+  geom_point(size=3, color="red", fill="white", shape = 21, stat="summary", stroke=1.5)+
+  theme_classic()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14),panel.grid.major.y = element_line(colour = "grey95"),panel.grid.minor.y = element_line(colour = "grey95"))+
+  xlab("Day of week")+ylab("Price")+
+  scale_x_continuous(breaks = seq(1,7,by=1))
+```
+
+
+### Total Area {#totalarea}
+
+This shows a clear relation, as expected, between the total area and the sale price: 
+The bigger the appartment the higher the sale price. Quite obvious.
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% ggplot(aes(x=full_sq,y=price_doc))+
+  geom_point()+
+  stat_smooth(aes(x=full_sq,y=price_doc),method="lm", color="red")+
+  scale_x_continuous(limits=c(0,300))+theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Total Area (full_sq)")+ylab("Price")
+
+```
+
+
+
+### Living Area {#livingarea}
+
+This shows a clear relation, as expected, between the total area and the sale price: 
+The bigger the appartment the higher the sale price. Quite obvious.
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% ggplot(aes(x=life_sq,y=price_doc))+
+  geom_point()+
+  stat_smooth(aes(x=life_sq,y=price_doc),color="red",method="lm")+
+  scale_x_continuous(limits=c(0,300))+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Living Area (life_sq)")+ylab("Price")
+
+```
+
+### Kitchen Area {#kitchenarea}
+
+Again a positive correlation between area and sale price. 
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% ggplot(aes(kitch_sq,price_doc))+
+  geom_point()+stat_smooth(color="red",method="lm")+
+  scale_x_continuous(limits=c(0,150))+theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Living Area (life_sq)")+ylab("Price")
+
+```
+
+### Number of Living Rooms { #livingrooms}
+
+
+```{r warning = FALSE,message=FALSE, cache=FALSE}
+train$num_room <- as.numeric(train$num_room)
+ggplot(train,aes(x=num_room,y=price_doc))+
+  geom_errorbar(stat="summary", color="grey40", width=0.4)+
+  geom_line(stat = "summary", color="red", size=1.5)+
+  geom_point(size=5, color="red", fill="white", shape = 21, stat="summary", stroke=1.5)+theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Number of living rooms (num_room)")+ylab("Price")+coord_cartesian(xlim=c(0,10))
+```
+
+
+
+
+### Build Year {.tabset #buildyear}
+
+The build_year variable will need some cleaning, because several values don't make sense.
+E.g. there are a lot of build_years with 0 and 1. And on the other hand there are some obvious mistakes, such as 20052009).
+
+```{r include = FALSE}
+train$by <- as.numeric(train$build_year)
+train$by[train$by == 20052009] <- 2007
+train$by[train$by == 4965] <- NaN
+train$by[train$by == 215] <- 2015
+
+```
+
+
+
+
+#### from 1900
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+tmp <- filter(train, by > 1000)
+
+tmp %>% ggplot()+
+  geom_point(aes(x=by,y=price_doc))+
+  stat_smooth(aes(x=by,y=price_doc),color="red")+theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+scale_x_continuous(limits=c(1900,2015))+xlab("Build Year (build_year)")+ylab("Price")
+
+```
+
+
+#### from 1950
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+tmp <- filter(train, by > 1950)
+
+ggplot(tmp)+
+  geom_bar(aes(x=by,y=price_doc),width=1,stat="summary", fun.y="mean",fill="grey60")+
+  stat_smooth(aes(x=by,y=price_doc),color="red",se = T)+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+scale_x_continuous(limits=c(1950,2015))+xlab("Build Year (build_year)")+ylab("Price")
+```
+
+
+#### Build year 0 and 1
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% 
+  mutate(bynew = ifelse(by<=1,by,"year")) %>% 
+  cplot("bynew","price_doc",xlab="Building year (build_year)",ylab="Price")
+```
+
+
+### Floor { #floor}
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% ggplot()+
+  geom_bar(aes(x=floor,y=price_doc),stat="summary",fun.y="mean",fill="gray60")+
+  stat_smooth(aes(x=floor,y=price_doc),color="red")+
+  scale_x_continuous(limits=c(1,20))+scale_y_continuous(limits=c(0,2000000))+theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Floor (floor)")+ylab("Price")
+```
+
+
+
+### Max Floor { #maxfloor}
+
+```{r warning = FALSE,message = FALSE, cache = FALSE}
+train <- train %>% mutate(max_floor = as.numeric(max_floor))
+train %>% ggplot()+
+  geom_bar(aes(x=max_floor,y=price_doc),stat="summary",fun.y="mean", fill="grey60")+
+  stat_smooth(aes(x=floor,y=price_doc), color="red")+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Number of floors (max floor)")+ylab("Price")+scale_x_continuous(limits=c(0,30))
+```
+
+### Floor by MaxFloor {#floorbymaxfloor}
+
+Not only the absolute floor level might have an effect on the sale price, but also the relative floor
+within a building. Living on the 3rd floor could be different depending if there are 20 floors above you or you can have a coffee on the rooftop :-)
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train$flbymax <- as.numeric(train$floor) / as.numeric(train$max_floor)
+train %>% ggplot()+stat_smooth(aes(x=flbymax,y=price_doc),color="red")+scale_x_continuous(limits=c(0,1))+
+  theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+xlab("Floor by Max Floor")+ylab("Price")
+```
+
+### Appartment State {#state}
+
+This variable is coded a little counterintuitively in the data dictionary (1 - worst condition, 4 - best condition)
+
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train$state <- as.numeric(train$state)
+train$state[train$state==33] <- 3
+train %>% cplot("state","price_doc", xlab="Appartment state (state)", ylab="Price")
+
+```
+
+#### Interaction with build_year
+
+There is an interesting interaction between the state of a house and its build_year. For the state variable there
+are many missing values for OwnerOccupier houses. So I just plot the trend for Investment houses. It is interesting
+to see that for houses built around 2001 there is an increase in sale price if the house is currently in the best state (4) or
+in a not so good state (1)
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train <- train %>% 
+  mutate(build_year=as.numeric(build_year),build_year=ifelse(build_year < 1960 | build_year > 2018,NA,build_year))
+train %>% 
+  filter(product_type=="Investment") %>%
+  ggplot(aes(x=build_year,y=price_doc,color=as.factor(state),fill=as.factor(state)))+facet_grid(as.factor(product_type)~.)+geom_smooth()+theme_bw()
+
+```
+
+
+### Wall Material { #material}
+
+The data dictionary does not contain more information about the meaning of the individual values.
+But still there is some variation with sale price.
+
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% 
+  filter(material != 3 | is.na(material)) %>% 
+  cplot("material","price_doc", xlab="Wall Material (material)", ylab="Price")
+```
+
+### Renovated houses {.tabset}
+One factor affecting house prices is whether the building has been modernized. To see whether we can get this information for some of the houses I examined the Wall Material by Build Year. One can then examine whether houses with an old build year have a "modern" build material (e.g. 4 or 6). However, looking at the graph this is not/rarely the case. 
+
+#### Density
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% 
+  mutate(build_year = as.numeric(build_year), material=as.factor(material)) %>% 
+  filter((material != 3 | is.na(material)) & (build_year < 2019 & build_year > 0)) %>% 
+  ggplot(aes(x=build_year))+geom_density(aes(fill=material,color=material),alpha=0.2, size=1)+coord_cartesian(xlim=c(1960,2018))+theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))
+```
+
+#### Proportions
+
+```{r warning = FALSE, message = FALSE, cache = FALSE}
+train %>% 
+  mutate(build_year = as.numeric(build_year), material=as.factor(material)) %>% 
+  filter((material != 3 | is.na(material)) & (build_year < 2019 & build_year > 1950)) %>% 
+  ggplot(aes(x=build_year,fill=material))+geom_bar(position="fill",width=1)+theme_bw()+theme(axis.title = element_text(size=16),axis.text = element_text(size=14))+scale_fill_brewer(palette = "Set3")
+```
+
+
+### Product Type{#type}
+
+We can see that, property prices are higher for investment sales compared to owner sales.
+Furthermore the distributions look dissimilar (sale prices might be determined differently).
+
+```{r warning = FALSE, fig.width=4, fig.height=4,message=FALSE, cache=FALSE}
+train %>% cplot("product_type","price_doc",xlab="Product Type (product_type)",ylab="Price")
+
+```
+
+### Dealing with cafes & restaurants
+
+There are many variables related to cafes and restaurant. These might give a good indication of the general price level in the area. The idea here is to look at which care variables are most important with regard to their correlation with log_price.
+
+```{r}
+tmp <- train %>% select(c(one_of("price_doc"),matches('cafe_count_[0-9]*$')))
+corrplot(cor(tmp,use = "pairwise.complete.obs"))
+```
+
+```{r fig.height=7}
+tmp <- train %>% select(c(one_of("price_doc"),starts_with('cafe_sum')))
+corrplot(cor(tmp,use = "pairwise.complete.obs"))
+```
+
+```{r}
+tmp <- train %>% select(c(one_of("price_doc"),starts_with('cafe_avg')))
+corrplot(cor(tmp,use = "pairwise.complete.obs"))
+```
+
+
+
+
+
+## Look at distribution of missing values between train and test
+Data quality is getting better for the test set. For many variables there are fewer missing values in the test compared to the train set. 
+```{r, warning=FALSE, message=FALSE}
+train <- train %>% mutate(train_test = "train")
+test <- test %>% mutate(train_test = "test")
+full <- bind_rows(train,test)
+
+basic_features <- c("full_sq", "life_sq", "kitch_sq", "num_room", "floor", "max_floor", "material", "build_year", "state", "product_type")
+
+missing_values <- full %>% select(one_of(basic_features,"train_test")) %>% group_by(train_test) %>% summarize_each(funs(sum(is.na(.))/n())) 
+
+missing_values <- gather(missing_values, -train_test, key="feature", value="missing_pct")
+missing_values %>% 
+  ggplot(aes(x=reorder(feature,missing_pct),y=missing_pct, group=train_test, fill=train_test)) +
+  geom_bar(stat="identity", position="dodge")+
+  coord_flip()+theme_bw()
+```
+  
+## Look at distribution of features between train and test
+
+```{r, warning=FALSE, message=FALSE}
+
+full <- full %>% mutate(product_type=ifelse(is.na(product_type),"Investment",product_type))
+
+full %>% filter(full_sq <= 200) %>% ggplot(aes(x=full_sq)) + stat_density(geom="line",position="identity", aes(group=train_test,color=train_test),size=1.2,na.rm=T)+facet_grid(product_type~.)+theme_bw()
+
+full %>% filter(life_sq <= 100) %>% ggplot(aes(x=life_sq)) + stat_density(geom="line",position="identity", aes(group=train_test,color=train_test),size=1.2,na.rm=T)+facet_grid(product_type~.)+theme_bw()
+
+full %>% filter(kitch_sq <= 25) %>% ggplot(aes(x=kitch_sq)) + stat_density(geom="line",position="identity", aes(group=train_test,color=train_test),size=1.2,na.rm=T)+facet_grid(product_type~.)+theme_bw()
+
+full %>% filter(num_room <= 5) %>% ggplot(aes(x=num_room)) + stat_density(geom="line",position="identity", aes(group=train_test,color=train_test),size=1.2,na.rm=T)+facet_grid(product_type~.)+theme_bw()
+
+full %>% filter(floor <= 35) %>% ggplot(aes(x=floor)) + stat_density(geom="line",position="identity", aes(group=train_test,color=train_test),size=1.2,na.rm=T)+facet_grid(product_type~.)+theme_bw()
+
+full %>% filter(max_floor <= 35) %>% ggplot(aes(x=max_floor)) + stat_density(geom="line",position="identity", aes(group=train_test,color=train_test),size=1.2,na.rm=T)+facet_grid(product_type~.)+theme_bw()
+
+
+```
+
+

@@ -1,0 +1,500 @@
+```{r include = FALSE}
+# This is a code block
+library(ggplot2) # Data visualization
+library(readr) # CSV file I/O, e.g. the read_csv function
+
+
+library(data.table)
+library(ggplot2)
+library(caret)
+library(dplyr)
+library(DT)
+library(highcharter)
+library(treemap)
+```
+
+
+
+
+```{r include = FALSE}
+train <- fread("../input/train.csv")
+test  <- fread("../input/test.csv")
+
+dim(train)
+
+
+
+train <- train[, timestamp :=as.Date(timestamp, format ="%Y-%m-%d")]
+
+
+unique(train[, max_floor])
+```
+
+
+## Price Doc Densities {.tabset}
+
+
+### Price_doc
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(train, aes(x  =  price_doc))  +geom_density() +
+ggtitle("Price_doc density plot")
+
+```
+
+
+### Log price doc
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+
+ggplot(train, aes(x =  log(price_doc)))  + geom_density()
+
+```
+
+
+### Floor
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(train, aes(x  = floor))  + geom_density() +
+ggtitle("Floor density") 
+
+```
+
+
+
+
+
+
+### Product Type vs Price_doc
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(train, aes(x = price_doc, colour = factor(product_type), 
+                  fill = factor(product_type), alpha = .3))  +  geom_density() +
+                  ggtitle("Price Doc density/ Product Type")
+
+```
+### Product TYpe vs log(price_doc)
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(train, aes(x =  log(price_doc), colour = factor(product_type), 
+                  fill = factor(product_type), alpha = .3))  + geom_density() +
+                  ggtitle("Log Price Doc density / Product Type")
+```
+
+###
+
+## Factor Variable plots {.tabset}
+
+### thermal_power_plant_raion 
+```{r warning = FALSE, echo = FALSE, message= FALSE, cache = FALSE}
+
+ftable(train[, thermal_power_plant_raion])
+prop.table(ftable(train[, thermal_power_plant_raion]))
+```
+
+```{r warning = FALSE, echo= FALSE, message = FALSE, cache = FALSE}
+
+ggplot(train, aes(x = price_doc, 
+                  fill = thermal_power_plant_raion, 
+                  colour = thermal_power_plant_raion, 
+                  alpha = .2)) + geom_density() +
+                  ggtitle("Thermal Power Plan Raion")
+
+
+
+ggplot(train, aes(x = log(price_doc), 
+                  fill = thermal_power_plant_raion, 
+                  colour = thermal_power_plant_raion, 
+                  alpha = .2)) + geom_density()
+
+```
+
+
+### incineration_raion
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(train, aes(x = price_doc, 
+                  fill = incineration_raion, 
+                  colour = incineration_raion, 
+                  alpha = .2)) + geom_density()
+
+
+ggplot(train, aes(x = log(price_doc), 
+                  fill = incineration_raion, 
+                  colour = incineration_raion, 
+                  alpha = .2)) + geom_density()
+
+```
+
+
+
+###  oil_chemistry_raion 
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(train, aes(x = price_doc, 
+                  fill = oil_chemistry_raion, 
+                  colour = oil_chemistry_raion, 
+                  alpha = .2)) + geom_density()
+
+
+ggplot(train, aes(x = log(price_doc), 
+                  fill = oil_chemistry_raion, 
+                  colour = oil_chemistry_raion, 
+                  alpha = .2)) + geom_density()
+
+
+```
+
+### radiation_raion 
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(train, aes(x = price_doc, 
+                  fill = radiation_raion, 
+                  colour = radiation_raion, 
+                  alpha = .2)) + geom_density()
+
+
+ggplot(train, aes(x = log(price_doc), 
+                  fill = radiation_raion, 
+                  colour = radiation_raion, 
+                  alpha = .2)) + geom_density()
+
+
+```
+
+###  railroad_terminal_raion 
+
+
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(train, aes(x = price_doc, 
+                  fill = railroad_terminal_raion, 
+                  colour = railroad_terminal_raion, 
+                  alpha = .2)) + geom_density()
+
+
+ggplot(train, aes(x = log(price_doc), 
+                  fill = railroad_terminal_raion, 
+                  colour = railroad_terminal_raion, 
+                  alpha = .2)) + geom_density()
+```
+
+###
+
+
+## Little data preprocessing 
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+
+ind_num <-  sapply(train, is.character)
+
+
+
+names_char <- names(train)[which(ind_num == 1)]
+
+
+
+for (f in names_char) {
+  if (class(train[[f]])=="character") {
+    levels <- unique(c(train[[f]]))
+    train[[f]] <- as.numeric(factor(train[[f]], levels=levels))
+  }
+}
+
+
+
+
+
+
+for (j in names(train))
+  set(train, which(is.na(train[[j]])), j, 0)
+
+```
+
+##  Timestamp Plots {.tabset}
+
+
+### Simple statistics
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+# Count by timestamp 
+
+
+train_count <- train %>% 
+                select(timestamp, price_doc) %>%
+                group_by(timestamp, price_doc) %>%
+                summarize(count = n(), 
+                          mean_price = mean(price_doc), 
+                          median_price = median(price_doc), 
+                          sd_price     = sd(price_doc))
+
+datatable(train_count)
+```
+### Frequency by Timestamp
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(train_count, aes(x = timestamp, y = count  , 
+                        fill=  "red", colour = "red"))  + geom_point()
+                        
+```
+
+### Mean Price  
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+
+ggplot(train_count, aes(x = timestamp, y = mean_price)) + 
+    geom_smooth() +
+    ggtitle("Mean Price/ Timestamp")
+```
+
+
+### Median Price
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+  ggplot(train_count, aes( x = timestamp, y = median_price))  +
+  geom_smooth()  +
+  ggtitle("Median Price / Timestamp")
+
+```
+
+
+###
+
+
+
+
+Extract month from timestamp
+
+```{r include = FALSE, warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+#Little processing
+train  <- train[, mon_date := format(timestamp, "%m")]
+train <- train[,  yearmon := format(timestamp, "%Y %m")]
+
+```
+
+##simple statistics , grouped by month {.tabset}
+
+
+### Data Table stats
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+yearmon_group <- train %>% 
+                 select(yearmon, price_doc) %>%
+                 group_by(yearmon) %>%
+                 summarize(mean_price  = mean(price_doc), median_price = median(price_doc), 
+                           sd_price = sd(price_doc))
+
+datatable(yearmon_group)
+```
+
+
+
+### Mean Price 
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(yearmon_group, aes(x =  yearmon, y = mean_price, 
+                          fill= "red", colour = "red", 
+                          ))  + geom_point() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### All at once
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(yearmon_group, aes(x = yearmon
+                          ))  + geom_point(aes(y = mean_price, colour = "blue")) + 
+  geom_point(aes( y = median_price, colour = "yellow")) +
+  geom_point(aes(y = sd_price, colour = "black")) +
+  geom_smooth(aes(y = mean_price, colour  = "blue")) +
+  geom_smooth(aes( y = median_price, colour = "red")) +
+  geom_smooth(aes(y = sd_price, colour = "black")) +
+  
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### Bocplot with geom_jitter
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+
+ggplot(train, aes(x = yearmon, y = price_doc, 
+                  colour = "blue"))  +
+  geom_boxplot(colour = "blue", outlier.alpha = 0.0) +
+  geom_jitter(alpha = .05, colour = "red") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+###
+
+
+## Highcharter Plots {.tabset}
+
+loading time consuming :( 
+
+
+```{r include = FALSE, warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+library(dplyr)
+train_count_stamp <- train %>%
+                     select(timestamp, price_doc) %>%
+                     group_by(timestamp)  %>%
+                     summarize(count = n(), 
+                               mean_price = mean(price_doc), 
+                               median_price = median(price_doc), 
+                               sd_price = sd(price_doc))
+
+
+```
+### Highcharter
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+
+
+highchart(type = "stock")    %>%
+  hc_add_series_times_values(train_count_stamp$timestamp, 
+                             train_count_stamp$mean_price, name = "Mean Price") %>%
+  hc_add_series_times_values(train_count_stamp$timestamp, 
+                             train_count_stamp$median_price, name = "median_price") %>%
+  hc_add_series_times_values(train_count_stamp$timestamp, 
+                             train_count_stamp$sd_price, name = "Standard Deviation of price") %>%
+    hc_add_theme(hc_theme_sandsignika()) 
+  
+```
+
+### Data Table
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+train_count_yearmon <- train %>%
+  select(yearmon, price_doc) %>%
+  group_by(yearmon)  %>%
+  summarize(count = n(), 
+            mean_price = mean(price_doc), 
+            median_price = median(price_doc), 
+            sd_price = sd(price_doc))
+datatable(train_count_yearmon)
+
+
+```
+
+### Highcharter,  few stats on one plot
+```{r  warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+
+highchart() %>% 
+  hc_xAxis(categories = train_count_yearmon$yearmon) %>%
+  hc_add_series(train_count_yearmon$mean_price, type = "area", name = "Mean Price") %>%
+  hc_add_series(train_count_yearmon$median_price, type = "area", name = "Median Price") %>%
+  hc_add_series(train_count_yearmon$sd_price, type = "area", name = "Price Standard Deviation") %>% 
+  hc_add_theme(hc_theme_sandsignika()) 
+
+```
+
+###
+
+
+## Sub Area tree map {.tabset} 
+
+
+### Count by sub_area
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+
+train_desc <- fread("../input/train.csv")
+
+
+train_desc_sub_area<- train_desc %>%
+                      select(sub_area) %>%
+                      group_by(sub_area) %>%
+                    summarize(count = n())
+datatable(train_desc_sub_area)
+```
+
+### Tree map plot
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+library("treemap")
+library("viridisLite")
+
+tm <- treemap(train_desc_sub_area, index = c("sub_area"),
+                 vSize = "count"
+                 , palette = viridis(6))
+```
+
+
+### Interactive Tree map plot
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+hc_tm <- highchart(height = 800) %>% 
+  hc_add_series_treemap(tm, allowDrillToNode = TRUE,
+                        layoutAlgorithm = "squarified",
+                        name = "tmdata") %>% 
+  hc_title(text = "Count by Sub Area") %>% 
+  hc_tooltip(pointFormat = "<b>{point.name}</b>:<br>
+             area: {point.value:,.0f}<br>
+             count: {point.valuecolor:,.0f}")
+             
+ hc_tm            
+```
+
+
+
+20170502 - end. 
+
+# Differences in test dataset 
+
+## Sub Area tree map TEST SET {.tabset} 
+
+
+### Count by sub_area
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+
+test_desc <- fread("../input/test.csv")
+
+
+test_desc_sub_area<- test_desc %>%
+                      select(sub_area) %>%
+                      group_by(sub_area) %>%
+                    summarize(count = n())
+datatable(test_desc_sub_area)
+```
+
+### Tree map plot - test dataset 
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+
+
+tm <- treemap(test_desc_sub_area, index = c("sub_area"),
+                 vSize = "count"
+                 , palette = viridis(6))
+```
+
+
+### Interactive Tree map plot
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+hc_tm <- highchart(height = 800) %>% 
+  hc_add_series_treemap(tm, allowDrillToNode = TRUE,
+                        layoutAlgorithm = "squarified",
+                        name = "tmdata") %>% 
+  hc_title(text = "Count by Sub Area") %>% 
+  hc_tooltip(pointFormat = "<b>{point.name}</b>:<br>
+             area: {point.value:,.0f}<br>
+             count: {point.valuecolor:,.0f}")
+             
+ hc_tm            
+```
+
+
+
+### Simple statistics
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+# Count by timestamp 
+
+
+test_count <- test_desc %>% 
+                select(timestamp) %>%
+                group_by(timestamp) %>%
+                summarize(count = n())
+
+datatable(test_count)
+```
+### Frequency by Timestamp
+
+```{r warning = FALSE, echo = FALSE, message = FALSE, cache = FALSE}
+ggplot(test_count, aes(x = timestamp, y = count  , 
+                        fill=  "red", colour = "red"))  + geom_point()
+                        
+```
+
+Update 20170505
+does not make sense to look deeper in test dataset.
+Todo: independent kernel with lasso, l1, penalized and trees. 
+end.

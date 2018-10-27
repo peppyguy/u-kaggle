@@ -1,0 +1,153 @@
+---
+title: "Is happiness correlated with open data?"
+author: "Megan Risdal"
+output:
+  html_document:
+    fig_width: 12
+    fig_height: 8
+    theme: spacelab
+    highlight: kate
+---
+
+
+
+### Introduction
+
+In this multiple data sources kernel, we'll have a look at whether countries whose governments adopt open policies with respect to data sharing are the same countries that score highly on the world happiness index. Let's hypothesize that the two are positively correlated.The two datasets shared on Kaggle that I'm going to use are:**Open Knowledge International's [2015 Global Open Data Index](https://www.kaggle.com/okfn/open-data)**> The Global Open Data Index is an annual effort to measure the state of open government data around the world. The crowdsourced survey is designed to assess the openness of specific government datasets according to the Open Definition.**Sustainable Development Solutions Network's [World Happiness Report](https://www.kaggle.com/unsdsn/world-happiness) from 2016**
+
+> The World Happiness Report is a landmark survey of the state of global happiness. The World Happiness Report 2016 Update, which ranks 156 countries by their happiness levels, was released in Rome in advance of UN World Happiness Day, March 20th. The reports review the state of happiness in the world today and show how the new science of happiness explains personal and national variations in happiness. They reflect a new worldwide demand for more attention to happiness as a criteria for government policy.
+
+### Reading in Multiple Sources
+
+It's pretty straightforward to read in multiple data sources. The dataset files will all be located at `../input/DATASETSLUG/DATAFILENAME` once you've selected which datasets you want to add to your environment. To see exactly what I mean, click on the "Fork Script" button at the top and you'll be able to see the data sources and even add more if you like.
+
+So, the code below reads in the data sources and joins them together by country name. There are probably some country names that don't exactly match, so I'll leave it to you to fork this and tweak the code.
+
+ 
+
+```{r, message = F, warning = F}
+
+library(dplyr)
+
+# Read in data files from `open-data` and `world-happiness` datasets
+
+open_data <- read.csv("../input/open-data/countries.csv", stringsAsFactors=F)
+happiness <- read.csv("../input/world-happiness/2015.csv", stringsAsFactors=F)
+
+# Rename from "Country Name" to just "Country" so it's easier to join
+colnames(open_data)[2] <- "Country"
+# Join the two dataset files on "Country"
+open_data_happiness <- open_data %>%
+  left_join(happiness, by = "Country") %>%
+  mutate(Country = factor(Country)) %>%
+  # Keep only columns I plan to use
+  select(Country, Region, X2015.Score, Happiness.Score, Economy..GDP.per.Capita., 
+         Family, Health..Life.Expectancy., Freedom, Trust..Government.Corruption., 
+         Generosity, Dystopia.Residual)
+
+# Give the columns nicer names now that our data is in one dataframe
+colnames(open_data_happiness) <- c("Country", "Region", "Openness", "Happiness", "GDP", "Family", "Health", "Freedom", "Trust", "Generosity", "DystopiaResidual")
+
+```
+
+Now that I have the data roughly how I want it, let's have a quick peek. I really like this package called [`formattable`](https://github.com/renkun-ken/formattable) for presenting information in dataframes. Let's use it to look at the characteristics of the top 10 countries with the highest scores for their open data sharing policies:
+
+```{r formattable_table}
+
+library(formattable)
+open_data_happiness %>%
+  # Which countries are the most open?
+  arrange(desc(Openness)) %>%
+  # Round our numeric variables to two decimal places
+  mutate_each(funs(round(., 2)), -c(Country, Region, Openness)) %>%
+  head(10) %>%
+  formattable(list(
+    Openness = color_bar("yellow"),
+    Happiness = color_bar("lightgreen"),
+    GDP = color_bar("deepskyblue"),
+    Family = color_bar("deepskyblue"),
+    Health = color_bar("deepskyblue"),
+    Freedom = color_bar("deepskyblue"),
+    Trust = color_bar("deepskyblue"),
+    Generosity = color_bar("deepskyblue"),
+    DystopiaResidual = color_bar("deepskyblue")
+  ), align = "l")
+
+  
+
+```
+
+The top ten most "open" countries aren't localized to one or two regions but instead span the globe which is interesting. Do any of these countries surprise you? I was interested to see Colombia in fourth position; you can see the country scores lower relative to other top countries on some measures including "Trust" (Government Corruption). I investigated a bit and found [this report](http://opendatabarometer.org/3rdedition/regional-report/latin-america/) from the Open Data Barometer which does in fact call out Colombia as a regional leader in its 2016 analysis of open data readiness, implementation, and impact among Latin American countries.
+
+I also suspect that the United States will get kicked down a few notches in coming years, sadly. Anyway, onto answering our main question:
+
+### Are open countries happy countries?
+
+Now we're ready to answer our question of whether countries that index highly for data openness are also home to happy people. Let's find out. The plot below will show the openness score and happiness score for each country as measured in 2015.
+
+```{r open_data_happiness_plot, message = F, warning = F}
+
+library(ggplot2)
+library(ggthemes)
+library(viridis)
+
+
+
+ggplot(open_data_happiness, 
+  aes(x = Openness, 
+      y = Happiness)) +
+  geom_point(aes(colour = Region),
+             size = 2) +
+  geom_smooth(method="lm") +
+  labs(x = "Openness Score",
+       y = "Happiness Score",
+       title = "Are open data friendly countries happy countries?",
+       subtitle = "Data openness and happiness by country in 2015") +
+  scale_color_viridis(discrete = T) +
+  theme_minimal() +
+  theme(text = element_text(size=16))
+
+  
+
+
+
+```
+
+
+
+**Overall, it looks like the answer is ... yes!** One thing that stands out from this plot is that Western European countries cluster above the linear fit line on "Happiness" while Sub-Saharan African countries are grouped together at the bottom left, falling lowest on the "Happiness" scale.
+
+
+
+### What other measures are correlated with "Openness"?
+
+
+
+Finally, what if we want to look at correlations between all of our variables? While we're exploring these datasets, let's spend some time creating a quick correlation matrix or "heatmap" for some additional insight.
+
+
+
+```{r correlation_plot}
+
+library(corrplot)
+
+# Subset the data to include only the variables we want to look at
+
+open_data_corr <- open_data_happiness %>%
+  select(Openness, Happiness, GDP, Family, Health, 
+         Freedom, Trust, Generosity, DystopiaResidual) %>%
+  mutate(Openness = as.numeric(Openness))
+
+od_corr <- cor(open_data_corr, use = "complete", method = "pearson")
+
+corrplot(od_corr)
+
+```
+
+
+
+The one thing I want to highlight in this plot is the positive correlation between a country's happiness and its "Dystopia Residual". This seems confusing at a glance! From the dataset's description, however, we learn that the "Dystopia Residual" is a country's difference from "a hypothetical country that has values equal to the world's lowest national averages for each of the six factors". Whew!### Conclusion
+
+
+
+Hope you enjoyed this introduction to multiple data sources. Go make the world a happier place! If you're interested in adding more data to this analysis (or any other analysis), you can upload new datasets here: https://www.kaggle.com/datasets/new

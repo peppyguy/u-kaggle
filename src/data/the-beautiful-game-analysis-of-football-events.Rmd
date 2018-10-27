@@ -1,0 +1,485 @@
+---
+title: "The Beautiful Game"
+author: "Ahmed Youssef"
+output: 
+ html_document:
+  toc: true
+  code_folding: hide
+---
+## Introduction
+
+In this report, I am going to take a look at statistics from football matches in the past six years (2011-2017), and try to come up with some interesting findings. This dataset includes information on **9,074** matches from Europe's top five leagues: the Premier League, La Liga, Serie A, Bundesliga, and Ligue 1. So without further ado, lets dive straight into the analysis!
+
+## Data Preprocessing
+#### *Reading in the data*
+First off, let's import our data and get an idea of what we're working with.
+```{r read, echo=TRUE, message=FALSE, warning=FALSE}
+library(data.table)
+events <- fread('../input/events.csv')
+matches <- fread('../input/ginf.csv')
+```
+```{r structure, echo=TRUE, message=FALSE, warning=FALSE}
+str(events)
+str(matches)
+```
+
+That's quite a lot to take in! Look's like the data is spread across two tables, one for matches and one for detailed match events. For this report, I'd like to have the *league* and *season* fields in the *events* table as well. Lets merge those two fields together, taking advantage of that convenient *id_odsp* column.
+```{r merge, message=FALSE, warning=FALSE}
+library(dplyr)
+events <- left_join(events, matches[,c('id_odsp','league','season')], by = "id_odsp")
+```
+
+#### *Data manipulation*
+Now to make some changes to the dataset. First, let's change the data type for some of the columns. Next, I will use the more popular league names instead of the current ones. 
+
+```{r manipulate}
+
+events$is_goal <- as.logical(events$is_goal)
+events$bodypart <- as.factor(events$bodypart)
+events$assist_method <- as.factor(events$assist_method)
+events$id_odsp <- as.factor(events$id_odsp)
+events$league <- as.factor(events$league)
+matches$league <- as.factor(matches$league)
+matches$season <- as.factor(matches$season)
+
+levels(events$league) <- c('Bundesliga','Premier League','Ligue 1','Serie A','La Liga')
+levels(matches$league) <- c('Bundesliga','Premier League','Ligue 1','Serie A','La Liga')
+```
+
+There's one more issue in this dataset we need to address. There's a discrepancy between the two tables, as some matches don't have detailed events logged for them.
+
+```{r summary}
+summary(matches[matches$adv_stats==F,c('league','season')])
+```
+
+As we can see from the summary, the bulk of these matches are from the Premier League, and all of them were between 2012 and 2014. To ensure fairness when comparing across leagues and teams, I'll discard all match events from those seasons.
+
+```{r filter}
+events <- events[events$season>2014,]
+```
+
+
+Now that the data is all tidied up, it's time to begin the analysis. The analysis section is divided into three parts: First, I will compare the leagues to one another. Then, I will extract some statistics regarding the teams, and I will finish with a look at individual player statistics.
+
+## Section 1: Leagues
+In this section, I'll extract some key statistics about Europe's top five leagues and see how they compare to each other.
+
+### *It's All About The Goals*
+Let's start by findng out which league had the most goals. To make it a fair comparison, I will compare the ratio of goals per match, since the Bundesliga has 2 fewer teams than the other leagues. Let's also throw in the ratio of goals per shot to get an idea of the conversion rates.
+
+```{r goal_ratios, echo=TRUE, message=FALSE, warning=FALSE, }
+matches$goals <- (matches$fthg + matches$ftag)
+goals <- matches %>% group_by(league) %>% summarise(goals = sum(goals))
+number_matches <- matches %>% count(league)
+shots <- events[events$event_type==1,] %>% count(league)
+
+ratios_table <- left_join(number_matches,goals, by = 'league')
+names(ratios_table)[2] = 'number_of_matches'
+ratios_table$goals_per_match <- ratios_table$goals / ratios_table$number_of_matches
+ratios_table$goals_per_shot <- ratios_table$goals / shots$n
+ratios_table <- mutate_each(ratios_table,funs(round(., 2)),-league) #round to 2 decimal places
+ratios_table <- arrange(ratios_table,desc(goals_per_match))
+
+library(formattable)
+formattable(ratios_table,
+            align = 'l',
+            list(number_of_matches = color_bar("deepskyblue"),
+                 goals = color_bar("lightgreen"), 
+                 goals_per_match = color_bar("orange"),
+                 goals_per_shot = color_bar("magenta"))
+            )
+```
+
+
+Looks like there are 2-3 goals per match on average in all five leagues. Even though the Bundesliga had the fewest number of goals, it actually had the highest goal rate per match, which is why it was important to calculate the ratios rather than dealing in absolute values. Meanwhile, La Liga had the highest conversion rate, with more than one in four shots hitting the back of the net.
+
+### *Rough Play*
+Now let's take a look at the statistics for bookings and sending-offs in each league. Serie A has a reputation for being Europe's 'roughest' league, so let's see if the numbers back that up.
+
+```{r cards, echo=TRUE,  message=FALSE}
+cards <- events[events$event_type==4 | events$event_type==5 | events$event_type==6,] %>%
+  group_by(league) %>%
+  summarize(total = n())  
+cards$cards_per_match <- round(cards$total / number_matches$n,2)
+cards <- arrange(cards, cards_per_match) #sort
+cards$league <- factor(cards$league, levels = cards$league[order(cards$cards_per_match)]) #reorder for plot
+
+library(ggplot2)
+ggplot(cards, aes(x = league, y = cards_per_match)) +
+  geom_bar(stat = "identity",  fill = "tomato2", width = 0.6 ) + 
+  labs(title = "Cards per match in Europe's top 5 leagues", x = "League", y = "Cards Per Match") +
+  theme(plot.title = element_text(size=15,hjust=-.6), axis.title = element_text(size=12)) +
+  geom_text(aes(label=cards_per_match), hjust = 2, size = 3, color = 'white') +
+  coord_flip()
+```
+
+Interesting! So either La Liga and Serie A are indeed the 'roughest' leagues, or maybe their referees are more eager to go for their pockets whenever a foul is committed. Let's investigate this further by taking a look at the number of fouls in each league.
+
+```{r fouls, echo=TRUE, message=FALSE}
+fouls <- events[events$event_type==3,] %>%
+  group_by(league) %>%
+  summarize(total = n()) 
+cards$fouls_per_match <- round(fouls$total / number_matches$n,2)
+cards <- cards[order(cards$fouls_per_match),] #sort
+cards$league <- factor(cards$league, levels = cards$league[order(cards$fouls_per_match)]) #reorder for plot
+
+library(reshape2)
+cards <- melt(cards[,-2])
+ggplot(cards, aes(x = league, y = value, fill = variable)) +
+  geom_bar(stat = "identity",  position = 'dodge' ) + 
+  labs(title = "Fouls and cards per match in Europe's top 5 leagues", x = "", y = "") +
+  theme(plot.title = element_text(size=15,hjust=-1),  legend.position = c(.89,.07),
+        legend.background = element_rect(fill='white'), legend.text = element_text(size=10),
+        legend.title = element_text(size=10), legend.key.size= unit(0.4,'cm')) +
+  geom_text(aes(label=value), hjust = 1.5, vjust = 2, size = 3) +
+  coord_flip()
+```
+
+From this plot we can see that Serie A matches indeed have the most fouls compared to the other leagues. Interestingly, La Liga matches have a relatively low number of fouls but a high number of cards. This suggests that La Liga referees are more eager to dish out cards for fouls than other referees. On the other hand, it seems like the Premier League is the most lenient, making it the easisest league in which you can get away with a foul without getting booked.
+
+### *Against the Odds*
+Some of the most memorable moments in sports happen when an underdog pulls off a surprise victory. Let's see which league witnessed the most upsets in the past six years. I will consider an upset to be a match where the winning team was tipped at 2:1 or more to lose. The odds in this dataset were collected from *oddsportal*.
+
+```{r upsets, echo=TRUE}
+upsets <- matches[  ( ( (matches$fthg>matches$ftag) & (matches$odd_h/matches$odd_a>2) ) |
+                      ( (matches$ftag>matches$fthg) & (matches$odd_a/matches$odd_h>2))) ,
+                    c('id_odsp','league')]
+upsets <- upsets %>% count(league)
+upset_ratio <- round((upsets$n / number_matches$n)*100,1)
+names(upset_ratio) <- levels(upsets$league)
+upsets <- upsets[order(desc(upsets$n)),]
+upsets$league <- factor(upsets$league, levels = upsets$league[order(desc(upsets$n))]) #reorder for plot
+
+ggplot(upsets, aes(x = league, y = n)) +
+  geom_bar(stat = "identity",  fill = "tomato2", width = 0.5) + 
+  labs(title = "Upsets in Europe's top 5 leagues", subtitle = '*percentage of all matches', x='',y='') +
+  theme(axis.text.x = element_text( vjust = 0.4)) +
+  theme(plot.caption=element_text(size=10),plot.title = element_text(size=15,hjust=-.1),
+        plot.subtitle = element_text(size=8, hjust=-.05,vjust = 3)) +
+  geom_text(aes(label=paste(n,'\n(',upset_ratio[levels(upsets$league)],'%)*')),
+            vjust = 1.5, size = 3, color = 'white') 
+
+```
+
+Unsurprisingly, the Premier League had the highest number of unexpected victories, with 9% of matches ending in upsets. It does pride itself on being the most exciting league after all, although the other four leagues aren't that far off.
+
+## Section 2: Teams
+In this section, I'll look at some of the statistics for the teams, and see how they compare to each other.
+
+### *Make The Most Of Your Chances*
+  
+Creating lots of chances isn't worth much if most of them are wasted. Let's start this section of the report by determining the most efficient teams in Europe's top five leagues.
+
+```{r chances, echo=TRUE, fig.width=9}
+shots <- events[events$event_type==1,] %>% count(event_team,league)
+goals <- events[events$is_goal,] %>% count(event_team)
+goals_table <- left_join(shots,goals, by = 'event_team')
+goals_table$goals_per_shot <- round(goals_table$n.y / goals_table$n.x,2)
+goals_table <- goals_table[order(desc(goals_table$goals_per_shot)),]
+goals_table$event_team <- factor(goals_table$event_team, levels = goals_table$event_team[order(desc(goals_table$goals_per_shot))]) #reorder for plot
+goals_table <- head(goals_table,10)
+
+ggplot(goals_table, aes(x = event_team, y = goals_per_shot, fill = league)) +
+  geom_bar(stat = "identity",   width = 0.5 ) + 
+  labs(title = "Most goals per shot in Europe's top 5 leagues", y='goals per shot', x='') +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.4)) +
+  theme(plot.caption=element_text(size=6),plot.title = element_text(size=15,hjust=-0.1)) +
+  geom_text(aes(label = goals_per_shot),vjust = 1.5, size = 3, color = 'white') 
+```
+
+So Barcelona are the most prolific team, scoring about once every five shots. Interestingly, no Premier League or Serie A teams crack the top ten. This could be due to better goalkeepers or worse strikers in those leagues, or a mix of both.
+
+### *Wrong Sport, Lads!*
+  
+Unless you're the goalkeeper (or Maradona), players are not allowed to touch the ball with their hands. Which teams don't seem to care too much about this rule? 
+
+```{r handballs, echo=TRUE, fig.width=10, fig.height=6.5}
+handballs <- events[events$event_type==10, ] %>%
+  group_by(event_team,league) %>%
+  summarize(total = n())
+handballs <- handballs[with(handballs,order(league,-total)),] #sort by league and handballs
+handballsLeagueTeams <- by(handballs, handballs$league, function(X) X[1:4,])
+handballs <- do.call("rbind", handballsLeagueTeams) #get top 4 teams in each league
+handballs$event_team <- factor(handballs$event_team, levels = handballs$event_team[order(handballs$total)]) #reorder for plot
+
+ggplot(handballs, aes(x=event_team, y=total, color=league)) +
+  geom_point(size=3) + 
+  geom_segment(aes(x=event_team,xend=event_team, y=0, yend=total)) +
+  labs(title = "Most handballs in Europe's top 5 leagues", x='',y='') +
+  geom_text(aes(label=total), hjust = -1, size = 3) +
+  theme(legend.position = 'none', plot.title = element_text(size=17,hjust=-0.3)) +
+  facet_wrap(~league, nrow = 5, scales = 'free', strip.position = 'right') +
+  ylim(0, max(handballs$total)) +
+  coord_flip()
+```
+
+We can see from this plot that the Premier League has much fewer handballs than the other leagues. France's Montpellier takes home the honors for most handballs.
+
+### *Not Your Lucky Day*
+  
+One of the most agonizing moments for any player is to see their shot hit the post. I'll use a similar plot to check which teams hit the woodwork more than any other.
+
+```{r bars, echo=TRUE, fig.width=10, fig.height=6.5}
+bars <- events[events$shot_outcome==4, ] %>%
+  group_by(event_team,league) %>%
+  summarize(total = n())
+bars <- bars[with(bars,order(league,-total)),] #sort by league and bars
+barsLeagueTeams <- by(bars, bars$league, function(X) X[1:4,])
+bars <- do.call("rbind", barsLeagueTeams) #get top 4 teams in each league
+bars$event_team <- factor(bars$event_team, levels = bars$event_team[order(bars$total)]) #reorder for plot
+
+ggplot(bars, aes(x=event_team, y=total, color=league)) +
+  geom_point(size=3) + 
+  geom_segment(aes(x=event_team,xend=event_team, y=0, yend=total)) +
+  labs(title = "Most shots against the post in Europe's top 5 leagues", x='',y='') +
+  geom_text(aes(label=total), hjust = -1, size = 3) +
+  theme(legend.position = 'none', plot.title = element_text(size=17,hjust=-0.7)) +
+  facet_wrap(~league, nrow = 5, scales = 'free', strip.position = 'right') +
+  ylim(0, max(bars$total)) +
+  coord_flip()
+```
+
+Looks like Bayern Munich are the unluckiest team in Europe, hitting the post a whopping 39 times in the past few years, despite their season being 4 matches short of their non-German compatriots.
+
+### *Leaving It Late*
+  
+Few moments in football are more thrilling than a last-minute winner. Let's see which teams enjoyed the most dramatic endings. Since the dataset does not contain a score tracker, the code for this part will be a little tricky, and I have opted for a traditional for-loop for code clarity at the cost of runtime efficiency.
+
+```{r late_winners, echo=TRUE, fig.width=10}
+late_goals <- events[events$is_goal & events$time>=85,]
+
+#isolate goals where score was tied until that point and no goals after
+number_late_goals <- nrow(late_goals)
+winners <- numeric(number_late_goals) #will store the positions of the late winners
+for(i in 1:number_late_goals){
+  t = late_goals[i,'time']
+  late_goal_id = late_goals[i,'id_odsp']
+  matchEventsBeforeGoal <- events[events$id_odsp==late_goal_id & (events$time<t),]
+  matchEventsAfterGoal <- events[events$id_odsp==late_goal_id & (events$time>t),]
+  if( (nrow(matchEventsBeforeGoal[matchEventsBeforeGoal$is_goal & matchEventsBeforeGoal$side==1,]) == 
+      nrow(matchEventsBeforeGoal[matchEventsBeforeGoal$is_goal & matchEventsBeforeGoal$side==2,])) &
+      nrow(matchEventsAfterGoal[matchEventsAfterGoal$is_goal,]) == 0)
+    winners <- append(winners,i)
+}
+
+late_winners <- late_goals[winners,] %>% 
+  group_by(event_team,league) %>%
+  summarise(winners = n()) %>%
+  arrange(desc(winners)) %>%
+  head(23)
+
+ggplot(late_winners, aes(x = event_team, y = winners, color=league, size=winners)) +
+  geom_jitter(width = .5, height = .5, alpha=.7, shape = 1) +
+  labs(title='Never Count Them Out',subtitle="Last-minute winners in Europe's top 5 leagues",x='',y='') +
+  theme(axis.text = element_blank(),axis.ticks = element_blank(),panel.grid = element_blank() ) +
+  geom_text(aes(label=event_team), position = position_jitter(.3,.3), size = 3) +
+  scale_size_continuous(range = c(4,12)) +
+  ylim(4.5,8.5)
+```
+
+Based on this bubble plot; Tottenham, Sevilla, Rennes, and Inter can accordingly be labeled as the kings of last-minute winners, with each recording 8 such goals over this time period. Great fighting spirit on display here from the English and Italian teams in particular, making up 70% of the teams in the plot.
+
+## Section 3: Players
+In this section, I will be looking at some of the star performers of European football. This will be the final section of the report.
+
+### *Can't Stop Scoring*
+Let's kick off this section with a look at the sport's most prolific goalscorers. Keep in the mind that this dataset includes statistics from domestic leagues only, and does not include goals from the UEFA Champions League or cup competitions.
+
+```{r goalscorers, echo=TRUE, fig.width=10, fig.height=6}
+top_goalscorers <- events[events$is_goal,] %>%
+  group_by(player) %>%
+  summarize(goals = n()) %>%
+  arrange(desc(goals)) %>%
+  head(25)
+top_goalscorers$player <- factor(top_goalscorers$player, levels = top_goalscorers$player[order(top_goalscorers$goals)]) #reorder for plot
+
+ggplot(top_goalscorers, aes(x=goals, y=player, label=goals, color=goals)) +
+  geom_point(size = 7) +
+  labs(title="Top goalscorers in Europe's top five leagues (2015 - 2017)") +
+  theme(plot.title = element_text(size=16,hjust=-1.1,vjust=5), plot.margin = unit(c(1,.1,.2,.2),"cm")) +
+  geom_text(color='white', size=2.5)
+```
+
+Looks like Ronaldo and Messi stand head and shoulders above everyone else. Can't really say that it comes as a surprise, considering that the two stars have been dominating world football for years now. Also, La Liga has seven representatives in Europe's top 25 goalscorers, more than any other league. Now let's break down the top goalscorers by league.
+
+```{r goalscorers_league, fig.width=10, fig.height=6.5}
+top_goalscorers <- events[events$is_goal, ] %>%
+  group_by(player, league) %>%
+  summarize(goals = n()) %>%
+  arrange(desc(goals)) 
+
+top_goalscorers <- top_goalscorers[with(top_goalscorers,order(league,-goals)),] #sort by league and player
+top_goalscorers_league <- by(top_goalscorers, top_goalscorers$league, function(X) X[1:4,])
+top_goalscorers <- do.call("rbind", top_goalscorers_league) #get top 4 scorers in each league
+top_goalscorers$player <- factor(top_goalscorers$player, levels = top_goalscorers$player[order(top_goalscorers$goals)]) #reorder for plot
+
+ggplot(top_goalscorers, aes(x=player, y=goals, color=league)) +
+  geom_point(size=3) + 
+  geom_segment(aes(x=player,xend=player, y=0, yend=goals)) +
+  labs(title = "Top goalscorers in Europe's top five leagues (2015 - 2017)", x='',y='') +
+  geom_text(aes(label=goals), hjust = -1, size = 3) +
+  theme(legend.position = 'none', plot.title = element_text(size=15,hjust=-0.7)) +
+  facet_wrap(~league, nrow = 5, scales = 'free', strip.position = 'right') +
+  ylim(0, max(top_goalscorers$goals)) +
+  coord_flip()
+```
+
+Serie A had the highest gap between the top scorer and the second-highest goalscorer, with Juventus's Higuain holding a comfortable 11 goal lead. The race is very much on in the Premier League however, with both Aguero and Kane tied at 61 goals each. Let's also break down the top goalscorers by how they scored: header, left foot, or right foot.
+
+```{r goalscorers_method, echo=TRUE, fig.width = 8}
+top_goalscorers <- events[events$is_goal, ] %>%
+  group_by(player, bodypart) %>%
+  summarize(goals = n()) %>%
+  arrange(desc(goals)) 
+levels(top_goalscorers$bodypart) <- c('Right Foot','Left Foot','Header')
+top_goalscorers <- top_goalscorers[with(top_goalscorers,order(bodypart,-goals)),] #sort by method and player
+top_goalscorers_method <- by(top_goalscorers, top_goalscorers$bodypart, function(X) X[1:5,])
+top_goalscorers <- do.call("rbind", top_goalscorers_method) #get top 5 scorers in each category
+
+ggplot(top_goalscorers, aes(x=player, y=goals, color=bodypart)) +
+  geom_point(size=3) + 
+  geom_segment(aes(x=player,xend=player, y=0, yend=goals)) +
+  labs(title = "Top goalscorers in Europe's top five leagues (2015 - 2017)", x='',y='') +
+  geom_text(aes(label=goals), hjust = -1, size = 3) +
+  theme(legend.position = 'none', plot.title = element_text(size=15,hjust=-0.1),
+        axis.text.x = element_text(angle = 45, vjust = 0.4)) +
+  facet_wrap(~bodypart, scales = 'free') +
+  ylim(0, max(top_goalscorers$goals))
+```
+
+Cristiano Ronaldo appears twice on this list, having scored both the most headers and right-footed shots. Unsurprisingly, no one even comes close to Messi in the left-footed goals category.
+
+### *The Providers*
+Having examined the top goalscorers, it's time to do the same for the assists. Without these players' contributions, the previous plots for goalscorers would have looked very different.
+
+```{r assists, echo=TRUE, fig.width=10, fig.height=6}
+top_assists <- events[events$is_goal & !is.na(events$player2), ] %>%
+  group_by(player2) %>%
+  summarize(assists = n()) %>%
+  arrange(desc(assists)) %>%
+  head(25)
+top_assists$player2 <- factor(top_assists$player2, levels = top_assists$player2[order(top_assists$assists)]) #reorder for plot
+
+ggplot(top_assists, aes(x=assists, y=player2, label=assists, color=assists)) +
+  geom_point(size = 7) +
+  labs(title="Top assists in Europe's top five leagues (2015 - 2017)", y='player') +
+  theme(plot.title = element_text(size=16,hjust=-0.5,vjust=5), plot.margin = unit(c(1,.1,.2,.2),"cm")) +
+  geom_text(color='white', size=2.5)
+```
+
+Messi tops the assist charts, and several other players from the top 25 goalscoers chart are also in the top 25 assists, such as Ronaldo, Zlatan, and Suarez. Meanwhile, only 2 players from Ligue 1 make the list (Payet and Di Maria). Now to break down the top assists by league like I did with the goals.
+
+```{r assists_league, fig.width=10, fig.height=6.5}
+top_assists <- events[events$is_goal & !is.na(events$player2), ] %>%
+  group_by(player2, league) %>%
+  summarize(assists = n()) %>%
+  arrange(desc(assists)) 
+
+top_assists <- top_assists[with(top_assists,order(league,-assists)),] #sort by league and player
+top_assists_league <- by(top_assists, top_assists$league, function(X) X[1:4,])
+top_assists <- do.call("rbind", top_assists_league) #get top 4 assists in each league
+top_assists$player2 <- factor(top_assists$player2, levels = top_assists$player2[order(top_assists$assists)]) #reorder for plot
+
+ggplot(top_assists, aes(x=player2, y=assists, color=league)) +
+  geom_point(size=3) + 
+  geom_segment(aes(x=player2,xend=player2, y=0, yend=assists)) +
+  labs(title = "Top assists in Europe's top five leagues (2015 - 2017)", x='',y='') +
+  geom_text(aes(label=assists), hjust = -1, size = 3) +
+  theme(legend.position = 'none', plot.title = element_text(size=15,hjust=-0.3)) +
+  facet_wrap(~league, nrow = 5, scales = 'free', strip.position = 'right') +
+  ylim(0, max(top_assists$assists)) +
+  coord_flip()
+```
+
+### *Ronaldo vs. Messi*
+Few arguments in football are as contentious as the classic Ronaldo or Messi argument. The two players have dominated world football for the past five years or so, taking turns winning the coveted player of the year awards. Lets see how their stats stack up against each other.
+
+```{r ronaldo_messi, echo=TRUE, fig.width=8}
+#give events labels from accompanied dictionary.txt file
+events$event_type <- as.factor(events$event_type)
+events$player <- as.factor(events$player)
+levels(events$event_type) <- c('Attempts','Corners','Fouls','Yellow Cards','2nd Yellow',
+                               'Red Cards','Substitutions','Free Kicks Won','Offsides',
+                               'Hand Balls','Penalty Conceded')
+#summarise ronaldo and messi stats
+ronaldo_messi <- events[events$player=='cristiano ronaldo' | events$player=='lionel messi',] %>%
+  group_by(event_type,player) %>%
+  summarise(count = n())
+ronaldo_messi <- ronaldo_messi[-15,]
+ronaldo_messi$event_type <- as.character(ronaldo_messi$event_type)
+
+#get assists and goals from previous sections
+ronaldo_messi[15,] <- c('Assists','cristiano ronaldo',22)
+ronaldo_messi[16,] <- c('Assists','lionel messi',37)
+ronaldo_messi[17,] <- c('Goals','cristiano ronaldo',89)
+ronaldo_messi[18,] <- c('Goals','lionel messi',81)
+
+#get some more detailed stats
+headers <- events[events$is_goal & events$bodypart==3,] %>% group_by(player) %>%
+  summarise(n = n()) %>% filter(!is.na(player))
+ronaldo_messi[19,] <- c('Headed Goals','cristiano ronaldo',headers[headers$player=='cristiano ronaldo','n'])
+ronaldo_messi[20,] <- c('Headed Goals','lionel messi',headers[headers$player=='lionel messi','n'])
+
+posts <- events[events$shot_outcome==4, ] %>% group_by(player) %>% summarise(n = n()) %>% filter(!is.na(player))
+ronaldo_messi[21,] <- c('Hit the Post','cristiano ronaldo',posts[posts$player=='cristiano ronaldo','n'])
+ronaldo_messi[22,] <- c('Hit the Post','lionel messi',posts[posts$player=='lionel messi','n'])
+
+fk_goals <- events[events$is_goal & (events$situation==4 ),] %>% group_by(player) %>%
+  summarise(n = n()) %>% filter(!is.na(player))
+ronaldo_messi[23,] <- c('Free Kick Goals','cristiano ronaldo',fk_goals[fk_goals$player=='cristiano ronaldo','n'])
+ronaldo_messi[24,] <- c('Free Kick Goals','lionel messi',fk_goals[fk_goals$player=='lionel messi','n'])
+
+ronaldo_messi <- ronaldo_messi[-c(1:3,8:10),] #remove singular stats for plot
+
+ronaldo_messi$count <- as.integer(ronaldo_messi$count)
+ronaldo_messi[ronaldo_messi$player=='cristiano ronaldo','count'] <- ronaldo_messi[ronaldo_messi$player=='cristiano ronaldo','count'] *-1
+ronaldo_messi <- arrange(ronaldo_messi, count)
+ronaldo_messi$event_type <- factor(ronaldo_messi$event_type, levels = ronaldo_messi[1:9,]$event_type[order(ronaldo_messi$count)]) #reorder for plot
+ronaldo_messi <- ronaldo_messi %>% 
+    mutate(nudge = ifelse(count > 0, 4, -4)) #adjust labels for plot
+
+#plot
+ggplot(ronaldo_messi, aes(x = event_type, y = count)) +
+  geom_bar(stat='identity', aes(fill=player), width=.5)  +
+  labs(title = 'Cristiano Ronaldo vs. Lionel Messi', subtitle = 'La Liga  2015 - 2017',
+       x='', y='') +
+  theme(axis.text.x=element_blank(), plot.title=element_text(hjust=-.3),
+        plot.subtitle = element_text(hjust=-.21), legend.position = 'bottom') +
+  geom_label(aes(label=abs(count)), size = 2, nudge_y = ronaldo_messi$nudge) +
+  coord_flip()
+  
+  
+```
+
+Their stats are pretty close to each other except for offsides and assists. Ronaldo was flagged offside three times as much as Messi, while Messi registered 15 more assists than Ronaldo. This is probably due to the fact that Messi tends to drop deep during build-up play while Ronaldo typically plays off the last man.
+
+### *90 Minutes*
+I'll conclude this report with a circle plot that examines when match events tend to occur. A football match is 90 minutes long, with the referee adding some extra added minutes at the end of each half. In this particular dataset, most of the events that happened in these extra minutes are recorded as happening in the minutes 45 or 90, which is why there will be a disproportionate spike in event occurences at those times.
+
+```{r circle, fig.height=8, fig.width=8, message=FALSE, warning=FALSE}
+eventTime <- events %>%
+  group_by(event_type, time) %>%
+  summarise(n = n()) 
+
+library(circlize)
+circos.par("track.height" = 0.4)
+circos.initialize(factors = eventTime$event_type, x = eventTime$time)
+
+circos.trackPlotRegion(factors = eventTime$event_type, y=eventTime$n,  force.ylim = F,
+                       panel.fun = function(x, y) {
+                         circos.axis(h='bottom',direction='inside', labels.cex=0.8, lwd=0.8)
+                         sector.index = get.cell.meta.data("sector.index")
+                         xcenter = get.cell.meta.data("xcenter")
+                         ycenter = get.cell.meta.data("ycenter")
+                         circos.text(xcenter, ycenter + (ycenter/2), sector.index)})
+
+circos.trackLines(eventTime$event_type, eventTime$time, eventTime$n,
+                  col = eventTime$event_type, lwd = 1, type = "h")
+
+text(0,0,"When do match events occur?", cex = 1)
+```
+
+## Conclusion
+This brings us to the end of my report on football events from the past few years. I hope you've found something interesting in this analysis. I welcome any feedback and suggestions to improve this report in the comments below!
+
+*- Ahmed Youssef on Jan 4, 2018*

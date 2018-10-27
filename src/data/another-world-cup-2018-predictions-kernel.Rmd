@@ -1,0 +1,1049 @@
+---
+title: "another WC 2018 predictions kernel"
+author: "Jonathan Bouchet"
+date: "`r Sys.Date()`"
+output:
+ html_document:
+    fig_width: 10
+    fig_height: 7
+    toc: yes
+    number_sections : yes
+    code_folding: show
+---
+
+<center><img src="https://cdn-s3.si.com/s3fs-public/2017/12/01/world-cup-group-draw-predictions.jpg"></center>
+
+<hr>
+
+<strong>History :</strong>
+
+* _version 1 : initial commit_ 
+* _version 2 : added single feature correlation plots, added Man.of.the.Match as dummies in the classification_
+* _version 3 : added the remaining single feature correlation plots_ 
+* _version 4 : updated file ; added comments + description for the radar charts_
+* _version 5 : added average characteristics per day and game's outcomes, improved coding_ 
+* _version 6 : added first.goal.time as dummy code for the classification_
+* _version 7 : added multilabels classification, fix correlation matrix plot_
+* _version 8 : fixes for updated file, added new features_
+* _version 9 : added new features for the plots vs. Time_
+* _version 10 : updated datafile_
+* _version 11 : added radarcharts for semi-final and final_
+* _version 12 : final version, fixed Croatia name_
+
+<hr>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
+```
+
+```{r}
+#load packages and csv file
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(RColorBrewer)
+library(reshape2)
+library(caret)
+library(caretEnsemble)
+library(fmsb)
+library(corrplot)
+library(rpart.plot)
+library(psych)
+library(gridExtra)
+library(scales)
+```
+
+# Motivation
+
+Not sure if needed to recall but the World Cup Soccer 2018 in Russia started a week ago(as of 2018-06-25). The data has been collected from 2018 FIFA [World Cup Russia Official App](https://www.fifa.com/mobile/index.html).
+
+The interesting thing of this dataset is:
+
+* a quite detailed summary of each Teams' game
+* as the data may be updated frequently, a time study of how a team's skills change during the competition can be done
+* possible classification to know what factors drive a `WON` as opposed of `LOST` or `DRAW` game
+
+
+# data preparation 
+
+* few fixes for row 17 and row 18 where the name of the Team and its opponent were the same.
+* create a `result` column that will be used later for the `EDA` and the classification.
+    * the way I did is to loop over all the rows (1 row = 1 game), then loop again to match the opponent team by `Date` and `name`.
+    * i could have done this easier by looking at group of rows 2-by-2 since the way the dataframe is structured is chronologically. Looking at `row ith ` and `row ith + 1` could have achieve the same result, but eh , why not making something more general
+* at the same time, I also create another column to keep track of the `goals` difference
+* unfortunately the `Date` has only the `day` information, not the `hour`. 
+    * I could maybe impute this by hand in the future. 
+    * The idea is that games are happening in the late afternoon and at night. So in case of warm days, it can impact a Team's skills.
+    
+```{r}
+fifa_results <- read.csv('../input/FIFA 2018 Statistics.csv')
+
+# rename some columns ; cosmetic only
+colnames(fifa_results) <-c("Date","Team","Opponent","Goal.Scored","Ball.Possession","Attempts","On.Target","Off.Target","Blocked","Corners","Offsides","Free.Kicks","Saves","Pass.Accuracy","Passes","Distance.Covered.Kms","Fouls.Committed","Yellow.Card","Yellow.Red","Red","Man.of.the.Match","first_goal","round","PSO","Goals.in.PSO","Own.Goals","Own.Goals.Time")
+#colnames(fifa_results) <-c("Date","Team","Opponent","Goal.Scored","Ball.Possession","Attempts","On.Target","Off.Target","Blocked","Corners","Offsides","Free.Kicks","Saves","Pass.Accuracy","Passes","Distance.Covered.Kms","Fouls.Committed","Yellow.Card","Yellow.Red","Red","Man.of.the.Match","first_goal")
+```
+
+```{r}
+WL <- c()
+diffScores <-c()
+for(i in 1:nrow(fifa_results)){
+	#print(i)
+	currentTeam <- fifa_results[i,c('Team')]
+	currentOpponent <- fifa_results[i,c('Opponent')]
+	currentTime <- fifa_results[i,c('Date')]
+	currentScore <- fifa_results[i,c('Goal.Scored')]
+	
+	#print(paste0('team:',currentTeam,', score:',currentScore,', opponent:', currentOpponent))
+	
+	allIndexes <- 1:nrow(fifa_results)
+	allIndexes <- allIndexes[allIndexes != i]
+	
+	for(j in allIndexes){
+		otherTeam <- fifa_results[j,c('Team')]
+		otherOpponent <- fifa_results[j,c('Opponent')]
+		otherTime <- fifa_results[j,c('Date')]
+		otherScore <- fifa_results[j,c('Goal.Scored')]
+		#print(paste0('other team:',otherTeam,', score:',otherScore,', opponent:',otherOpponent))
+		
+		if(currentOpponent == otherTeam & currentTime == otherTime){
+			#print(paste0('team:',currentTeam,'-',currentScore,' VS. opponent: ',otherTeam,'-',otherScore))
+		  diffScores <- append(diffScores, currentScore - otherScore)
+			if(currentScore > otherScore){
+				WL <- append(WL,'WIN')
+			}
+			else if(currentScore < otherScore){
+				WL <- append(WL,'LOST')
+			}
+			else if (currentScore == otherScore){
+				WL <- append(WL,'DRAW')
+			}
+		}
+	}
+}
+fifa_results$diff.Goals <- diffScores
+fifa_results$Results <- WL
+```
+
+* new features have been added to the updated file: `round`,`PSO`,`Goals.in.PSO`,`Own.Goals`,`Own.Goals.Time`
+* `Own.Goals` is coded as am integer but should be a factor, `0` meaning no own goal and `1` meaning this team scored an own goal ; so here I will simply convert it to a factor.
+
+```{r}
+fifa_results$Own.Goals <- ifelse(is.na(fifa_results$Own.Goals)==TRUE,'NO','YES')
+```
+
+# EDA
+
+## Features distribution
+
+```{r fig.width=10, fig.height=12, fig.align='center',eval=T}
+fifa_results %>% 
+  dplyr::select(-Date, -Team, -Opponent, -Man.of.the.Match, -round,-PSO,-Goals.in.PSO,-Own.Goals,-Own.Goals.Time) %>%
+  reshape2::melt(id=c('Results')) %>% 
+  ggplot(aes(x=value,fill=Results)) + geom_density(alpha=.4,color='white',size=.5) + 
+  theme_minimal(10) + 
+  facet_wrap(~variable,scales='free',ncol=3) + scale_fill_brewer(palette='Set1') + 
+  theme(legend.position='top',legend.direction='horizontal')
+```
+
+Comments :
+
+* overall the distributions make sense, i.e when a Team has won, the goal difference is positive
+* we also see:
+    * when a Team has won, it has more `off.target`, more `attempts`, more `offsides`. 
+    * More offsides is understanble because in order to score a goal, you need to take some risks, ie being more agressive
+* `yellow.Red` feature has a `NULL` variance (see also next section) and will not be used in classification for that matter.
+* the `distance.covered` distribution looks okay but the units seem off; the only explanation is that this the sum of all players's distance coverage. 
+    * Several sources([gizmodo for example](https://gizmodo.com/5992583/how-far-do-you-run-in-different-sports)) mentions an average of 9-10 miles which makes ~ 11 * 15kms = 165 kms 
+    
+## Correlation 
+
+The correlation is interesting to look at to confirm my hypothesis above.
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+corrplot(cor(
+  fifa_results %>% select_if(is.numeric),use = "pairwise.complete.obs",
+  method='pearson')
+  ,method='ellipse',
+  tl.cex=1,
+  col = viridis::viridis(50),
+  tl.col='black')
+```
+
+Independently of the game outcome, we see some obvious correlations:
+
+*  `passes` and `ball.possession`
+* `goals.scored` and `diff.goals`
+* a lot and anto-correlations for `saves`: for example vs. `Corners`. Does it mean less `saves` by the goal keeper during corner kicks ?
+* `ball.possession` and `passes`: interesting. the more you make passes, the more time your team is in the control of the ball.
+
+## Correlation by Feature{.tabset .tabset-fade .tabset-pills}
+
+### Code
+
+The correlation plot in the previous section does not show the details (per row), so it could be interesting to know this on a team-by-team basis. 
+
+Also plotting the correlation 2-2 with the outcome of the game can be insightful regarding that a set of features, i.e number of goals scored vs. passes
+
+The code below is just to loop over the numerical features and plot the correlation of a given one (`x`) vs. all the others.
+
+```{r}
+# make a list of all numerical features
+numFeatures <- sort(fifa_results %>% select_if(is.numeric) %>% colnames())
+
+# loop over all features, skip the case where the feature is the one we're lokking at
+
+makeMyFeatureCorrelation <- function(myfeature){
+	cnt<-0
+	listFeatures<-list()
+	for(i in 1:length(numFeatures)){
+		y <- numFeatures[i]
+		x <- myfeature
+		if(y != x){
+			cnt <- cnt +1
+			listFeatures[[cnt]]<-fifa_results %>% ggplot(aes_string(x,y)) + 
+				geom_jitter(aes(color=Results),shape=16,position=position_jitter(0.2),size=2,alpha=.75) + 
+				theme_minimal() + labs(subtitle=paste0(y,' vs. ',x)) + 
+				scale_color_brewer(name="",palette='Set1') + theme(legend.key.size = unit(.2, "cm"),axis.title = element_blank(),legend.text=element_text(size=5))
+			}
+	}
+	return(listFeatures)
+}
+
+# loop over all features and call the function
+ALL_CORR <- list()
+for(i in 1:length(numFeatures)){
+  ALL_CORR[[i]] <- makeMyFeatureCorrelation(numFeatures[[i]])
+}
+```
+
+### `Attempts`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[1]], ncol=3))
+```
+
+### `Ball possession`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[2]], ncol=3))
+```
+
+### `Blocks`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[3]], ncol=3))
+```
+
+### `Corners`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[4]], ncol=3))
+```
+
+### `Goal difference`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[5]], ncol=3))
+```
+
+### `Distance covered(kms)`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[6]], ncol=3))
+```
+
+### `First goal`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[7]], ncol=3))
+```
+
+### `Fouls committed`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[8]], ncol=3))
+```
+
+### `Free kicks`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[9]], ncol=3))
+```
+
+### `Goals Scored`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[10]], ncol=3))
+```
+
+### `Penalties(Goals on PSO)`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[11]], ncol=3))
+```
+
+### `Off target`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[12]], ncol=3))
+```
+
+### `Offsides`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[13]], ncol=3))
+```
+
+### `On target`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[14]], ncol=3))
+```
+
+### `Time of own goal`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[15]], ncol=3))
+```
+
+
+### `Pass accurary`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[16]], ncol=3))
+```
+
+### `Passes`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[17]], ncol=3))
+```
+
+### `Red`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[18]], ncol=3))
+```
+
+### `Saves`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[19]], ncol=3))
+```
+
+### `Yellow card`
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+do.call(grid.arrange, c(ALL_CORR[[20]], ncol=3))
+```
+
+## Features by Team{.tabset .tabset-fade .tabset-pills}
+
+Here come the radarcharts (obligatory !)
+
+### Codes
+
+* The idea is to represent all the numerical features (per country) vs. the average (over all countries) in a radar chart
+* `Iran` , `Iceland` are representative examples of team a bit _weaker_ (i.e below the average) whereas `Germany`, `Brazil` are _above_ average in term of statistics for the games in this World Cup
+* But that does not mean these teams can be qualified (or disqualified) for the next stage of the World Cup.
+
+```{r}
+makeColors <- function(myteam){
+	colClasses<-data.frame(col2rgb(c('gray50','steelblue'))/255)
+	colnames(colClasses) <- c('mean all teams',myteam)
+    colClasses<-data.frame(rbind(colClasses,'alpha'=c(1,1,1)))
+    colors_border=c(
+    rgb(colClasses[1,1],colClasses[2,1],colClasses[3,1],colClasses[4,1]),
+    rgb(colClasses[1,2],colClasses[2,2],colClasses[3,2],colClasses[4,2]))
+    colors_border
+}
+
+makeRadar<-function(myteam){
+	meanAll<- data.frame(fifa_results %>% select_if(is.numeric) %>% select(-diff.Goals,-Yellow.Red) %>% summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 2))
+	max<- data.frame(fifa_results %>% select_if(is.numeric) %>% select(-diff.Goals,-Yellow.Red) %>% summarise_all(funs(max(., na.rm = TRUE))) %>% mutate_all(round, 2)) %>% as.vector
+	temp <- data.frame(fifa_results %>% filter(Team == myteam)%>% select(-diff.Goals,-Yellow.Red)  %>% select_if(is.numeric) %>% summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 2))
+	min<-data.frame(fifa_results %>% select_if(is.numeric) %>% select(-diff.Goals,-Yellow.Red) %>% summarise_all(funs(min(., na.rm = TRUE))) %>% mutate_all(round, 2)) %>% as.vector
+	
+	tempRadar<-data.frame(rbind(max, min, meanAll, temp))
+	rownames(tempRadar)<-NULL
+	rownames(tempRadar) = make.names(c("","", "mean",myteam), unique=TRUE)
+	
+	mycols <- makeColors(myteam)
+	
+	radarchart(tempRadar,pcol=mycols ,
+           axistype=2 , 
+           plwd=4 , 
+           plty=1,
+           cglcol="grey", 
+           cglty=2, 
+           axislabcol="black", 
+           caxislabels=seq(0,20,5), 
+           cglwd=1,
+           vlcex=.8,palcex=1,
+           title=paste0(toupper(myteam)))
+           legend(x=.75, y=1.25, legend = rownames(tempRadar[-c(1,2),]), bty = "n", pch=20 , col= mycols , text.col = "grey", cex=1.0, pt.cex=1)
+}
+```
+
+### ARGENTINA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Argentina")
+```
+
+### AUSTRALIA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Australia")
+```
+
+### BELGIUM
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Belgium")
+```
+
+### BRAZIL
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Brazil")
+```
+
+### COLOMBIA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Colombia")
+```
+
+### COSTA RICA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Costa Rica")
+```
+
+### CROATIA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Croatia")
+```
+
+### DENMARK
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Denmark")
+```
+
+### EGYPT
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Egypt")
+```
+
+### ENGLAND
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("England")
+```
+
+### FRANCE
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("France")
+```
+
+### GERMANY
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Germany")
+```
+
+### ICELAND
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Iceland")
+```
+
+### IRAN
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Iran")
+```
+
+### JAPAN
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Japan")
+```
+
+### KOREA REPUBLIC
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Korea Republic")
+```
+
+### MEXICO
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Mexico")
+```
+
+### MOROCCO
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Morocco")
+```
+
+### NIGERIA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Nigeria")
+```
+
+### PANAMA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Panama")
+```
+
+### PERU
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Peru")
+```
+
+### POLAND
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Poland")
+```
+
+### PORTUGAL
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Portugal")
+```
+
+### RUSSIA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Russia")
+```
+
+### SAUDI ARABIA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Saudi Arabia")
+```
+
+### SENEGAL
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Senegal")
+```
+
+### SERBIA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Serbia")
+```
+
+### SPAIN
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Spain")
+```
+
+### SWEDEN
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Sweden")
+```
+
+### SWITZERLAND
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Switzerland")
+```
+
+### TUNISIA
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Tunisia")
+```
+
+### URUGUAY
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+makeRadar("Uruguay")
+```
+
+### ALL TEAMS 
+```{r fig.width=10, fig.height=16, fig.align='center',eval=T}
+par(mfrow=c(8,4))
+par(mar=c(1,1,1,1))
+
+for(i in 1:length(sort(unique(fifa_results$Team)))){
+  curTeam <- sort(unique(fifa_results$Team))[i]
+  makeRadar(curTeam)
+}
+```
+
+# Classification
+
+## Train / test split, models to train
+
+* feature engineering: convert the `first_goal` numeric as dummy code.
+* split the initial dataframe into numerical and categorical feature
+* scale and recenter the numerical features
+* make a dummy code for the categorical feature BUT do not scale it
+* `column-bind` all the different parts and `train/test` split 
+* training is using a `cross-validation`
+
+```{r results="hide",fig.keep="none"}
+# feature engineering for the time of first_goal
+makeFirstGoalTime <- function(x){
+	if(!is.na(x)){
+		if(x<=45){
+			res<-'first_half'
+		}
+		else if(x>45){
+			res<-'second_half'
+		}
+	}
+	else{
+		res<-'no_goal'
+	}
+	return(res)
+}
+
+fifa_results$first_goal_time <- sapply(fifa_results$first_goal, makeFirstGoalTime)
+
+temp_num <- data.frame(fifa_results %>% dplyr::filter(Results != 'DRAW') %>%  dplyr::select(-Date, -Team, -Opponent, -Yellow.Red, -Red, -Man.of.the.Match, -diff.Goals, -Results, -first_goal, -first_goal_time,-round,-PSO,-Goals.in.PSO, -Own.Goals, -Own.Goals.Time) %>% scale(center=TRUE, scale=TRUE))
+
+temp_cat <- data.frame(fifa_results %>% dplyr::filter(Results != 'DRAW') %>% dplyr::select(Man.of.the.Match, first_goal_time, round, PSO, Goals.in.PSO, Own.Goals))
+temp_cat_dummies <- as.data.frame(cbind('man.of.the.match' = dummy.code(temp_cat$Man.of.the.Match), 'did.first.goal' = dummy.code(temp_cat$first_goal_time), 'round' = dummy.code(temp_cat$round), 'penalties' = dummy.code(temp_cat$PSO),'own.goals' = dummy.code(temp_cat$Own.Goals)))
+colnames(temp_cat_dummies) <- c('man.of.the.match.yes', 'man.of.the.match.no','goal.first.half','no.goal','goal.second.half','Group', 'Stage Round of 16','penalties.kick.no','penalties.kick.yes','own.goals.no','own.goals.yes')
+
+temp <- data.frame(cbind(temp_num, temp_cat_dummies, fifa_results %>% dplyr::filter(Results != 'DRAW') %>% dplyr::select(Results)))
+
+set.seed(2345)
+split <- createDataPartition(y=temp$Results, p = 0.75, list = FALSE)
+train <- temp[split,]
+test <- temp[-split,]
+
+tot_num_feat <- ncol(temp_num)
+
+models<-caretList(x=train[,1:(ncol(train)-1)],
+                  y=train[,ncol(train)],
+                  trControl=trainControl(method="cv",number=5,repeats=3,classProbs=TRUE),
+                  metric="Accuracy",methodList=c("knn","nb","rf","regLogistic","rpart"))
+```
+
+## Results on the `train` sample
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+results <- resamples(models)
+summary(results)
+```
+
+```{r}
+bwplot(results,scales = list(relation = "free"), xlim = list(c(0.5,1), c(0.,1)))
+```
+
+* `Decision tree - like` classifier score a very good accuracy
+
+## ROC on the `test` sample
+
+```{r}
+mylist<-list()
+cnt<-0
+for(i in 1:length(models)){
+  probs <- predict(models[[i]], newdata=test, type='prob')
+  probs<-data.frame(cbind(probs,res = test$Results))
+  probs$res_num<-ifelse(probs$res=='WIN',1,0)
+  pred<-ROCR::prediction(probs$WIN,probs$res_num)
+  perf<-ROCR::performance(pred,"tpr", "fpr")
+  mylist[[i]] <- data.frame(fpr=unlist(perf@x.values),tpr=unlist(perf@y.values),model=models[[i]]$method) 
+}
+allROCS <-data.frame(do.call("rbind",mylist))
+```
+
+```{r}
+ggplot(allROCS, aes(x=fpr, ymin=0, ymax=tpr)) + 
+  geom_line(aes(y=tpr,color=model),size=1) + 
+  xlab("False Positive rate") + ylab("True Positive Rate") + 
+  theme_minimal() + scale_color_brewer(palette='Paired') + 
+  geom_segment(aes(x=0, y=0, xend=1, yend=1), colour = 'black',lty=2) + labs(title='ROC curves') + 
+  facet_wrap(~model)
+```
+
+* the issue being for now is the low number of rows to test the classifiers (as well as to train then)
+* therefore `ROC` curves maybe not be relevant for now.
+
+## Decision Tree visualization
+
+### Features importances
+
+```{r, eval=T}
+plot(caret::varImp(models[[length(models)]]))
+```
+
+* interesting to see that the `Man.of.the.Game` is actually an important feature.
+
+### Decision tree
+
+```{r, eval=T}
+rpart.plot(models[[length(models)]]$finalModel)
+```
+
+* well ... best decision tree ever. Maybe some features are too explicits
+
+# Multiclass prediction
+
+## Training 
+
+In the previous section I have removed the `Draw` outcome, mostly to be able to plot the `ROC` curve. However it removes al arge chunk of the data. In this section I will redo the same exercise but for a multiclass approach.
+
+```{r results="hide",fig.keep="none"}
+temp_num_m <- data.frame(fifa_results %>% dplyr::select(-Date, -Team, -Opponent, -Yellow.Red, -Red, -Man.of.the.Match, -diff.Goals, -Results, -first_goal, -first_goal_time,-round,-PSO,-Goals.in.PSO, -Own.Goals, -Own.Goals.Time) %>% scale(center=TRUE, scale=TRUE))
+
+temp_cat_m <- data.frame(fifa_results %>% dplyr::select(Man.of.the.Match, first_goal_time, round, PSO, Goals.in.PSO, Own.Goals))
+temp_cat_dummies_m <- as.data.frame(cbind('man.of.the.match' = dummy.code(temp_cat_m$Man.of.the.Match), 'did.first.goal' = dummy.code(temp_cat_m$first_goal_time), 'round' = dummy.code(temp_cat_m$round), 'penalties' = dummy.code(temp_cat_m$PSO),'own.goals' = dummy.code(temp_cat_m$Own.Goals)))
+colnames(temp_cat_dummies_m) <- c('man.of.the.match.yes', 'man.of.the.match.no','goal.first.half','no.goal','goal.second.half','Group', 'Stage Round of 16','penalties.kick.no','penalties.kick.yes','own.goals.no','own.goals.yes')
+
+temp_m <- data.frame(cbind(temp_num_m, temp_cat_dummies_m, fifa_results %>% dplyr::select(Results)))
+
+set.seed(1234)
+split <- createDataPartition(y=temp_m$Results, p = 0.75, list = FALSE)
+train_m <- temp_m[split,]
+test_m <- temp_m[-split,]
+models_m<-caretList(x=train_m[,1:(ncol(train_m)-1)],
+                  y=train_m[,ncol(train_m)],
+                  trControl=trainControl(method="cv",number=5,repeats=3,classProbs=TRUE),
+                  metric="Accuracy",
+                  methodList=c("nnet","xgbTree","knn","nb","rf","regLogistic","rpart"))
+```
+
+## Results on `train sample`
+
+```{r}
+results_m <- resamples(models_m)
+summary(results_m)
+bwplot(results_m,scales = list(relation = "free"), xlim = list(c(0.5,1), c(0.,1)))
+```
+
+* in general for all classifiers the accuracy is lower than with the binary classification (although `accuracy` is not the best metric for multiclass)
+
+## Confusion Matrix on `test sample`
+
+Since we can't use the `ROC` curve (at least not easily), I will use the confusion matrix to evaluate the classifiers on this multilabels approach.
+
+```{r}
+# code to style the CM 
+ggplotConfusionMatrix <- function(m, myclassifier){
+  mytitle <- paste("Accuracy", percent_format()(m$overall[1]),
+                   "Kappa", percent_format()(m$overall[2]), ' for ', myclassifier)
+  p <-
+    ggplot(data = as.data.frame(m$table) ,
+           aes(x = Reference, y = Prediction)) +
+    geom_tile(aes(fill = log(Freq)), colour = "white") +
+    scale_fill_gradient(low = "white", high = "steelblue") +
+    geom_text(aes(x = Reference, y = Prediction, label = Freq)) +
+    theme(legend.position = "none") +
+    labs(subtitle=mytitle) + theme_minimal(12) + theme(legend.position='None')
+  return(p)
+}
+
+# loop of the list of classifiers
+
+myCM<-list()
+cnt<-0
+for(i in 1:length(models_m)){
+  cur.pred <- predict(models_m[[i]], newdata = test_m)
+  myCM[[i]] <- ggplotConfusionMatrix(confusionMatrix(cur.pred, test_m$Results), models_m[[i]]$method)
+}
+```
+
+```{r fig.width=8, fig.height=14, fig.align='center',eval=T}
+do.call(grid.arrange, c(myCM, ncol=2))
+```
+
+* there is obviously some overfiiting for some classifiers:
+    
+    * for example, `xgbTree` scores 0.8 on the `train sample` but only .55 on the `test sample`
+    
+
+# Are the teams getting better ?{.tabset .tabset-fade .tabset-pills}
+
+## Code 
+
+Since we have the data for each day, we can see if Team are getting better as the competition goes on. Also the interesting feature is to see this behavior independently for Teams who won their game, Team who lost their gamr and the draws.
+
+The idea here is to :
+
+* group_by `Date` and `Results`
+* average all numerical features
+
+```{r}
+# make a DateTime variable
+fifa_results$DateTS <- as.Date(fifa_results$Date, format="%d-%m-%Y")
+
+# filter by day and outcome
+
+loss_vs_time <- data.frame(
+  fifa_results %>% dplyr::filter(Results == 'LOST') %>% 
+    dplyr::select(-Date, -Team, -Opponent, -Man.of.the.Match, -Results) %>% dplyr::group_by(DateTS) %>%
+    dplyr::summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 1))
+
+wins_vs_time <- data.frame(
+  fifa_results %>% dplyr::filter(Results == 'WIN') %>% 
+    dplyr::select(-Date, -Team, -Opponent, -Man.of.the.Match, -Results) %>% dplyr::group_by(DateTS) %>%
+    dplyr::summarise_all(funs(mean(., na.rm = TRUE))) %>% dplyr::mutate_all(round, 1))
+
+all_vs_time <- data.frame(
+  fifa_results %>% dplyr::select(-Date, -Team, -Opponent, -Man.of.the.Match, -Results) %>% 
+    dplyr::group_by(DateTS) %>% 
+    dplyr::summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 1))
+
+# make a feature for the outcome ; used lated for rearraging the dataframes
+
+wins_vs_time$outcome <- rep('WIN',nrow(wins_vs_time))
+loss_vs_time$outcome <- rep('LOST',nrow(loss_vs_time))
+all_vs_time$outcome <- rep('ALL',nrow(all_vs_time))
+```
+
+Since I'm lazy, I will use a lot of `dplyr pipe` functionality:
+
+* to merge the 3 different dataframe: `all` games, `wins` and `losses`
+* `paste` the name of the numerical feature: since there are 15+ variables, this is the easist way
+* `alpha` the line for the `All` games.
+
+
+```{r, eval=T}
+numFeatures <- sort(fifa_results %>% dplyr::select_if(is.numeric) %>% colnames())
+
+AVG_TIME <- list()
+for(i in 1:length(numFeatures)){
+  x <- numFeatures[[i]]
+  AVG_TIME[[i]] <- 
+    Reduce(function(...) left_join(..., by='DateTS'), 
+           list(all_vs_time %>% dplyr::select(DateTS, x), 
+                wins_vs_time %>% dplyr::select(DateTS, x), 
+                loss_vs_time %>% dplyr::select(DateTS, x))) %>% 
+    setNames(., c('Date',paste0('All.',x), paste0('Win.',x),paste0('Loss.',x))) %>% reshape2::melt(id='Date') %>%
+    ggplot(aes(x=Date,y=value,group=variable)) + 
+    geom_line(aes(color=variable,alpha=ifelse(grepl('All',variable)==TRUE,0.5,1)),size=2) + 
+    geom_point(size=2) + theme_minimal(14) + 
+    scale_color_brewer(name="",palette='Set1',direction=-1) + guides(alpha=FALSE) + 
+    scale_alpha(range=c(0.4,1)) + 
+    labs(title= paste0('Average ',x,' since begining of the World Cup')
+         ,subtitle='ALL = wins + draws + losses games') + 
+    theme(axis.title = element_blank())
+}
+```
+
+The interesting results:
+
+* the average number of passes increases vs. Time
+* the average number of `Yellow cards` per game increases vs. Time
+* the average covered distance decreases: expected since the competion is now running since ~2 weeks, recovery is more difficult.
+
+## `Attempts`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[1]]
+```
+
+## `Ball possession`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[2]]
+```
+
+## `Blocks`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[3]]
+```
+
+## `Corners`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[4]]
+```
+
+## `Goal difference`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[5]]
+```
+
+## `Distance covered(kms)`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[6]]
+```
+
+## `First Goal`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[7]]
+```
+
+## `Fouls committed`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[8]]
+```
+
+## `Free kicks`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[9]]
+```
+
+## `Goals Scored`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[10]]
+```
+
+## `Penalties(Goals.On.PSO)`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[11]]
+```
+
+## `Off target`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[12]]
+```
+
+## `Offsides`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[13]]
+```
+
+## `On target`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[14]]
+```
+
+## `Time of own goal`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[15]]
+```
+
+## `Pass accurary`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[16]]
+```
+
+## `Passes`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[17]]
+```
+
+## `Red`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[18]]
+```
+
+## `Saves`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[19]]
+```
+
+## `Yellow card`
+
+```{r fig.width=10, fig.height=6, fig.align='center',eval=T}
+AVG_TIME[[20]]
+```
+
+# Final Results
+
+As of `2018-07-15`. France has won. Let's have a look at the overall characteristics for both finalists(`France`, `Croatia`) and the semi-finalists(`England`, `Belgium`)
+
+## Semi-Finalists
+
+```{r}
+EN <- data.frame(fifa_results %>% filter(Team == 'England')%>% select(-diff.Goals,-Yellow.Red, -first_goal, -Goals.in.PSO, -Own.Goals.Time)  %>% select_if(is.numeric) %>% summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 2))
+BE <- data.frame(fifa_results %>% filter(Team == 'Belgium')%>% select(-diff.Goals,-Yellow.Red, -first_goal, -Goals.in.PSO, -Own.Goals.Time)  %>% select_if(is.numeric) %>% summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 2))
+maxVal<- data.frame(fifa_results %>% select_if(is.numeric) %>% select(-diff.Goals,-Yellow.Red, -first_goal, -Goals.in.PSO, -Own.Goals.Time) %>% summarise_all(funs(max(., na.rm = TRUE))) %>% mutate_all(round, 2)) %>% as.vector
+minVal<- data.frame(fifa_results %>% select_if(is.numeric) %>% select(-diff.Goals,-Yellow.Red, -first_goal, -Goals.in.PSO, -Own.Goals.Time) %>% summarise_all(funs(min(., na.rm = TRUE))) %>% mutate_all(round, 2)) %>% as.vector
+meanAll<- data.frame(fifa_results %>% select_if(is.numeric) %>% select(-diff.Goals,-Yellow.Red,-first_goal, -Goals.in.PSO, -Own.Goals.Time) %>% summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 2))
+
+tempRadar <- data.frame(rbind(maxVal, minVal, meanAll, EN, BE))
+colClasses<-data.frame(col2rgb(c('gray50','#B0171F','#FFC125'))/255)
+colnames(colClasses) <- c('mean all teams','ENGLAND','BELGIUM')
+colClasses<-data.frame(rbind(colClasses,'alpha'=c(1,1,1)))
+colors_border=c(
+  rgb(colClasses[1,1],colClasses[2,1],colClasses[3,1],colClasses[4,1]),
+  rgb(colClasses[1,2],colClasses[2,2],colClasses[3,2],colClasses[4,2]),
+  rgb(colClasses[1,3],colClasses[2,3],colClasses[3,3],colClasses[4,3]))
+
+rownames(tempRadar)<-NULL
+rownames(tempRadar) = make.names(c("","", "mean",'ENGLAND','BELGIUM'), unique=TRUE)
+```
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+radarchart(tempRadar,pcol=colors_border ,
+           axistype=2 , 
+           plwd=4 , 
+           plty=1,
+           cglcol="grey", 
+           cglty=2, 
+           axislabcol="black", 
+           caxislabels=seq(0,20,5), 
+           cglwd=1,
+           vlcex=.8,palcex=1,
+           title='Semi-Finalists\'s average performances during the World Cup 2018')
+           legend(x=.75, y=1.25, legend = rownames(tempRadar[-c(1,2),]), bty = "n", pch=20 , col= colors_border , text.col = "grey", cex=1.0, pt.cex=1)
+```
+
+## Finalists
+
+```{r}
+CR <- data.frame(fifa_results %>% filter(Team == 'Croatia')%>% select(-diff.Goals,-Yellow.Red, -first_goal, -Goals.in.PSO, -Own.Goals.Time)  %>% select_if(is.numeric) %>% summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 2))
+FR <- data.frame(fifa_results %>% filter(Team == 'France')%>% select(-diff.Goals,-Yellow.Red, -first_goal, -Goals.in.PSO, -Own.Goals.Time)  %>% select_if(is.numeric) %>% summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 2))
+maxVal<- data.frame(fifa_results %>% select_if(is.numeric) %>% select(-diff.Goals,-Yellow.Red, -first_goal, -Goals.in.PSO, -Own.Goals.Time) %>% summarise_all(funs(max(., na.rm = TRUE))) %>% mutate_all(round, 2)) %>% as.vector
+minVal<- data.frame(fifa_results %>% select_if(is.numeric) %>% select(-diff.Goals,-Yellow.Red, -first_goal, -Goals.in.PSO, -Own.Goals.Time) %>% summarise_all(funs(min(., na.rm = TRUE))) %>% mutate_all(round, 2)) %>% as.vector
+meanAll<- data.frame(fifa_results %>% select_if(is.numeric) %>% select(-diff.Goals,-Yellow.Red,-first_goal, -Goals.in.PSO, -Own.Goals.Time) %>% summarise_all(funs(mean(., na.rm = TRUE))) %>% mutate_all(round, 2))
+
+tempRadar <- data.frame(rbind(maxVal, minVal, meanAll, FR, CR))
+colClasses<-data.frame(col2rgb(c('gray50','#0000FF','#DC143C'))/255)
+colnames(colClasses) <- c('mean all teams','FRANCE','CROATIA')
+colClasses<-data.frame(rbind(colClasses,'alpha'=c(1,1,1)))
+colors_border=c(
+  rgb(colClasses[1,1],colClasses[2,1],colClasses[3,1],colClasses[4,1]),
+  rgb(colClasses[1,2],colClasses[2,2],colClasses[3,2],colClasses[4,2]),
+  rgb(colClasses[1,3],colClasses[2,3],colClasses[3,3],colClasses[4,3]))
+
+rownames(tempRadar)<-NULL
+rownames(tempRadar) = make.names(c("","", "mean",'FRANCE','CROATIA'), unique=TRUE)
+```
+
+```{r fig.width=10, fig.height=10, fig.align='center',eval=T}
+radarchart(tempRadar,pcol=colors_border ,
+           axistype=2 , 
+           plwd=4 , 
+           plty=1,
+           cglcol="grey", 
+           cglty=2, 
+           axislabcol="black", 
+           caxislabels=seq(0,20,5), 
+           cglwd=1,
+           vlcex=.8,palcex=1,
+           title='Finalists\'s average performances during the World Cup 2018')
+           legend(x=.75, y=1.25, legend = rownames(tempRadar[-c(1,2),]), bty = "n", pch=20 , col= colors_border , text.col = "grey", cex=1.0, pt.cex=1)
+```
+
+* Croatia was better in attack(`Goal.Scored`, `attempts`) but on the other side French run less during the whole tournament and committed less fouls.

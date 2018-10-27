@@ -1,0 +1,502 @@
+---
+title: "GOOOOOAAAAALLLLLL !!!!!!!!!!!!"
+author: "Jonathan Bouchet"
+date: "`r Sys.Date()`"
+output:
+ html_document:
+    fig_width: 10
+    fig_height: 7
+    toc: yes
+    number_sections : yes
+    code_folding: show
+---
+
+<center><img src="https://i.pinimg.com/originals/60/0a/f3/600af3325ac7608996d37a0869ec9c23.jpg"></center>
+
+<hr>
+
+<strong>History :</strong>
+
+* _version 1 : initial commit_ 
+* _version 2 : added World Cup history, fix some typos, some cosmetics_ 
+* _version 3 : added alluvials plots for the matches details_
+* _version 4 : added work for modeling section, added summary table_
+
+<hr>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,message=FALSE,warning=FALSE)
+```
+
+```{r}
+#load packages and csv file
+library(ggplot2)
+library(dplyr)
+library(gridExtra)
+library(RColorBrewer)
+library(ggthemes)
+library(viridis)
+library(reshape2)
+library(gridExtra)
+library(scales)
+library(ggalluvial)
+library(knitr)
+library(DT)
+```
+
+# Introduction
+
+There are 2 files in this dataset:
+
+* a summary showing all information about all the World Cups in the history.
+* details of matches showing all the results from the macthes.
+
+Plan for the kernel:
+
+* overview
+* breakdown by edition and try to make some prediction for the `2018` edition.
+
+_personal comment: for those who remember, PIQUE, the mascot of the 1986 edition, is still the best mascot ever_ 
+
+# Data preparation
+
+* convert the `Attendance` column to numeric
+* make a `DateTime` variable
+
+```{r}
+worldCups <- read.csv('../input/WorldCups.csv',sep=',',stringsAsFactors=F)
+worldCups$Attendance <- sapply(worldCups$Attendance, function(x) as.numeric(gsub("\\.","",x)))
+worldCups$DateTS <- as.Date(paste0(worldCups$Year,'-01-01'))
+#head(worldCups)
+```
+
+## Making colors per countries
+
+The idea is to associate a unique color per country. That way we can visualizae both the winning countries and host countries in 1 plot.
+
+Since the color hex code will be a column, I'm using `scale_fill_identity()`. However it also displays the legend as the `hex` codes, and not the name of Countries.
+
+That's why I made another plot(`myleg`) to represent the color code.
+
+```{r}
+countries <-unique(sort(append(unique(worldCups$Winner),unique(worldCups$Country))))
+cols<-colorRampPalette(brewer.pal(9,'Set1'))(length(countries))
+COLS <- data.frame(color = cols, country = countries)
+COLS$color <- as.character(COLS$color)
+COLS$country <- as.character(COLS$country)
+COLS$index <- 1:nrow(COLS)
+```
+
+```{r}
+# adding country host color
+worldCups$CountryColor <- sapply(worldCups$Country, function(x) COLS$color[match(x,COLS$country)])
+# adding winner country color
+worldCups$WinnerColor <- sapply(worldCups$Winner, function(x) COLS$color[match(x,COLS$country)])
+```
+
+```{r}
+# make a legend plot
+myleg<- COLS %>% ggplot(aes(x=reorder(country,-index),y=1)) + 
+  geom_bar(stat='identity',aes(fill=color)) + 
+  coord_flip() + scale_fill_identity()+ 
+  theme_fivethirtyeight() + 
+  theme(panel.grid= element_blank() ,axis.text.x = element_blank())
+```
+
+```{r}
+# add limits for the x-axis
+lims <- as.POSIXct(strptime(c("1927-01-01","2015-01-01"), format = "%Y-%m-%d"))
+# plotof goals vs year
+g1 <- worldCups %>% ggplot(aes(x=as.POSIXct(DateTS),y=GoalsScored)) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1930-01-01')),alpha=.5) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1934-01-01')),alpha=.5) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1966-01-01')),alpha=.5) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1978-01-01')),alpha=.5) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1998-01-01')),alpha=.5) + 
+  geom_line(alpha=.1,size=4) + 
+  geom_point(aes(color=WinnerColor),size=4) + 
+  theme_fivethirtyeight() + 
+  scale_x_datetime(limits =lims, date_breaks="4 year", labels = date_format("%Y")) + 
+  scale_color_identity()
+# add the legend plot
+g11 <- g1 + annotation_custom( ggplotGrob(myleg), 
+                               xmin=as.numeric(as.POSIXct(as.Date('1922-01-01'))),
+                               xmax=as.numeric(as.POSIXct(as.Date('1936-01-01'))),
+                               ymin=90,ymax=180) + 
+  labs(title='Total Goals scored per World Cup')
+# plot of Attendance vs year                    
+g2 <- worldCups %>% ggplot(aes(x=as.POSIXct(DateTS),y=Attendance)) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1930-01-01')),alpha=.5) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1934-01-01')),alpha=.5) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1966-01-01')),alpha=.5) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1978-01-01')),alpha=.5) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1998-01-01')),alpha=.5) + 
+  geom_line(alpha=.1,size=4) + 
+  geom_point(aes(color=CountryColor),size=4) + 
+  theme_fivethirtyeight() + 
+  theme(axis.text.y =element_text(angle=75)) +
+  scale_x_datetime(
+    limits =lims, 
+    date_breaks="4 year", 
+    labels = date_format("%Y")) +
+  scale_color_identity() + theme(axis.text.x=element_blank()) + labs(
+    title='Attendance per World Cup',
+    subtitle='vertical lines show editions for which the host country also won')
+```
+
+```{r  fig.width=12, fig.height=8, fig.align='center'}
+# assemble everything
+grid.arrange(g2,g11,ncol=1)
+```
+
+* `Uruguay(1930)`, `Italy(1934)`, `England(1966)` ,`Argentina(1978)` and `France(1998)` were the only editions where a host country also won the Cup.
+* `1954`, `1982`, `1998` and `2014` will be interesting to investigate because of the spikes in the number of total goals scored.
+
+# History of the World Cup
+
+Via [Wikipedia](https://en.wikipedia.org/wiki/History_of_the_FIFA_World_Cup)
+
+Very interesting to read since it reflects somehow events that happened worldwide. For example:
+
+* `1942`: The beginning of European hostilities in late 1939 prompted further plans for the 1942 World Cup to be cancelled, before a host country was selected. The FIFA tournament did not take place
+* `1946`: end of WWII
+* `1962`: Earthquake in Chile
+* `1966`: England hosted the World Cup but South-Africa remained banned until 1992
+
+```{r}
+matchesPlayed<-worldCups %>% ggplot(aes(x=as.POSIXct(DateTS),y= MatchesPlayed)) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1930-01-01')),size=1.5,alpha=1,color='red') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1934-01-01')),size=1.5,alpha=1,color='darkgreen') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1938-01-01')),size=1.5,alpha=1,color='darkgreen') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1950-01-01')),size=1.5,alpha=1,color='blue') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1954-01-01')),size=1.5,alpha=1,color='gold') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1970-01-01')),size=1.5,alpha=1,color='gold') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1974-01-01')),size=1.5,alpha=1,color='skyblue') +
+  geom_vline(xintercept= as.POSIXct(as.Date('1978-01-01')),size=1.5,alpha=1,color='skyblue') +
+  geom_vline(xintercept= as.POSIXct(as.Date('1982-01-01')),size=1.5,alpha=1,color='purple') +
+  geom_vline(xintercept= as.POSIXct(as.Date('1986-01-01')),size=1.5,alpha=1,color='salmon') +
+  geom_vline(xintercept= as.POSIXct(as.Date('1994-01-01')),size=1.5,alpha=1,color='salmon') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1998-01-01')),size=1.5,alpha=1,color='black') +
+  geom_vline(xintercept= as.POSIXct(as.Date('2014-01-01')),size=1.5,alpha=1,color='black') +
+  geom_line(alpha=.2,size=3) + geom_point(size=3) + theme_fivethirtyeight() +
+  scale_x_datetime(limits =lims, date_breaks="4 year", labels = date_format("%Y")) + 
+  labs(title='Matches played',subtitle='Lines denote the changes in the format of each final tournament:\nhttps://en.wikipedia.org/wiki/History_of_the_FIFA_World_Cup') +
+  theme(axis.text.x=element_blank())
+
+qualifiedTeams<-worldCups %>% ggplot(aes(x=as.POSIXct(DateTS),y= QualifiedTeams)) + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1930-01-01')),size=1.5,alpha=1,color='red') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1934-01-01')),size=1.5,alpha=1,color='darkgreen') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1938-01-01')),size=1.5,alpha=1,color='darkgreen') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1950-01-01')),size=1.5,alpha=1,color='blue') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1954-01-01')),size=1.5,alpha=1,color='gold') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1970-01-01')),size=1.5,alpha=1,color='gold') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1974-01-01')),size=1.5,alpha=1,color='skyblue') +
+  geom_vline(xintercept= as.POSIXct(as.Date('1978-01-01')),size=1.5,alpha=1,color='skyblue') +
+  geom_vline(xintercept= as.POSIXct(as.Date('1982-01-01')),size=1.5,alpha=1,color='purple') +
+  geom_vline(xintercept= as.POSIXct(as.Date('1986-01-01')),size=1.5,alpha=1,color='salmon') +
+  geom_vline(xintercept= as.POSIXct(as.Date('1994-01-01')),size=1.5,alpha=1,color='salmon') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1998-01-01')),size=1.5,alpha=1,color='black') +
+  geom_vline(xintercept= as.POSIXct(as.Date('2014-01-01')),size=1.5,alpha=1,color='black') +
+  geom_line(alpha=.2,size=3) + geom_point(size=3) + 
+  theme_fivethirtyeight() + 
+  scale_x_datetime(limits =lims, date_breaks="4 year", labels = date_format("%Y")) + 
+  scale_color_identity() + labs(title='Qualified teams') + 
+  theme(axis.text.x=element_text(size=11))
+```
+
+```{r  fig.width=12, fig.height=8, fig.align='center'}
+# assemble everything
+grid.arrange(matchesPlayed, qualifiedTeams,ncol=1)
+```
+
+# Matches details
+
+This dataset has the following features:
+
+* Year
+* DateTime
+* Round
+* Stadium
+* City
+* HomeTeam
+* HomeGoals
+* AwayGoals
+* AwayTeam
+* Observation
+
+In this section I want to visualize the results of the finals round, so for simplicity I will gather the `Round` as `Round of 16`,`Quarter-finals`,`Semi-finals`,`Third Place`,`Final`.
+
+I will also limit these results for World Cup after 1986. Before that time the finals rounds have a different structure.
+
+First I will create a new column to determine the winner of each play; there are 2 cases to consider :
+
+* the game ended at the 90mn with a winner / loser; here I can use the `HomeGoals` and `AwayGoals` to know which team won
+* the 90mn ened with a draw score, then the 2 teams went to the penalties goals. Here I use the `Observation` column to extract the result. An example looks like :
+
+```{r,eval=F}
+Argentina win on penalties (2 - 4)
+```
+
+* the `regexp` extracts the 2 numbers inside the parenthesis, splits by `-`, and converts to numeric
+
+
+## Codes
+
+* load file and remove `NA's`
+
+```{r}
+df<-read.csv('../input/WorldCupMatches.csv',sep=',',stringsAsFactors=F)
+```
+
+```{r fig.width=12, fig.height=6, fig.align='center'}
+na_count <-data.frame(sapply(df, function(y) sum(length(which(is.na(y))))))
+colnames(na_count)<-'number'
+names <- rownames(na_count)
+rownames(na_count) <- NULL
+na_count <- cbind(names,na_count)
+na_count$Percentage <- (na_count$number / nrow(df)) * 100
+na_count$Percent <-paste0(round(na_count$Percentage,1),"")
+ggplot(data=na_count,aes(x=reorder(names,-number),y=number)) + 
+  geom_histogram(stat='identity') + 
+  theme(axis.text.x = element_text(angle=90, hjust=1)) + 
+  ylab('Number of rows') + xlab('features') +
+  geom_text(aes(label=Percent), position=position_dodge(width=0.9), hjust=0.25,vjust=-0.25,size=6,color='red')  +theme_fivethirtyeight() + labs(title='Missing values in dataset',subtitle='percentage in red')
+```
+
+```{r}
+df <- df %>% na.omit()
+```
+
+* function to find the winner of each game
+
+```{r}
+makeFinalScore<-function(team1, team2, score1, score2, free1, free2){
+ 	# decision made within time
+ 	if(score1 != score2){
+ 		if(score1 > score2){
+ 			return(team1)
+ 		}
+ 		else if(score2>score1){
+ 			return(team2)
+ 		}
+ 	}
+ 	# decision made with free kicks
+ 	else{
+ 		if(free1 > free2){
+ 			return(team1)
+ 			}
+ 			else if(free2>free1){
+ 			return(team2)
+ 		}
+ 	}
+}
+```
+
+* loop over the full dataset, for year > 1982
+
+```{r}
+worldCup <- list()
+cnt <- 0
+
+for (edition in seq(1986,2014,4)){
+	cnt <- cnt + 1
+	tempo <- data.frame(df %>% dplyr::filter(Year == edition & (!grepl('Group',Round) & !grepl('Play-off',Round))))
+	tempo$Team_1_Score <- sapply(tempo$Observation, function(x) as.numeric(trimws(strsplit(gsub(".*\\((.*)\\).*","\\1",x),"-")[[1]])[1]))
+	tempo$Team_2_Score <- sapply(tempo$Observation, function(x) as.numeric(trimws(strsplit(gsub(".*\\((.*)\\).*","\\1",x),"-")[[1]])[2]))
+	tempo$gameWinner <- mapply(makeFinalScore, tempo$HomeTeam,tempo$AwayTeam, tempo$HomeGoals, tempo$AwayGoals, tempo$Team_1_Score, tempo$Team_2_Score)
+	worldCup[[cnt]] <- tempo
+}
+```
+
+* for the visualization, I'm using `alluvial` plots(also known as `Parallel Coordinates Plot`) which are a nice way to represent how data flows accros features
+* I regroup all `Round` related to the `Third place` into a single one
+
+```{r}
+makeSingleAlluvial <- function(mydf, myyear){
+	mydf$Round <- ifelse(mydf$Round %in% c('Round of 16','Quarter-finals','Semi-finals','Final'),mydf$Round, "Third Place")
+	gg<-data.frame(mydf %>% group_by(Round, gameWinner) %>% summarise(count=n()))
+	gg$Round <- factor(gg$Round, levels=c('Round of 16','Quarter-finals','Semi-finals','Third Place','Final'))
+	
+	ggplot(gg,aes(axis1 = gg[,2], axis2 = gg[,1])) + 
+    geom_alluvium(aes(fill = factor(gg[,1])),width = 1/12,color='black',size=.25) +
+    geom_stratum(width = 1/12, color = "white",alpha=.1,size=.5) +
+    geom_label(stat = "stratum", 
+               label.strata = TRUE,
+               size=4.,
+               color='white',
+               fill='black') +
+    scale_x_continuous(breaks = 1:2, 
+                       labels = c('round', 'team')) + scale_fill_brewer(name='', palette='Set1') + theme_fivethirtyeight() + labs(title=paste0('Final rounds the ',myyear,' World Cup')) + theme(legend.position='bottom',legend.direction='horizontal',axis.text.y = element_blank(),axis.text.x = element_blank(),panel.grid = element_blank())
+}
+```
+
+* I then loop over the dataframes saved in the previous plots, and calls the function to make a single `alluvial` plot
+
+```{r}
+alluvials <- list()
+years <- seq(1986, 2014,4)
+for(i in 1:length(years)){
+	alluvials[[i]] <- makeSingleAlluvial(worldCup[[i]],years[i])
+}
+```
+
+## `Alluvials plots` for World Cups after 1982
+```{r fig.width=12, fig.height=18, fig.align='center'}
+do.call(grid.arrange, c(alluvials, ncol=2))
+```
+
+# Prediction / modeling
+
+The idea is to look at the results of the preliminary phases only (ie before `Round of 16`) and find features to characterize the final outcome of the Cup. The reason is because some teams are already removed after these preliminary phases so there will no be predictive power.
+
+I may also use the aggregated dataset to know whether the host country won or lost ; we can think of a team being `supported` at the national level as an important feature.
+
+I cannot use the final number of wins or goals because these are `final` results hence are not related to the preliminary phases.
+
+The features I'm thinking of:
+
+* number of wins
+* number of draws
+* number of goals
+
+## Tables for the `Preliminary Rounds` 
+
+Some work is needed to `flatten` the dataset since it has all the matches, ir each row is the result of as single match, whereas we want 1 row per Country
+
+### Test with `2014 World Cup`
+
+```{r}
+df2 <- df %>% filter(Year==2014)
+# select preliminary phases
+groups <- data.frame(df2 %>% filter(grepl('Group',Round)))
+
+# function to determine the winner/loser of each match
+makeFinalScoreRound<-function(team1, team2, score1, score2){
+        if(score1 > score2){
+            return(team1)
+        }
+        else if(score2>score1){
+            return(team2)
+        }
+        else {return('Draw')
+    }
+}
+
+groups$gameWinner <- mapply(makeFinalScoreRound, groups$HomeTeam,groups$AwayTeam, groups$HomeGoals, groups$AwayGoals)
+
+# function to calculate the number of points per match
+# win = 3, loss = 0, draw = 1
+makePointsRound<-function(team1, team2, score1, score2){
+		    #win
+        if(score1 > score2){
+            return(3)
+        }
+        #loose
+        else if(score2>score1){
+            return(0)
+        }
+        #draw
+        else {return(1)
+    }
+}
+
+# note that I apply the fucntion twice because each team played as Host and Away
+groups$Team_1_Score <- mapply(makePointsRound, groups$HomeTeam,groups$AwayTeam, groups$HomeGoals, groups$AwayGoals)
+groups$Team_2_Score <- mapply(makePointsRound, groups$AwayTeam,groups$HomeTeam, groups$AwayGoals, groups$HomeGoals)
+```
+
+* Loop over all groups and calculate the total number of points, the total number of goals and the total number of wins
+* I then joined the results for `Home` and `Away` for a same team
+
+```{r}
+groupsList <- list()
+cnt<-0
+for(mygroup in unique(groups$Round)){
+	cnt<-cnt+1
+	tempo<-left_join(
+	  groups %>% group_by(Round, HomeTeam) %>% summarise(count_home=n() ,pointsHome = sum(Team_1_Score), goalsHome = sum(HomeGoals)) %>% rename(team = HomeTeam),
+	  groups %>% group_by(Round, AwayTeam) %>% summarise(count_away=n() ,pointsAway = sum(Team_2_Score),goalsAway = sum(AwayGoals)) %>% rename(team = AwayTeam),by='team') %>% 
+	  filter(Round.x == mygroup) %>% mutate(totGame = count_home + count_away, totPoints = pointsHome + pointsAway, totGoals = goalsHome + goalsAway) %>% rename(Round = Round.x) %>% 
+	  select(team, totGame, totPoints, totGoals) %>% arrange(-totPoints)
+	tempo$rank <- c(1:4)
+	groupsList[[cnt]]<-tempo
+}
+RES<-data.frame(do.call("rbind",groupsList))
+```
+
+* We can check my results agree with the real ones(via [wikipedia](https://en.wikipedia.org/wiki/2014_FIFA_World_Cup))
+* the trick is that the decision to select 2 teams from each group depends on:
+
+    * number of wins
+    * if ex aequo, number of points
+    * if ex-aequo, number of goals
+
+* To find the winner of the Cup, I looked at the outcome for `Round` == `Final`, and also based on the number of goals
+
+```{r}
+findWinner <- function(round, score1, score2){
+	if(round =='Final'){
+		if(score1>score2){
+			return('Won')
+		}
+		else {
+			return('Lost')
+			}
+	}
+	else{
+		return('Lost')
+		}
+}
+df2$hasWon <- mapply(findWinner, df2$Round, df2$HomeGoals, df2$AwayGoals)
+```
+
+* I can then `group_by` (team, outcome), take the distinct values and merge with the preliminary results
+
+```{r}
+finalResult <- data.frame(df2 %>% group_by(HomeTeam, hasWon) %>% summarise(count=n()) %>% distinct() %>% select(HomeTeam, hasWon))
+RES <- data.frame(left_join(RES, finalResult %>% rename(team = HomeTeam)))
+```
+
+* next is to remove the team who has both won and lost and keep only the `Won` result
+
+```{r}
+teamToRemove<-(RES %>% group_by(team) %>% summarise(count=n()) %>% filter(count==2))$team
+RES <- RES[!(RES$team == teamToRemove & RES$hasWon =='Lost'),]
+```
+
+* et voila ... we have features (results of preliminary phases) and the ground truth(winner of the Cup), hence everything to test some models.
+
+### Summary Table for the `2014 Edition`
+
+The table below shows the results, for each group, of the preliminary phases (skip to group F to find the winner of the 2014 edition)
+
+```{r}
+options(DT.options = list(pageLength = 4))
+datatable(RES) %>% 
+  formatStyle(
+  'rank',
+  target = 'row',
+  backgroundColor = styleEqual(c(1, 2, 3, 4), c('greenyellow','greenyellow','gray40', 'gray80'))
+)
+```
+
+## Generalizaing to the other editions
+
+```{r fig.width=12, fig.height=6, fig.align='center'}
+df$DateTS <- as.Date(paste0(df$Year,'-01-01'))
+df %>% filter(grepl('Group',Round)) %>% group_by(DateTS, Round) %>% summarise(count=n()) %>%
+  ggplot(aes(x=as.POSIXct(DateTS),y=count,fill=Round)) + 
+  geom_bar(stat='identity',color='black',size=.5) + 
+  scale_fill_manual(values = colorRampPalette(brewer.pal(12,'Paired'))(14)) + 
+  theme_fivethirtyeight(14) + 
+  labs(title='Preliminary groups structure',subtitle='represented are the number of teams in each group')+ 
+  geom_vline(xintercept= as.POSIXct(as.Date('1972-01-01')),color='red') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1980-01-01')),color='red') + 
+  geom_vline(xintercept= as.POSIXct(as.Date('1984-01-01')),color='red')
+```
+
+The issues with the preliminary groups over time are :
+
+* different number of groups
+* different notations: between 1970 and 1982, they were labelled with number and letter
+* after 1992, the number of preliminary groups is the same(only letters) so I can start with that period

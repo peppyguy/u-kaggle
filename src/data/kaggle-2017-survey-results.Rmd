@@ -1,0 +1,1785 @@
+---
+output:
+  html_document:
+    collapsed: FALSE
+    theme: cosmo
+    toc: yes
+    toc_float: no
+    toc_depth: 2
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      out.width = "100%", 
+                      message = FALSE
+                      )
+```
+
+# Introduction
+
+This is an analysis of the responses to Kaggle's 2017 user survey. In total, 16,716 people responded to enough of the survey to be analyzed. The following data analysis is just one approach to the data.
+
+You can explore some interactive data visualizations in the [report](https://www.kaggle.com/surveys/2017). 
+
+Don't forget, there's a $1000 prize for the most compelling Kaggle Kernels investigating the results of this survey. Find more details [here](https://www.kaggle.com/about/datasets-awards/kernels). 
+
+## Data Source
+
+All data was collected by [Kaggle](https://www.kaggle.com) in their 2017 user survey. The survey was available to users from August 7 - August 25, 2017. 
+
+## Installing Necessary Packages
+
+```{r}
+# For Data Cleaning
+library(tidyverse)
+library(rlang)
+library(stringr)
+library(car)
+
+# For text analysis and word clouds
+library(tm)
+library(SnowballC)
+library(wordcloud)
+```
+
+## Loading Data
+
+Based on the way this data is structured, I want to keep the first row as column headers. 
+
+```{r}
+# Import multiple choice data
+rawMCData <- read.csv('../input/multipleChoiceResponses.csv', stringsAsFactors = TRUE, header = TRUE)
+
+# Import freeform responses
+rawFFData <- read.csv('../input/freeformResponses.csv', stringsAsFactors = FALSE, header = TRUE)
+
+# Import the actual questions asked
+schema <- read.csv('../input/schema.csv', stringsAsFactors = FALSE, header = TRUE)
+```
+
+Last, I need to import the currency conversion rates for use later. 
+```{r}
+conversionRates <- read.csv('../input/conversionRates.csv', header = TRUE)
+```
+
+We'll start by taking an introductory look at the multiple choice data. First, how is it structured? 
+
+```{r}
+# Number of rows
+nrow(rawMCData)
+ncol(rawMCData)
+```
+
+It turns out that this dataset has 16,716 rows (or survey entries) and 228 columns.
+
+The variables have all been imported as factors. This should be fine since these are all multiple choice type questions, but we can always adjust to character strings as needed.
+
+The data looks pretty clean as is, but to ensure that we keep our raw data un-touched, we'll create a duplicate dataframe called "cleanMCData" and a separate one for the freeform responses called "cleanFFData"
+
+```{r}
+cleanMCData <- rawMCData
+cleanFFData <- rawFFData
+```
+
+## Writing Functions 
+
+Great, we're almost ready to start analyzing the data. But first, it looks like there are two types of multiple choice questions in this survey: questions where you can select *one* answer and questions where you can select *multiple* answers. Since these questions are all formatted similarly, I plan to analyze them the same way. 
+
+I'll write two functions to help me easily analyze these questions. For both functions, the only arguments are the question number and the option to feed in filtered data if necessary.
+
+### Function for single choice questions {#function-chooseOne}
+```{r}
+# A function to analyze questions where you choose only one answer
+chooseOne = function(question, filteredData = cleanMCData){
+  
+  filteredData %>% 
+    # Remove any rows where the respondent didn't answer the question
+    filter(!UQ(sym(question)) == "") %>% 
+    # Group by the responses to the question
+    group_by_(question) %>% 
+    # Count how many respondents selected each option
+    summarise(count = n()) %>% 
+    # Calculate what percent of respondents selected each option
+    mutate(percent = (count / sum(count)) * 100) %>% 
+    # Arrange the counts in descending order
+    arrange(desc(count))
+  
+}
+```
+
+### Function for multi choice questions {#function-chooseMultiple}
+```{r}
+# A function to analyze questions where you choose multiple answers
+chooseMultiple = function(question, filteredData = cleanMCData){
+
+  filteredData %>% 
+    # Remove any rows where the respondent didn't answer the question
+    filter(!UQ(sym(question)) == "") %>%
+    # Remove all columns except question
+    select(question) %>% 
+    # Add a column with the initial number of respondents to question
+    mutate(totalCount = n()) %>% 
+    # Split multiple answers apart at the comma, but ignore commas inside parentheses
+    mutate(selections = strsplit(as.character(UQ(sym(question))), 
+                                 '\\([^)]+,(*SKIP)(*FAIL)|,\\s*', perl = TRUE)) %>%
+    # Split answers are now nested, need to unnest them
+    unnest(selections) %>% 
+    # Group by the selected responses to the question
+    group_by(selections) %>% 
+   # Count how many respondents selected each option
+    summarise(totalCount = max(totalCount),
+              count = n()) %>% 
+    # Calculate what percent of respondents selected each option
+    mutate(percent = (count / totalCount) * 100) %>% 
+    # Arrange the counts in descending order
+    arrange(desc(count))
+  
+}
+```
+
+```{r echo = FALSE}
+questionText = function(questionName){
+  schema %>% 
+    filter(Column == questionName) %>% 
+    select(Question)
+}
+```
+
+Ok, now we're ready to start analyzing the data. 
+
+# Data Exploration
+
+## Demographics
+
+### Gender breakdown
+
+```{r echo = FALSE}
+questionText("GenderSelect")
+```
+
+Looks like question one asks about gender. What's the gender breakdown of respondents? 
+
+```{r}
+# This question only allowed users to select one answer, so we'll use the chooseOne function
+chooseOne("GenderSelect")
+```
+
+Perhaps unsurprisingly, nearly 82% of the survey-takers identify as males, 17% identify as females, 0.48% identify as "Non-binary, genderqueer, or gender on-conforming", and .98% identify as "A different identity". 
+
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+### Current Residence
+
+```{r echo = FALSE}
+questionText("Country")
+```
+
+Kaggle has users from around the world. Where are they currently located? 
+
+```{r}
+residence <- chooseOne("Country")
+
+residence
+```
+
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+What might this look like graphed? (for the sake of this graphic, only countries with more than 20 people are displayed) 
+
+```{r}
+residenceFilter <- residence %>% 
+  filter(count >= 20)
+
+ggplot(residenceFilter, aes(x = reorder(Country, count), y = count)) + 
+  geom_bar(stat = "identity") +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust = 1))
+```
+
+So the US and India are home to the most Kaggle users (a combined 41.4% of users). Russia, UK, China, Brazil, Germany, France, Canada, and Australia are the closest behind. 
+
+### Age Analysis
+
+```{r echo = FALSE}
+questionText("Age")
+```
+
+What is the age distribution of users?
+
+```{r}
+# This column needs to be read as numbers
+cleanMCData$Age <- as.numeric(as.character(cleanMCData$Age))
+
+age <- chooseOne("Age") %>% 
+   # Remove values < 1 year
+  filter(!Age < 1)
+
+age
+```
+
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Some of these entries are likely not accurate (is a 2-year-old really using Kaggle? Are there actually ten 100-year-olds using Kaggle? ) but we'll plot the age distribution anyway.
+
+```{r}
+ageHist <- cleanMCData %>% 
+  # Remove any rows where the respondent didn't answer the question
+  filter(!Age == "") %>% 
+  select(Age)
+
+ggplot(ageHist, aes(x = Age)) + 
+  geom_histogram(binwidth = 2) + 
+  xlab("Age (years)") + 
+  ylab("Number of Respondents")
+```
+
+The vast majority of Kaggle users are young adults (early 20's to 30's).  What is the median age? 
+
+
+```{r}
+ageHist %>% 
+  summarise(median = median(Age, na.rm = TRUE), sd = sd(Age, na.rm = TRUE))
+```
+
+The median age is 30 years (plus or minus 10 years). 
+
+Does this vary amongst people that come from the 5 countries with the most Kaggle users? 
+
+```{r}
+top5 <- residence %>% 
+  # add a row number to each row
+  mutate(row = row_number()) %>% 
+  # select only the top 5 countries
+  filter(row <= 5) %>% 
+  # keep only the country name column
+  select(Country) %>% 
+  # change these to character elements, instead of factors
+  mutate(Country = as.character(Country))
+
+# Create a list of the top 5 countries
+top5List <- top5$Country
+
+top5Age <- cleanMCData %>% 
+  # Keep only entries whose country is included in the top 5 list
+  filter(Country %in% top5List) %>% 
+  # Remove any ages that are under a year or NA or blank
+  filter(Age > 1, 
+         !is.na(Age)) %>% 
+  filter(!Age == "") %>% 
+  # Group the data by country and then age
+  group_by(Country, Age)
+
+ggplot(top5Age, aes(x = Age, fill = Country)) + 
+  geom_density(alpha = 0.3) + 
+  facet_wrap(~Country) + 
+  ylab("Density of Users of a Given Age") + 
+  theme(legend.position="none")
+```
+
+Generally speaking, it looks like Russian and Chinese users are slightly younger than users from other Kaggle-heavy countries. Also, there's a wider age-range of users in the US and UK. 
+
+
+Lastly, I'm curious if there is a difference in age by Gender (regardless of country of residence).
+
+```{r}
+ageGender <- cleanMCData %>% 
+  # Group data by gender and then age
+  group_by(GenderSelect, Age) %>%
+  # Remove empty gender and age entries
+  filter(!GenderSelect == "") %>% 
+  filter(!Age == "")
+
+ggplot(ageGender, aes(x = Age, fill = GenderSelect)) + 
+  geom_density(alpha=.3) + 
+  facet_wrap(~GenderSelect) + 
+  theme(legend.position="none")
+```
+
+Generally speaking, users of different gender identities generally fall into the similar age distributions. Though, people who do not identify as either male or female have a slightly more distributed age range.
+
+## Employment
+
+### Employment Status
+
+```{r echo = FALSE}
+questionText("EmploymentStatus")
+```
+
+The next question asks users their employment status. 
+
+What is the breakdown?
+```{r}
+chooseOne("EmploymentStatus")
+```
+
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+About 65% of the 16,716 users who answered this question are currently employed full-time, while 12.6% are unemployed and looking for work. Nearly 8% of respondents consider themselves self-employed or freelancers. 
+
+## Career Profile (Non-Workers)
+
+### Student Status
+
+```{r echo = FALSE}
+questionText("StudentStatus")
+```
+
+The last question, regarding employment, did not ask if the respondents were currently students in a degree-seeking school. That's where the next question comes in. 
+
+How many of the Kaggle users are currently students? 
+
+**Note**: *This question was only shown to people that indicated that they were `Not employed, and not looking for work`, `Not employed, but looking for work`, or `I prefer not to say`*
+
+```{r}
+chooseOne("StudentStatus")
+```
+
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Of the 1280 users that did see and answer this question, 76% are currently in degree-granting schools.
+
+### Learning Data Science
+
+```{r echo = FALSE}
+questionText("LearningDataScience")
+```
+
+The next question asked whether the respondent was learning data science skills either formally or informally. 
+
+**Note**: *This question was only shown to people that indicated that they were `Not employed, and not looking for work`, `Not employed, but looking for work`, or `I prefer not to say`*
+
+```{r}
+chooseOne("LearningDataScience")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+So, about 62% of respondents are focused on learning mostly data science skills. 
+
+## Career Profile (Workers)
+
+### Job Tasks
+
+```{r echo = FALSE}
+questionText("CodeWriter")
+```
+This question asks whether or not the respondent writes code to analyze data in their current job.
+
+What were the responses? 
+
+**Note**: *This question was only shown to people that indicated that they were `Employed full-time`, `Employed part-time`, `Independent contractor, freelancer, or self-employed`, or `retired`*
+
+```{r}
+chooseOne("CodeWriter")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+So 77% of employed Kaggle users write code in their current job. 
+
+For the 3033 users that answered "No" on the above question they were further asked whether or not they were planning to switch careers to data science. 
+
+```{r echo = FALSE}
+questionText("CareerSwitcher")
+```
+
+```{r}
+chooseOne("CareerSwitcher")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+70% of the employed Kaggle users that don't currently write code in their job are planning to switch into a data science field.
+
+### Job Titles
+
+```{r echo = FALSE}
+questionText("CurrentJobTitleSelect")
+```
+
+Respondents were asked to select an option that is most similar to their current job title. How did this break down? 
+
+```{r}
+chooseOne("CurrentJobTitleSelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+About 45% of Kaggle users are either Data Scientists, Software Developers/Engineers or Data Analysts. Predictive Modeler, Data Miner, and Operations Research Practitioner are among the least common job titles for Kaggle users (totalling only about 3% of responses).
+
+10% of users selected "Other". Let's see what the most common words were among those answers. 
+
+```{r fig.align = 'center', warning = FALSE}
+# Create a corpus
+jobTitles <- Corpus(VectorSource(cleanFFData$CurrentJobTitleFreeForm))
+
+# Convert to plain text document
+jobTitles <- tm_map(jobTitles, PlainTextDocument)
+
+# Remove numbers and punctuation, just in case
+jobTitles <- tm_map(jobTitles, removeNumbers)
+jobTitles <- tm_map(jobTitles, removePunctuation)
+
+# Make all jobTitles lowercase
+jobTitles <- tm_map(jobTitles, content_transformer(tolower))
+
+# Remove non job title words
+jobTitles <- tm_map(jobTitles, removeWords, c("and"))
+
+# Generate the wordcloud
+wordcloud(jobTitles, 
+          scale = c(5,0.2), 
+          max.words = 150, 
+          random.order = FALSE, 
+          rot.per = 0.35, 
+          use.r.layout = TRUE, 
+          colors = brewer.pal(6, "Blues")[c(4,5,6,7,8,9)])
+```
+Looks like there are lots of managers, analysts, architects, and engineers.
+
+### Job Title Fit
+
+```{r echo = FALSE}
+questionText("TitleFit")
+```
+
+```{r}
+chooseOne("TitleFit")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+
+### Current Employer
+
+```{r echo = FALSE}
+questionText("CurrentEmployerType")
+```
+
+We already know what types of jobs Kaggle users have, but what does their employer-situation look like?
+
+```{r}
+chooseMultiple("CurrentEmployerType")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+About 25% of responsdents indicated that they were employed by a professional services and consulting firm. A similar number of people noted that they work for a company that performs advanced analytics (23%), although 18% work for a company that *does not* perform advanced analytics. 
+
+## Career Profile (All)
+
+### Consider self a data scientist? 
+
+```{r echo = FALSE}
+questionText("DataScienceIdentitySelect")
+```
+Do Kaggle users consider themselves to be data scientists? 
+
+```{r}
+chooseOne("DataScienceIdentitySelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Although all respondents were shown this question, only 12,671 (73%) answered it. Of those that answered, only 33.6% of respondents consider themselves to currently be data scientists. 
+
+Does job title play a role in the self-recognition of being a data scientist? Let's see how this question breaks down for people whose job title is "Data Scientist" vs. those whose is not. 
+
+```{r}
+dataScientistTitle <- cleanMCData %>% 
+  # create a new column called dsTitle. If respondents are data scientists by job title, then this field is "Title Data Scientist", otherwise it's "Title Other"
+  #mutate(dsTitle = ifelse(CurrentJobTitleSelect == "Data Scientist", "Title Data Scientist", "Title Other")) %>% 
+  # Remove any blank entries for either question
+  filter(!CurrentJobTitleSelect == "", !DataScienceIdentitySelect == "") %>% 
+  # Group first by job title then by whether or not they consider themselves to be data scientists
+  group_by(CurrentJobTitleSelect, DataScienceIdentitySelect) %>%
+  # Count the number of people that fall into each group
+  summarise(count = n()) %>% 
+  # Calculate percentage
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  # Arrange in descending order
+  arrange(CurrentJobTitleSelect)
+  
+dataScientistTitle
+```
+
+Anyone who is a data scientist by job title didn't answer this question. People of all job titles seem to have varying individual opinions about whether or not they are data scientists. 
+
+## Education and Career Background (All)
+
+### Formal Education
+
+```{r echo = FALSE}
+questionText("FormalEducation")
+```
+
+All respondents were asked to list the highest level of their formal education. 
+
+```{r}
+chooseOne("FormalEducation")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Of the respondents, 89% have a bachelor's degree or higher level of formal education. 
+
+### Undergraduate major
+
+```{r echo = FALSE}
+questionText("MajorSelect")
+```
+
+Of the respondents that attended college, what was their major? 
+
+```{r}
+chooseOne("MajorSelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Nearly 69% of respondents majored in a math or computer oriented field (computer science, math/statistics, engineering, electrical engineering). Fine arts, psychology and health sciences are among the least declared majors for Kaggle users. 
+
+### Experience writing code
+
+```{r echo = FALSE}
+questionText("Tenure")
+```
+
+```{r}
+chooseOne("Tenure")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+A full 50% of respondents have been writing data analysis code for somewhere between 1 and 5 years. 17.5% of users have just started within the last year. Overall, a lot of Kaggle users are not long-time coding veterans. 
+
+### Other titles held
+```{r echo = FALSE}
+questionText("PastJobTitlesSelect")
+```
+What other job titles have Kaggle users held in the past 10 years? 
+
+```{r}
+chooseMultiple("PastJobTitlesSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+This might be most interesting if we knew what titles job respondents were coming *from* and what they changed *to*.
+
+In order to do that, we need to create a new, smaller data frame with just this information. For the purposes of this discussion, I'll only display the 20 most common job title transitions. 
+```{r}
+titleFlow <- cleanMCData %>% 
+  # Remove any non-answers from the questions about their current job title and past job title
+  filter(!PastJobTitlesSelect == "") %>% 
+  filter(!CurrentJobTitleSelect == "") %>% 
+  # Remove all of the columns except the two for the questions of interest
+  select(c("PastJobTitlesSelect", "CurrentJobTitleSelect")) %>% 
+  # Split multiple answers apart at the comma
+  mutate(PastJobTitlesSelect = strsplit(as.character(PastJobTitlesSelect), ",")) %>% 
+  # Split answers are now nested, need to unnest them
+  unnest(PastJobTitlesSelect) %>% 
+  # Split multiple answers apart at the comma
+  mutate(CurrentJobTitleSelect = strsplit(as.character(CurrentJobTitleSelect), ",")) %>% 
+  # Split answers are now nested, need to unnest them
+  unnest(CurrentJobTitleSelect) %>% 
+  # Group by previous job titles and then current job titles
+  group_by(PastJobTitlesSelect, CurrentJobTitleSelect) %>% 
+  # Count the number of respondents that have made the same career move
+  summarise(count = n()) %>% 
+  # Remove any instances where the job title hasn't changed
+  filter(!PastJobTitlesSelect == CurrentJobTitleSelect) %>% 
+  # Ungroup all of the data
+  ungroup() %>% 
+  # Sort the data in descending order by count
+  arrange(desc(count)) %>% 
+  # Add a row number for each job title move
+  mutate(row = row_number()) %>% 
+  # Remove anything that isn't in the top 20
+  filter(row <= 20) %>% 
+  # Rename columns
+  rename(From = PastJobTitlesSelect, To = CurrentJobTitleSelect)
+
+titleFlow
+```
+Looks like lots of people have been transitioning to Data Scientist roles from lots of other jobs. 
+
+### Getting started
+
+```{r echo = FALSE}
+questionText("FirstTrainingSelect")
+```
+How did Kaggle users get started in machine learning/data science training? 
+```{r}
+chooseOne("FirstTrainingSelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Looks like over half (61%) of respondents learned through non-formal methods: online courses or self-taught. Only 1.7% learned through Kaggle competitions. 
+
+### Training in each category
+
+```{r echo = FALSE}
+questionText("LearningCategorySelftTaught")
+```
+
+Since few people only use one type of training, respondents were asked to calculate the percentage of their training that came from several categories. This has been entered into our data file as several columns, each starting with "LearningCategory". 
+
+```{r warning = FALSE, message = FALSE}
+training <- cleanMCData %>% 
+  # Keep only the columns that start with "LearningCategory" and don't include "FreeForm"
+  select(starts_with("LearningCategory"), -contains("FreeForm")) %>% 
+  # Set column names
+  purrr::set_names(c("Self-taught", "Online Courses", "Work", "University Lecture", "University Practical Course", "Other")) %>% 
+  # Re-structure the data
+  gather(key = response, value = percent) %>% 
+  # Remove any rows where the percentage was NA
+  filter(!is.na(percent)) %>% 
+  # Change the percentage column to a number
+  mutate(percent = as.numeric(percent))
+
+ggplot(training, aes(x = percent, fill = response)) + 
+  geom_histogram(bins = 10) + 
+  facet_wrap(~response) + 
+  ylab("Responses of a given percentage") + 
+  theme(legend.position="none")
+```
+
+Online courses and self-teaching seem to have the widest range of percentages reported, whereas formal education responses (university classes or work) have a large number of "0%" responses.
+
+### Area Competence
+
+```{r echo = FALSE}
+questionText("MLSkillsSelect")
+```
+
+```{r}
+chooseMultiple("MLSkillsSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Kaggle users seem to feel pretty competent with both supervised and unsupervised machine learning (64% and 34% of people are familiar with these concepts, respectively). 
+
+### Technique Competence
+
+```{r echo = FALSE}
+questionText("MLTechniquesSelect")
+```
+
+```{r}
+chooseMultiple("MLTechniquesSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Logistic Regression appears to be the most well-understood technique of Kaggle users. Both Random Forest (used by 57% of respondents) and Gradient Boosted Machine (used by 40% of respondents) Decision trees were also ranked highly. However, some types of neural networks and Markov Logic Networks lie outside the skill level of most users. 
+
+## Education and Career (Workers)
+
+### Industry
+
+```{r echo = FALSE}
+questionText("EmployerIndustry")
+```
+**Note**: *This question was only shown to people that indicated that they were `Employed full-time`, `Employed part-time`, `Independent contractor, freelancer, or self-employed`, or `retired`*
+
+```{r}
+chooseOne("EmployerIndustry")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Perhaps unsurprisingly, the highest numbers of users are in the tech and academic sectors. Few Kaggle users find themselves in the military/security, hospitality/entertainment/sports, or non-profit sectors.
+
+### Company Size
+
+```{r echo = FALSE}
+questionText("EmployerSize")
+```
+
+Are Kaggle users working at big or small companies? 
+
+**Note**: *This question was only shown to people that indicated that they were `Employed full-time`, `Employed part-time`, `Independent contractor, freelancer, or self-employed`, or `retired`*
+
+```{r}
+chooseOne("EmployerSize")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Wow! The highest number of Kaggle users work for very large companies (10,000 or more employees)!. After that, small to mid-size companies seem to be the biggest employers of Kaggle users. 
+
+### Company Size Changes
+
+```{r echo = FALSE}
+questionText("EmployerSizeChange")
+```
+
+Are these companies expanding their number of data science employees or limiting them? 
+
+```{r}
+chooseOne("EmployerSizeChange")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+In what is likely to be a good sign for data scientists, 91% of respondents indicated that their companies were either staying the same size or increasing in size. 
+
+### Years company has used DS
+
+```{r echo = FALSE}
+questionText("EmployerMLTime")
+```
+
+Some companies have been using data science or advanced analytics for many years, while others are new to the game. For the employed Kaggle-users, how long have their companies been incorporating these skills? 
+
+```{r}
+chooseOne("EmployerMLTime")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Similar to the experience level of most Kaggle users, nearly half of their employers have been incorporating data science and analytics jobs for between 1 and 5 years. 15% of employers have been doing this type of work for more than 10 years, the same percentage have been doing this work for less than 1 year. 
+
+### Finding a job
+
+```{r echo = FALSE}
+questionText("EmployerSearchMethod")
+```
+
+Looking for work is a job in and of itself. How did Kaggle users find their current (or most recent) job? 
+
+```{r}
+chooseOne("EmployerSearchMethod")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+As the saying goes, when it comes to finding a job, it's often *who* you know. Nearly a quarter of Kaggle users found their job through a friend, family member, or former colleague. Slightly fewer users were recruited by the company. It looks like tech-specific job boards or career fairs are among the least-useful methods of finding jobs for Kaggle users.
+
+### Methods used at work
+
+```{r echo = FALSE}
+questionText("WorkAlgorithmsSelect")
+```
+
+```{r}
+chooseMultiple("WorkAlgorithmsSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Similar to the methods that Kaggle users felt most competent in, logistic regression and decision trees/random forests were the most commonly reported methods used at work. The same methods that Kaggle users did not feel competent with (GANs, Markov Logic Networks) are also the least commonly performed in users' day jobs.
+
+### Types of Data at Work
+
+```{r echo = FALSE}
+questionText("WorkDataTypeSelect")
+```
+
+```{r}
+chooseMultiple("WorkDataTypeSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Most Kaggle users are working with relational or text data (77%) at work. Very few are working with video data. 
+
+### Primary Function at Work
+
+```{r echo = FALSE}
+questionText("JobFunctionSelect")
+```
+
+```{r}
+chooseOne("JobFunctionSelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Just about 39% of respondents indicated that their primary job is to analyze and understand data to influence product or business decisions. Only 8% are involved in machine learning specific research.
+
+### Models in Production
+```{r echo = FALSE}
+questionText("WorkProductionFrequency")
+```
+
+It can be assumed that at least some of the employed Kaggle users are creating models in their day job. How frequently are those being put into production? 
+
+```{r}
+chooseOne("WorkProductionFrequency")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Only 7% of respondents indicated that their models are *always* put into production, but about 62% indicated that their models were put into production at least some or most of the time. Another 17.6% indicated that this happened rarely. 
+
+### Data size at work
+
+```{r echo = FALSE}
+questionText("WorkDatasetSize")
+```
+
+How many Kaggle users are actually working with *big data*? 
+
+```{r}
+chooseOne("WorkDatasetSize")
+```
+Looks like most Kaggle users are working in the small to medium dataset range. 79% of users responded that they use data files that are 10GB or less. 
+
+### Computing Hardware at Work
+
+```{r echo = FALSE}
+questionText("WorkHardwareSelect")
+```
+
+What types of work stations are Kaggle users using at work? 
+
+```{r}
+chooseMultiple("WorkHardwareSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+### Tools at Work
+
+```{r echo = FALSE}
+questionText("WorkToolsSelect")
+```
+
+Which data science/analytics tools, technologies, and languages have been used in the past year?
+
+```{r}
+chooseMultiple("WorkToolsSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Python is used slightly more than R for at-work Kaggle users. SQL follows closely behind. Angoss, Salfrod Systems CART, Treenet, and SPM are among the least-used tools.
+
+*How frequently are these tools used?*
+```{r message = FALSE}
+# Create list of possible tools
+tools <- schema %>% 
+  # Filter only columns that contain the following phrase
+  filter(grepl("At work, how often did you use the following", Question, fixed = TRUE)) %>%
+  # Remove any columns that contain the word "Other"
+  filter(!grepl("Other", Question, fixed = TRUE)) %>%
+  # Split the Question column at the hyphen
+  mutate(response = strsplit(as.character(Question), " - ")) %>% 
+  # Separate out the responses
+  unnest(response) %>% 
+  # Remove the first part of the question's phrase
+  filter(!grepl("At work, how often did you use the following", response, fixed = TRUE)) %>% 
+  # Keep only the columns with the question number and second part of the phrase
+  select(-2)
+
+# Create data frame of question Number and frequency response
+toolNames <- cleanMCData %>% 
+  # Keep only the columns that start with "WorkToolsFrequency" and doesn't contain "FreeForm"
+  select(starts_with("WorkToolsFrequency"), -contains("FreeForm")) %>% 
+  # Restructure the data
+  gather(key = response, value = frequency) %>% 
+  # Remove any empty rows
+  filter(!frequency == "") 
+
+# Join list of tools with the question number and frequency of response
+toolNamesChar <- left_join(toolNames, tools, by = c("response" = "Column")) %>% 
+  # Group by the user's response and then the frequency they indicated
+  group_by(response.y, frequency) %>% 
+  # Count how many users submitted the same information
+  summarise(count = n()) %>% 
+  # Reorder the factor elements of the frequency column
+  mutate(frequency = factor(frequency, levels = c("Rarely", "Sometimes", "Often", "Most of the time"), ordered = TRUE))  %>%
+  # Filter to only include tools used by more than 1500 respondents
+  filter(sum(count) > 1500,
+    !is.na(response.y)) %>%
+  ungroup()
+  
+
+# Plot
+ggplot(toolNamesChar, aes(x = frequency, y = count, fill = response.y)) + 
+  geom_bar(stat = "identity") + 
+  facet_wrap(~response.y) + 
+  ylab("Number of times a response was selected") + 
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust = 1))
+```
+
+Looks like Python, R, Jupyter notebooks, and SQL are all used the most often and most frequently. 
+
+### Data Science Methods at Work
+
+```{r echo = FALSE}
+questionText("WorkMethodsSelect")
+```
+
+```{r}
+chooseMultiple("WorkMethodsSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Data Visualization is the most commonly reported skill used for Kaggle-users at work. Again, logistic regression (a method that many Kaggle users feel competent in and use at work regularly) is noted as being used. 
+
+### Percentage of work time devoted
+
+```{r echo = FALSE}
+questionText("TimeGatheringData")
+```
+
+Users were asked to break down their work tasks into the time they spend working on each task. This has been entered into our data file as several columns, each starting with "Time". 
+
+```{r message = FALSE}
+workTime <- cleanMCData %>%
+  # Keep only the columns that start with "Time" that don't contain "Other" or "Studying"
+  select(starts_with("Time"), -contains("Other"), -ends_with("Studying")) %>% 
+  # Set the column names manually
+  purrr::set_names(c("Gathering and Cleaning Data", "Model Building and Selection", "Putting Work into Production", "Visualizing Data", "Finding Insights in the Data and Communicating these to Relevant Stakeholders")) %>% 
+  # Restructure the data
+  gather(key = response, value = percent) %>% 
+  # Convert the percent column to a numeric column
+  mutate(percent = as.numeric(percent)) %>% 
+  # Remove any entries where the percentage is NA or is > 100
+  filter(!is.na(percent),
+         percent < 100) 
+
+# Plot
+ggplot(workTime, aes(x = percent, fill = response)) + 
+  geom_histogram(bins = 10) + 
+  facet_wrap(~response) + 
+  ylab("Responses of a given percentage") + 
+  theme(legend.position="none")
+```
+
+Gathering and cleaning data seems to take up the most of users' work time. 
+
+### Understanding Mathematics at Work
+
+```{r echo = FALSE}
+questionText("AlgorithmUnderstandingLevel")
+```
+```{r}
+chooseOne("AlgorithmUnderstandingLevel")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+It looks like the majority of Kaggle users (38%) have a good enough understanding of the algorithms they use at work to explain it to someone non-technical. 
+
+### Data Visualization
+
+```{r echo = FALSE}
+questionText("WorkDataVisualizations")
+```
+
+Data Viz is becoming a more commonly used skill across the data science world. What proportion of employed-Kaggle users' projects involve data viz? 
+
+```{r}
+chooseOne("WorkDataVisualizations")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+36% of respondents use data viz in 76 - 100% of their work (a full 18% of which use data viz in all of their projects). 
+
+### Barriers or Challenges at Work {#barriers}
+
+```{r echo = FALSE}
+questionText("WorkChallengesSelect")
+```
+
+For this question, I'm only interested in employed Kaggle users that write code to analyze data at work. So, I need to filter the data before feeding it into the `chooseMultiple` function. 
+
+```{r}
+# Define a list of any employment status that indicates that the respondent is or was employed
+employed <- c("Employed full-time", "Employed part-time", "Independent contractor, freelancer, or self-employed", "Retired")
+
+# Filter the data
+filterBarriers <- cleanMCData %>% 
+  # Remove blank responses on employment question
+  filter(!EmploymentStatus == "") %>% 
+  # Keep only entries that indicated that they use code to analyze data at work
+  filter(CodeWriter == "Yes") %>% 
+  # Keep only entries that included one of the above "employed" statuses
+  filter(grepl(paste(employed, collapse = "|"), EmploymentStatus))
+
+# Using the filtered data, run chooseMultiple() function
+chooseMultiple("WorkChallengesSelect", filterBarriers)
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Looks like dirty data is slightly more common of a problem for Kaggle users than other barriers. 
+
+In order to determine how often these barriers were faced, users were asked about each barrier independently. This has been entered into our data file as several columns, each starting with "WorkChallengeFrequency". Within the text of each question is the same question followed by a " - " and one of the barriers. 
+```{r echo = FALSE}
+questionText("WorkChallengeFrequencyPolitics")
+```
+
+```{r out.height = "200%", message = FALSE}
+# Create list of possible challenges
+challenges <- schema %>% 
+  # From the list of questions, keep only questions that contain the below phrase
+  filter(grepl("At work, how often did you experience these barriers", Question, fixed = TRUE)) %>%
+  # Remove any Columns that contain "FreeForm"
+  filter(!grepl("FreeForm", Column, fixed = TRUE)) %>% 
+  # Split the question text at the hyphen
+  mutate(response = strsplit(as.character(Question), " - ")) %>% 
+  # Separate the responses onto separate rows
+  unnest(response) %>% 
+  # Remove rows that contain the first phrase
+  filter(!grepl("At work, how often did you experience these barriers", response, fixed = TRUE)) %>% 
+  # Keep only the question number and the associated barrier
+  select(-2)
+
+# Limit the full dataset to the columns that answer these questions
+challengeNames <- cleanMCData %>% 
+  # Keep only columns that start with "WorkChallengeFrequency" and don't contain "FreeForm"
+  select(starts_with("WorkChallengeFrequency"), -contains("FreeForm")) %>% 
+  # Restructure Data
+  gather(key = response, value = frequency) %>% 
+  # Remove any blank entries
+  filter(!frequency == "") 
+
+# Combine the list of possible challenges with the limited dataset
+challengeNamesChar <- left_join(challengeNames, challenges, by = c("response" = "Column")) %>% 
+  # Group the responses by the question Number and the frequency with which each challenged is dealt with
+  group_by(response.y, frequency) %>%
+  # Count the number of entries within each group
+  summarise(count = n()) %>% 
+  # Re-order the factors
+  mutate(frequency = factor(frequency, levels = c("Rarely", "Sometimes", "Often", "Most of the time"), ordered = TRUE)) 
+
+# Plot
+ggplot(challengeNamesChar, aes(x = frequency, y = count, fill = response.y)) + 
+  geom_bar(stat = "identity") + 
+  facet_wrap(~response.y) + 
+  ylab("Number of times a response was selected") + 
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust = 1))
+
+# Since the names are often too long to be displayed well in this figure, print the list of challenges in the order they appear in the graphic
+levels(as.factor(challengeNamesChar$response.y))
+```
+
+### Internal or External Projects at Work
+
+```{r echo = FALSE}
+questionText("WorkInternalVsExternalTools")
+```
+
+```{r}
+chooseOne("WorkInternalVsExternalTools")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Seems like most users are focusing on internal sources (65% use either entirely internal or more internal than external data). Very few (less than 3%) users work with entirely external data. 
+
+### DS within Organization
+
+```{r echo = FALSE}
+questionText("WorkMLTeamSeatSelect")
+```
+
+Many employment organizations are complex. Where does the Data Science team fit within the overall company's organization? 
+
+```{r}
+chooseOne("WorkMLTeamSeatSelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+The most common response was that the Data Science team stands alone. 
+
+### Data Storage at Work
+
+```{r echo = FALSE}
+questionText("WorkDataStorage")
+```
+
+```{r}
+chooseMultiple("WorkDataStorage")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+## Sharing Source Data at Work
+
+```{r echo = FALSE}
+questionText("WorkDataSharing")
+```
+
+```{r}
+chooseMultiple("WorkDataSharing")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Looks like many organizations are still using a shared drive on their company's network or Sharepoint website. Slightly fewer share their data via email. 
+
+### Sharing Code at Work
+
+```{r echo = FALSE}
+questionText("WorkCodeSharing")
+```
+
+```{r}
+chooseMultiple("WorkCodeSharing")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+
+Wow! 58% of Kaggle users are familiar with and use Git at work. 
+
+### Working remotely
+
+```{r echo = FALSE}
+questionText("RemoteWork")
+```
+
+Since so much of the work data scientist's do is on the computer, many people can now work remotely. How many Kaggle users are taking advantage of this? 
+
+```{r}
+chooseOne("RemoteWork")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+40% of users "sometimes" work remotely, with only 17% working remotely either most of the time or always. A full 42% rarely or never work remotely. 
+
+### Annual Salary
+```{r echo = FALSE}
+questionText("CompensationAmount")
+```
+
+In order to compare the annual salaries of respondents from different countries, we'll need to correct for the type of currency being reported. Luckily, we have the conversion rates to convert all currencies to US dollars (as accessed on September 14, 2017). 
+
+```{r}
+reportedSalary <- cleanMCData %>% 
+  # Keep only the columns with the reported salary and currency
+  select(c("CompensationAmount", "CompensationCurrency")) %>% 
+  # Remove any blank responses
+  filter(!CompensationCurrency == "") %>% 
+  filter(!CompensationAmount == "")
+
+# Combine the reported salary data with the conversion rate
+salaryUSD <- left_join(reportedSalary, conversionRates, by = c("CompensationCurrency" = "originCountry")) %>%
+  # Convert the reported salary to a character string
+  mutate(CompensationAmount = as.character(CompensationAmount),
+         # Remove any commas from the salary entry and convert it to a number
+         originalSalary = as.numeric(gsub(",", "", CompensationAmount)),
+         # Convert the exchange rate to a number
+         exchangeRate = as.numeric(as.character(exchangeRate)),
+    # Calculate the salary in USD
+    usSalary = originalSalary * exchangeRate,
+    # Convert the calculated salary to a number and round to 2 decimal places
+    usSalary = as.numeric(format(round(usSalary, 2), nsmall = 2, scientific = FALSE))) %>% 
+  arrange(desc(usSalary))
+
+# For graphing purposes, remove responses over $400,000 (since there are very few above that limit) 
+salaryUSDPlot <- salaryUSD %>% 
+  # Remove any salaries (in USD) that are above $400,000 or less than or equal to 0
+  filter(usSalary < 400000,
+         usSalary > 0)
+# Plot
+ggplot(salaryUSDPlot, aes(x = usSalary)) + 
+  geom_histogram(bins = 100) +
+  ylab("Responses of a given Salary (in USD)") + 
+  theme(legend.position="none") + 
+  scale_x_continuous(labels = scales::comma)
+```
+
+
+### Change in Salary
+
+```{r echo = FALSE}
+questionText("SalaryChange")
+```
+
+People get promotions or switch careers or career fields. How has their salary or compensation changed in the last 3 years? 
+
+```{r}
+chooseOne("SalaryChange")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Again, in what is a positive sign for data scientists, about 52% have noted that their salary has increased more than 6% over the past 3 years. 
+
+### Job Satisfaction
+
+```{r echo = FALSE}
+questionText("JobSatisfaction")
+```
+Employed Kaggle users were asked to rank their job satisfaction on a scale of 1-10. Here's what they reported
+
+```{r}
+# Perform the chooseMultiple() function
+jobSatisfaction <- chooseMultiple("JobSatisfaction") %>% 
+  # Remove "I prefer not to share" and blank answers
+  filter(!selections == "I prefer not to share") %>% 
+  filter(!selections == "") %>% 
+  # Reorder the factors for graphing
+  mutate(selections = factor(selections, levels = c('1 - Highly Dissatisfied', '2', '3', '4', '5', '6', '7', '8', '9', '10 - Highly Satisfied')))
+
+# Plot
+ggplot(jobSatisfaction, aes(x = selections, y = count)) + geom_bar(stat = "identity")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Overall, Kaggle-users seem pretty satisfied in their current jobs.
+
+### Future Learning - 1 new tool
+
+```{r echo = FALSE}
+questionText("MLToolNextYearSelect")
+```
+
+```{r}
+chooseOne("MLToolNextYearSelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Tensorflow, Python, and R all fall high on the wish lists of Kaggle users. Whereas Angoss, TIBCO Spotfire, and SAS JMP are less desired skills. 
+
+### Future Learning - Methods
+```{r echo = FALSE}
+questionText("MLMethodNextYearSelect")
+```
+```{r}
+chooseOne("MLMethodNextYearSelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Deep learning and neural nets are both exciting new methods to learn for this year. MARS, uplift modeling, and rule induction are way less exciting for users.
+
+### Recommended Language
+```{r echo = FALSE}
+questionText("LanguageRecommendationSelect")
+```
+
+Everyone has their favorites. What are the most recommended languages to learn first?
+
+```{r}
+chooseOne("LanguageRecommendationSelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Python takes this one by a landslide -- 63% of users recommend that others learn this language first. Looks like Haskell and F# are not the best languages to learn first. 
+
+This leads me to a follow-up question. You see, I'm an avid user of R (clearly) and would probably recommend that new learners start with learning the R language. Are others just as likely to recommend the language that they already use? 
+
+```{r}
+# Create data frame of recommendations by language use
+# Tools used at work WorkToolsSelect and recommendations LanguageRecommendationSelect
+recommendations <- cleanMCData %>% 
+  # Remove any non-entries for either question
+  filter(!WorkToolsSelect == "") %>% 
+  filter(!LanguageRecommendationSelect == "") %>% 
+  # Select only the columns for the language recommendations and language use
+  select(c("WorkToolsSelect", "LanguageRecommendationSelect")) %>% 
+  # Split the language usage column at the comma
+  mutate(WorkToolsSelect = strsplit(as.character(WorkToolsSelect), '\\([^)]+,(*SKIP)(*FAIL)|,\\s*', perl = TRUE)) %>% 
+  # Split answers are now nested, need to unnest them
+  unnest(WorkToolsSelect) %>% 
+  # Group by language used and then by recommendation
+  group_by(WorkToolsSelect, LanguageRecommendationSelect) %>% 
+  # Rename the columns
+  rename(Used = WorkToolsSelect, Recommended = LanguageRecommendationSelect) %>% 
+  # Count the number of responses for each language use/recommendation combination
+  summarise(count = n()) %>% 
+  # Calculate percentage
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  # Arrange the values in descending count order
+  arrange(desc(count)) %>% 
+  # Add a row number to each row
+  mutate(row = row_number()) %>% 
+  # Keep only the 3 most common recommendations for each used language
+  filter(row <= 3) %>% 
+  # Sort the values first by the language being used and then in descending count order
+  arrange(Used, desc(count))
+
+# Display the results
+recommendations
+```
+
+Looks like Python is the most recommended language for beginners regardless of what language the respondent uses at work. Even 51% of R users recommended that beginners learn Python first (over 39% of R users that recommended R). Alternatively, 72% of Python users recommended Python compared to just about 19% of Python users that recommended R first. But what I didn't split out is respondents that *only* use R or *only* use Python. Let's see if that makes a difference. 
+
+What if a user indicated that they use either Python or R (or both!)? Which do they recommend? 
+
+*Note: other languages that were recommended by users of both R and Python were calculated, just not printed, so Python + R does not add up to 100% here*
+
+```{r}
+# Create a data frame of people who use R and not Python
+justR <- cleanMCData %>% 
+  # Remove non-responses for both questions
+  filter(!WorkToolsSelect == "") %>% 
+  filter(!LanguageRecommendationSelect == "") %>% 
+  # Keep only the columns of language used and language recommended
+  select(c("WorkToolsSelect", "LanguageRecommendationSelect")) %>% 
+  # Add a new column "R". If "Python" is NOT a used language but R is, then "R" is true.
+  mutate(R = ifelse(grepl("Python", WorkToolsSelect) == FALSE & grepl("R", WorkToolsSelect) == TRUE, TRUE, FALSE)) %>% 
+  # Keep only the entries where R is used but Python is not
+  filter(R == TRUE) %>% 
+  # Rename columns
+  rename(Used = WorkToolsSelect, Recommended = LanguageRecommendationSelect) %>% 
+  # Group based on the recommended languages
+  group_by(Recommended) %>% 
+  # Count the number of entries for each language
+  summarise(count = n()) %>% 
+  # Calculate percentage
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  # Arrange in descending count order
+  arrange(desc(count))
+
+# Display results
+justR
+
+# The process for calculating just Python and both is the same as just R. 
+
+justPy <- cleanMCData %>% 
+  filter(!WorkToolsSelect == "") %>% 
+  filter(!LanguageRecommendationSelect == "") %>% 
+  select(c("WorkToolsSelect", "LanguageRecommendationSelect")) %>% 
+  mutate(Py = ifelse(grepl("Python", WorkToolsSelect) == TRUE & grepl("R", WorkToolsSelect) == FALSE, TRUE, FALSE)) %>% 
+  filter(Py == TRUE) %>% 
+  rename(Used = WorkToolsSelect, Recommended = LanguageRecommendationSelect) %>% 
+  group_by(Recommended) %>% 
+  summarise(count = n()) %>% 
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  arrange(desc(count))
+
+justPy
+
+bothRec <- cleanMCData %>% 
+  filter(!WorkToolsSelect == "") %>% 
+  filter(!LanguageRecommendationSelect == "") %>% 
+  select(c("WorkToolsSelect", "LanguageRecommendationSelect")) %>% 
+  #mutate(WorkToolsSelect = as.character(WorkToolsSelect)) %>% 
+  mutate(both = ifelse(grepl("Python", WorkToolsSelect) == TRUE & grepl("R", WorkToolsSelect) == TRUE, TRUE, FALSE)) %>% 
+  filter(both == TRUE) %>% 
+  group_by(LanguageRecommendationSelect) %>% 
+  summarise(count = n()) %>% 
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  arrange(desc(count)) %>% 
+  filter(percent > 20)
+
+bothRec
+```
+
+So even programmers who use both R and Python at work recommend Python twice as often as they recommend R as the best language for beginners. 
+
+The interesting part here is that in terms of actual use in a work-environment, Kaggle users reported using Python only slightly more than R (13% vs. 10% of respondents).
+
+### Finding public datasets
+```{r echo = FALSE}
+questionText("PublicDatasetsSelect")
+```
+
+Where do Kaggle users find their public datasets? 
+
+```{r}
+chooseMultiple("PublicDatasetsSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Dataset aggregators like Kaggle are highly used by the respondents of this survey. 
+
+
+## Job Search 
+
+### Helpful platforms and resources
+```{r echo = FALSE}
+questionText("LearningPlatformSelect")
+```
+
+Everyone needs resources when they are learning new things. Where do Kaggle users find theirs?
+
+```{r}
+chooseMultiple("LearningPlatformSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Look at that! Kaggle is the most commonly reported resource to users (probably because we surveyed Kaggle users), followed closely behind by online courses and Stack Overflow Q&A. Trade books, Company internal Communities and Newsletters are not as helpful. 
+
+### Employed vs. Entering Field Resources {#employedResources}
+This makes me wonder, do the veterans of data science (in this case, employed respondents who analyze data for their job) have different resources or helpful platforms than people looking for work? 
+
+**Note:** *The code here uses a pre-defined list of employed statuses defined [here](#barriers).*
+
+
+```{r}
+# Create a data frame of the resources used by respondents employed in the field
+employedResources <- cleanMCData %>% 
+  # Remove any non-responses 
+  filter(!EmploymentStatus == "") %>% 
+  # Keep only responses that indicated that they use code to analyze data at work
+  filter(CodeWriter == "Yes") %>% 
+  # Keep only responses that are from someone employed
+  filter(grepl(paste(employed, collapse = "|"), EmploymentStatus)) %>% 
+  # Keep only the resources
+  select("LearningPlatformSelect") %>% 
+  # Split multiple answers apart at the comma
+  mutate(LearningPlatformSelect = strsplit(as.character(LearningPlatformSelect), ',')) %>% 
+  # Split answers are now nested, need to unnest them
+  unnest(LearningPlatformSelect) %>% 
+  # Group by resources
+  group_by(LearningPlatformSelect) %>% 
+  # Count number of responses that indicated a certain resource
+  summarise(count = n()) %>% 
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  arrange(desc(count)) %>% 
+  # Add a row number (this will indicate the ranking of each resource)
+  mutate(employed = row_number())
+
+# The methods for calculating the resources for people looking for work are the same as above
+
+lookingResources <- cleanMCData %>% 
+  filter(!EmploymentStatus == "") %>% 
+  filter(grepl("Not employed, but looking for work", EmploymentStatus) | 
+           # Is the respondent a student?
+           StudentStatus == "Yes" |
+           # Are they focused on learning Data Science skills?
+           grepl("Yes", LearningDataScience) |
+           # Are they planning to transition to Data Science?
+           CareerSwitcher == "Yes") %>% 
+  select("LearningPlatformSelect") %>% 
+  # Split multiple answers apart at the comma
+  mutate(LearningPlatformSelect = strsplit(as.character(LearningPlatformSelect), ',')) %>% 
+  # Split answers are now nested, need to unnest them
+  unnest(LearningPlatformSelect) %>% 
+  group_by(LearningPlatformSelect) %>% 
+  summarise(count = n()) %>% 
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  arrange(desc(count)) %>% 
+  mutate(looking = row_number())
+
+
+# Combine the resources used by employed people and those used by people looking for work
+resources <- left_join(employedResources, lookingResources, by = "LearningPlatformSelect") %>% 
+  select(c("LearningPlatformSelect", "employed", "looking"))
+
+# Display results
+resources
+```
+Both types of Kaggle users report using Kaggle the most and Trade books the least. In the middle though, there's some disagreement. Perhaps unsurprisingly, things like conferences and Company Internal Communities are more useful resources to people who have jobs. People who are looking for work are more likely to consider the official documentation or tutoring/mentoring to be helpful resources. It also looks like the Stack Overflow Q&A and podcasts are preferred by employed Kaggle users. 
+
+### Favorite DS Podcast/Blog/Newsletter
+
+```{r echo = FALSE}
+questionText("BlogsPodcastsNewslettersSelect")
+```
+
+Since no one can pick just one, users were allowed to pick 3 favorites. 
+
+```{r}
+chooseMultiple("BlogsPodcastsNewslettersSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+KDNuggets and R Bloggers are the most commonly reported blog/podcast and newsletter (perhaps surprisingly given how many Python users there are taking this survey). Emergent/Future Newsletter (Algorithmia), The Analytics Dispatch Newsletter, and Jack's Import AI Newsletter are among the least commonly used. 
+
+Do employed people use different blogs/podcasts/newsletters than those looking for work?
+
+**Note:** *The code here uses a pre-defined list of employed statuses defined [here](#barriers).*
+
+**Also** *This process is essentially the same as the one used [here](#employedResources), so comments in this code chunk are minimal.*
+
+```{r}
+# This method is the same as 
+employedPodcasts <- cleanMCData %>% 
+  filter(!EmploymentStatus == "") %>% 
+  filter(CodeWriter == "Yes") %>% 
+  filter(grepl(paste(employed, collapse = "|"), EmploymentStatus)) %>% 
+  select("BlogsPodcastsNewslettersSelect") %>% 
+  # Split multiple answers apart at the comma
+  mutate(BlogsPodcastsNewslettersSelect = strsplit(as.character(BlogsPodcastsNewslettersSelect), '\\([^)]+,(*SKIP)(*FAIL)|,\\s*', perl = TRUE)) %>%
+  # Split answers are now nested, need to unnest them
+  unnest(BlogsPodcastsNewslettersSelect) %>% 
+  group_by(BlogsPodcastsNewslettersSelect) %>% 
+  summarise(count = n()) %>% 
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  arrange(desc(count)) %>% 
+  mutate(employed = row_number())
+
+lookingPodcasts <- cleanMCData %>% 
+  filter(!EmploymentStatus == "") %>% 
+   filter(grepl("Not employed, but looking for work", EmploymentStatus) | 
+           # Is the respondent a student?
+           StudentStatus == "Yes" |
+           # Are they focused on learning Data Science skills?
+           grepl("Yes", LearningDataScience) |
+           # Are they planning to transition to Data Science?
+           CareerSwitcher == "Yes") %>% 
+  select("BlogsPodcastsNewslettersSelect") %>% 
+  # Split multiple answers apart at the comma
+  mutate(BlogsPodcastsNewslettersSelect = strsplit(as.character(BlogsPodcastsNewslettersSelect), '\\([^)]+,(*SKIP)(*FAIL)|,\\s*', perl = TRUE)) %>%
+  # Split answers are now nested, need to unnest them
+  unnest(BlogsPodcastsNewslettersSelect) %>% 
+  group_by(BlogsPodcastsNewslettersSelect) %>% 
+  summarise(count = n()) %>% 
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  arrange(desc(count)) %>% 
+  mutate(looking = row_number())
+
+podcasts <- left_join(employedPodcasts, lookingPodcasts, by = "BlogsPodcastsNewslettersSelect") %>% 
+  select(c("BlogsPodcastsNewslettersSelect", "employed", "looking"))
+
+podcasts
+```
+
+It's probably unsurprising the podcast *Becoming a Data Scientist* is more popular amongst people looking for work than those who already have it. *Data Stories* podcast and the *Data Machina Newsletter* are also more popular amongst people looking for work. *No Free Hunch* and the *Partially Derivative* Podcast are both more commonly used amongst employed Kaggle users. 
+
+
+### How long learning DS?
+```{r echo = FALSE}
+questionText("LearningDataScienceTime")
+```
+For learners of data science, how long have they been working on it? 
+
+```{r}
+chooseOne("LearningDataScienceTime")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+They say data science is a new field and that is reflected in the learners using Kaggle: 84% of them have been learning data science for less than 2 years. 
+
+### Important Skills
+
+```{r echo = FALSE}
+questionText("JobSkillImportanceBigData")
+```
+
+What do learners think the most important skills are for getting a job in data science? 
+
+These responses are entered in several separate columns in the dataset, each starting with "JobSkillImportance".
+
+```{r}
+# Create list of possible skills
+skills <- schema %>% 
+  # Keep only the questions which contain the following phrase
+  filter(grepl("How important do you think the below skills ", Question, fixed = TRUE)) %>%
+  # Remove any questions that contain "FreeForm"
+  filter(!grepl("FreeForm", Column, fixed = TRUE)) %>% 
+  # Split the question text at the hyphen
+  mutate(response = strsplit(as.character(Question), " - ")) %>% 
+  # Un-nest the two parts
+  unnest(response) %>% 
+  # Remove the first part of the question text
+  filter(!grepl("How important do you think the below skills ", response, fixed = TRUE)) %>% 
+  # Keep only the question text and the question number
+  select(-2)
+
+# In the dataset of responses, keep only the responses to this question
+skillResponses <- cleanMCData %>% 
+  # select only the columns that start with "JobSkillImportance" and don't contain "FreeForm"
+  select(starts_with("JobSkillImportance"), -contains("FreeForm")) %>% 
+  # Re-structure the data
+  gather(key = response, value = frequency) %>% 
+  # Remove any entries where the respondent didn't answer this question
+  filter(!frequency == "") 
+
+# Combine the possible skills with the responses
+skillResponseNames <- left_join(skillResponses, skills, by = c("response" = "Column")) %>% 
+  # Group by the response and then the frequency
+  group_by(response.y, frequency) %>% 
+  # Calculate the number of respondents that indicated a certain response
+  summarise(count = n()) %>% 
+  # Re-factor the frequency
+  mutate(frequency = factor(frequency, levels = c("Unnecessary", "Nice to have", "Necessary"), ordered = TRUE)) 
+
+# Plot
+ggplot(skillResponseNames, aes(x = frequency, y = count, fill = response.y)) + 
+  geom_bar(stat = "identity") + 
+  facet_wrap(~response.y) + 
+  ylab("Number of times a response was selected") + 
+  theme(legend.position = "none") +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust = 1))
+```
+
+Interesting, very few of these skills are considered largely unnecessary. Among the ones that users find the most necessary are being fluent in Python, R, or SQL, Visualization tools, Big Data, and Advanced statistics. 
+
+### Online courses
+
+```{r echo = FALSE}
+questionText("CoursePlatformSelect")
+```
+
+For the users that indicated that they were taking online courses, which ones are either started or completed? 
+
+```{r}
+chooseMultiple("CoursePlatformSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Coursera takes the cake here with 75% of respondents having started or completed a course. 
+
+### Computing Hardware
+
+```{r echo = FALSE}
+questionText("HardwarePersonalProjectsSelect")
+```
+
+When working on projects at home, what are data scientists using? 
+
+```{r}
+chooseMultiple("HardwarePersonalProjectsSelect")
+```
+*See how the `chooseMultiple` function works [here](#function-chooseMultiple)*
+
+Similar to the workplace, Kaggle users are mostly working on Macbooks. 
+
+### Time Studying
+
+```{r echo = FALSE}
+questionText("TimeSpentStudying")
+```
+
+```{r}
+chooseOne("TimeSpentStudying")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+The majority of students are studying between 2 and 10 hours per week. 
+
+### Proving Knowledge
+
+```{r echo = FALSE}
+questionText("ProveKnowledgeSelect")
+```
+
+```{r}
+chooseOne("ProveKnowledgeSelect")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+
+Looks like hands-on experience either at work or in Kaggle competitions seems ideal for just over half of respondents. Obtaining a PhD or Master's degree is not terribly popular way to prove knowledge, with a combined total of 16% of responses. 
+
+### Looking for Job Openings
+
+```{r echo = FALSE}
+questionText("JobSearchResource")
+```
+
+**Note**: *This question was only shown to people who indicated that they are trying to enter the data science field*
+
+```{r}
+chooseOne("JobSearchResource")
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+Since there was a question about how currently employed people found their job and how unemployed people are looking for jobs, we can ask a follow-up question. Is there a difference between how people find jobs vs. how they look for them? 
+
+**Note:** *The code here uses a pre-defined list of employed statuses defined [here](#barriers).*
+
+**Also** *This process is essentially the same as the one used [here](#employedResources), so comments in this code chunk are minimal.*
+
+```{r}
+# List of options for currently employed
+currentEmployed <- c("A friend, family member, or former colleague told me", "I was contacted directly by someone at the company (e.g. internal recruiter)", "A general-purpose job board", "Some other way", "An external recruiter or headhunter", "I visited the company's Web site and found a job listing there", "A career fair or on-campus recruiting event", "A tech-specific job board")
+
+# New options (to match the options shown to people looking for work)
+newEmployed <- c("Friend, Family, Colleague", "Recruiter", "General Job Board", "Other", "Recruiter", "Company Website", "Career Fair or Recruiting Event", "Tech Job Board")
+
+employedJob <- cleanMCData %>% 
+  filter(!EmploymentStatus == "") %>% 
+  filter(!EmployerSearchMethod == "") %>% 
+  filter(CodeWriter == "Yes") %>% 
+  filter(grepl(paste(employed, collapse = "|"), EmploymentStatus)) %>% 
+  select("EmployerSearchMethod") %>% 
+  group_by(EmployerSearchMethod) %>% 
+  summarise(count = n()) %>% 
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  arrange(desc(count)) %>% 
+  mutate(EmployerSearchMethod = as.character(EmployerSearchMethod)) %>% 
+  # Replace the original selection with one of the new selections (to match those shown to people entering the field)
+  mutate(updated = str_replace(EmployerSearchMethod, fixed(currentEmployed), newEmployed)) %>% 
+  group_by(updated) %>%
+  summarise(sum = sum(count)) %>% 
+  arrange(desc(sum)) %>% 
+  mutate(employed = row_number())
+
+lookingJob <- cleanMCData %>% 
+  filter(!JobSearchResource == "") %>% 
+  filter(!EmploymentStatus == "") %>% 
+   filter(grepl("Not employed, but looking for work", EmploymentStatus) | 
+           # Is the respondent a student?
+           StudentStatus == "Yes" |
+           # Are they focused on learning Data Science skills?
+           grepl("Yes", LearningDataScience) |
+           # Are they planning to transition to Data Science?
+           CareerSwitcher == "Yes") %>% 
+  select("JobSearchResource") %>% 
+  group_by(JobSearchResource) %>% 
+  summarise(count = n()) %>% 
+  mutate(percent = (count / sum(count)) * 100) %>% 
+  arrange(desc(count)) %>% 
+  mutate(looking = row_number()) 
+
+
+levels(lookingJob$JobSearchResource) <- c(NA, "Friend, Family, Colleague", "Career Fair or Recruiting Event", "Company Website", "Recruiter", "Other", "General Job Board", "Tech Job Board")
+
+
+# Combine data frames
+jobSearching <- left_join(employedJob, lookingJob, by = c("updated" = "JobSearchResource")) %>% 
+  select(c("updated", "employed", "looking"))
+
+# Display results
+jobSearching
+```
+
+Looks like people entering the field are looking for work in all the wrong places!
+
+### Time Job Searching
+
+```{r echo = FALSE}
+questionText("JobHuntTime")
+```
+```{r}
+chooseOne("JobHuntTime") %>% 
+  mutate(JobHuntTime = as.factor(JobHuntTime))
+```
+*See how the `chooseOne` function works [here](#function-chooseOne)*
+
+A full 40% of respondents are not spending any time per week looking for work. 
+
+### Assessing Job Opportunities
+
+```{r echo = FALSE}
+questionText("JobFactorLearning")
+```
+
+The responses for this question were entered into this data frame in several different columns, each starting with "JobFactor". 
+
+```{r}
+# Create a list of the question numbers and text
+opportunities <- schema %>% 
+  # Keep only the columns with the below text string
+  filter(grepl("How are you assessing potential job opportunities?", Question, fixed = TRUE)) %>%
+  # Remove any columns that contain the word "FreeForm" in the number
+  filter(!grepl("FreeForm", Question, fixed = TRUE)) %>% 
+  # Split the question text at the hyphen
+  mutate(response = strsplit(as.character(Question), " - ")) %>% 
+  # Unnest the split question text
+  unnest(response) %>% 
+  # Filter out entries containing the first part of the question
+  filter(!grepl("How are you assessing potential job opportunities?", response, fixed = TRUE)) %>% 
+  # Remove unneccessary column
+  select(-2)
+
+# Create a separate data frame of the responses
+oppNames <- cleanMCData %>% 
+  # Keep only the columns that start with "JobFactor" and doesn't contain "FreeForm"
+  select(starts_with("JobFactor"), -contains("FreeForm")) %>%
+  # Restructure the data
+  gather(key = response, value = frequency) %>% 
+  # Filter out all of the non-responses
+  filter(!frequency == "") 
+
+# Combine the two data frames
+oppNamesChar <- left_join(oppNames, opportunities, by = c("response" = "Column")) %>%
+  # Group by the response and then the frequency they indicated
+  group_by(response.y, frequency) %>% 
+  # Count the number of each response
+  summarise(count = n()) %>% 
+  # Re-order the frequency factors
+  mutate(frequency = factor(frequency, levels = c("Not important", "Somewhat important", "Very Important"), ordered = TRUE)) %>% 
+  # Remove NA entries
+  filter(!is.na(response.y))
+
+levels(as.factor(oppNamesChar$response.y))
+
+# Plot
+ggplot(oppNamesChar, aes(x = frequency, y = count, fill = response.y)) + 
+  geom_bar(stat = "identity") + 
+  facet_wrap(~response.y) + 
+  ylab("Number of times a response was selected") + 
+  theme(legend.position="none") +
+  theme(axis.text.x = element_text(angle = 90, 
+                                   vjust = 0.5, 
+                                   hjust = 1))
+```
+It looks like "Opportunities for Professional Development", "How projects are managed", and "Compensation and benefits offered" are among the most important aspects of assessing job opportunities. 
+
+# Wrap-Up
+
+There is so much to learn from this survey and so many ways to cut the data. Don't forget, if you'd like to check out some interactive graphics of this data, check out the [report](https://www.kaggle.com/surveys/2017) or make your own [kernel](https://www.kaggle.com/about/datasets-awards/kernels). 

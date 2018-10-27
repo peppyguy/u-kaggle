@@ -1,0 +1,486 @@
+---
+title: 'Simple OJ Trees (and EDA)'
+author: "Ash S"
+output:
+  html_document:
+
+    number_sections: true
+    fig_caption: true
+    toc: true
+    fig_width: 7
+    fig_height: 4.5
+    theme: cosmo
+    highlight: tango
+    code_folding: hide
+---
+
+# Introduction
+
+This paper will look at a data set relating to sale information for 1070 customer purchases of Citrus Hill or Minute Maid brands of orange juice. The data will be looked at initially in exploratory data analysis.
+
+After the exploratory data analysis is complete, an initial classification tree and a pruned classification tree will be fitted to the data in order to predict Purchase, a categorical variable indicating whether the customer purchased Citrus Hill or Minute Maid Orange Juice. Classification trees are a form of decision trees.
+
+From reference [1], decision trees for regression and classification have a number of advantages over the more classical approaches, like multiple linear regression and logistic regression. 
+
+Trees are very easy to explain to people. Some people believe that decision trees more closely mirror human decision-making than do the regression and classification approaches. Trees can be displayed graphically, and are easily interpreted even by a non-expert (especially if they are small). Trees can easily handle qualitative predictors without the need to create dummy variables.
+
+Of course, there are some cons or disadvantages tress have over more classical approaches. For one, trees generally do not have the same level of predictive accuracy as some of the other regression and classification approaches. Additionally, trees can be very non-robust. In other words, a small change in the data can cause a large change in the final estimated tree.
+
+# Data
+
+As mentioned earlier, the orange juice (OJ) data set is about customer purchases for the Citrus Hill and Minute Maid brands of orange juice. This data is part of the ISLR package in R. The source of the data is from reference [4]. It contains 1070 customer purchases and 18 attributes.
+
+```{r, warning=FALSE, message=FALSE}
+rm(list=ls()) # Clear the workspace
+graphics.off() # Clear graphics
+
+library(ggplot2) # Plotting
+library(knitr) # kable
+library(GGally) # ggpairs plot
+library(ISLR) # Source of Data
+library(caret) # Showing Confusion Matrix Data
+library(purrr) # Organizing
+library(tidyr) # Organize/tidy data
+library(reshape) # Melt data for plotting
+library(tree) # CART
+
+tableCounter = 0
+figCounter = 0
+
+### Helper Functions
+
+# Mostly From https://stackoverflow.com/questions/23891140/r-how-to-visualize-confusion-matrix-using-the-caret-package
+draw_confusion_matrix <- function(cm, class1Label, class2Label) {
+
+  layout(matrix(c(1,1,2)))
+  par(mar=c(2,2,2,2))
+  plot(c(100, 345), c(300, 450), type = "n", xlab="", ylab="", xaxt='n', yaxt='n')
+  title('CONFUSION MATRIX', cex.main=2)
+
+  # create the matrix 
+  rect(150, 430, 240, 370, col='#009900')
+  text(195, 435, class1Label, cex=1.2)
+  rect(250, 430, 340, 370, col='#FF0000')
+  text(295, 435, class2Label, cex=1.2)
+  text(125, 370, 'Predicted', cex=1.3, srt=90, font=2)
+  text(245, 450, 'Actual', cex=1.3, font=2)
+  rect(150, 305, 240, 365, col='#FF0000')
+  rect(250, 305, 340, 365, col='#009900')
+  text(140, 400, class1Label, cex=1.2, srt=90)
+  text(140, 335, class2Label, cex=1.2, srt=90)
+
+  # add in the cm results 
+  res <- as.numeric(cm$table)
+  text(195, 400, res[1], cex=1.6, font=2, col='white')
+  text(195, 335, res[2], cex=1.6, font=2, col='white')
+  text(295, 400, res[3], cex=1.6, font=2, col='white')
+  text(295, 335, res[4], cex=1.6, font=2, col='white')
+
+  # add in the specifics 
+  plot(c(100, 0), c(100, 0), type = "n", xlab="", ylab="", main = "DETAILS", xaxt='n', yaxt='n')
+  text(10, 85, names(cm$byClass[1]), cex=1.2, font=2)
+  text(10, 70, round(as.numeric(cm$byClass[1]), 3), cex=1.2)
+  text(30, 85, names(cm$byClass[2]), cex=1.2, font=2)
+  text(30, 70, round(as.numeric(cm$byClass[2]), 3), cex=1.2)
+  text(50, 85, names(cm$byClass[5]), cex=1.2, font=2)
+  text(50, 70, round(as.numeric(cm$byClass[5]), 3), cex=1.2)
+  text(70, 85, names(cm$byClass[6]), cex=1.2, font=2)
+  text(70, 70, round(as.numeric(cm$byClass[6]), 3), cex=1.2)
+  text(90, 85, names(cm$byClass[7]), cex=1.2, font=2)
+  text(90, 70, round(as.numeric(cm$byClass[7]), 3), cex=1.2)
+
+  # add in the accuracy information 
+  text(30, 35, names(cm$overall[1]), cex=1.5, font=2)
+  text(30, 20, round(as.numeric(cm$overall[1]), 3), cex=1.4)
+  text(70, 35, names(cm$overall[2]), cex=1.5, font=2)
+  text(70, 20, round(as.numeric(cm$overall[2]), 3), cex=1.4)
+}  #End of Draw Confusion Matrix
+```
+
+The 18 attributes and a short description of each attribute or variable is provided below.
+
+<center>------------------------------
+`r tableCounter =  tableCounter + 1`
+Table `r tableCounter`: Variable Names and Descriptions of the Data Set
+</center>
+```{r}
+Variable = c("Purchase", "WeekofPurchase", "StoreID", "PriceCH", "PriceMM", "DiscCH", "DiscMM", "SpecialCH","SpecialMM","LoyalCH","SalePriceMM","SalePriceCH","PriceDiff","Store7","PctDiscMM","PctDiscCH","ListPriceDiff","STORE")
+Description = c("A factor with levels CH and MM indicating whether the customer purchased Citrus Hill or Minute Maid Orange Juice",
+                "Week of purchase",
+                "Store ID",
+                "Price charged for CH","Price charged for MM",
+                "Discount offered for CH","Discount offered for MM", 
+                "Indicator of special on CH","Indicator of special on MM",
+                "Customer brand loyalty for CH",
+                "Sale price for MM","Sale price for CH",
+                "Sale price of MM less sale price of CH",
+                "A factor with levels No and Yes indicating whether the sale is at Store 7",
+                "Percentage discount for MM","Percentage discount for CH",
+                "List price of MM less list price of CH",
+                "Which of 5 possible stores the sale occured at")
+df = data.frame(Variable, Description)
+kable(df, format='markdown')
+```
+<center>------------------------------
+</center>
+
+# Analysis
+
+The OJ data will be looked at in exploratory data analysis. Then classification trees will be fitted to the data.
+
+In order to properly assess the fit of the trees, the data will be split into a training and testing data set. 
+
+First, the training set will be used to fit an initial classification tree predicting Purchase with all the other variables as predictors. Various aspects of the initial classification tree will be looked at. The initial classification tree will also be used to predict values based on the test set data to see how well the tree performed.
+
+Once that is complete, cross-validation will be performed on the initial tree in order to determine the optimal tree size. Then, a pruned tree will be fitted. The error rates between the pruned tree and the initial classification tree will be compared.
+
+## Exploratory Data Analysis
+
+In this section, we will explore the data prior to any modeling. Some numerical and graphical summaries of the OJ data will be produced and observations/patterns will be noted. 
+
+Let us take a look at the numerical summary of the OJ data that is produced by R.
+<center>------------------------------
+</center>
+```{r}
+summary(OJ)
+```
+<center>------------------------------
+</center>
+
+Here, one can notice that Purchase is a categorical variable (factor in R) with two categories, CH and MM for Citrus Hill and Minute Maid respectively. Recall, this variable indicates whether the customer purchased CH or MM Orange Juice. 615 customers purchased CH, while the other 417 purchased MM. This is about a 60%/40% split. This will be used as the response variable later for prediction.
+
+Also, notice how some of the variables have 5 number summaries (Min., 1st Qu, Median, Mean, 3rd Qu., Max.), when the variables are more categorical in nature. The 5 number summaries are not as meaningful for categorical variables. 
+
+Store, StoreID, Special CH, and Special MM are examples of the categorical variables with 5 number summaries. These variables will be converted to categories. The summary from R is printed again with these changes.
+
+<center>------------------------------
+</center>
+```{r}
+OJ.orig = OJ # Save off original data 
+catVars = c("STORE","StoreID","SpecialCH","SpecialMM") # Categorical variables that need changing
+OJ[catVars] = lapply(OJ[catVars], as.factor)
+summary(OJ)
+```
+<center>------------------------------  
+</center>
+
+One can see SpecialCH, SpecialMM, StoreID, and STORE now show more meaningful data in the summary.
+
+Looking at the store variables (StoreID, Store7, STORE), one can see they are all related. For one, STORE and StoreID have the same number of customers per store for stores 1-4. The fifth store also has the same number of customers at 356. The only difference seems to be an index of 0 vs a store ID of 7. 
+From the Store7 variable, one can see 356 again as the number of customers who shopped ("Yes") at store 7, while 714 is all the other customers who did not shop at store 7. 714 is the sum of customers who shopped at stores 1 to 4.
+
+Also, the SpecialCH and SpecialMM show that most purchases did not include a special on either orange juice brand.
+
+These various aspects can also be seen visually below with bar plots.
+
+<center>------------------------------  
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Data Distributions for Categorical Variables of Data Set
+</center>
+```{r, warning=FALSE, results='hide'}
+OJ %>%
+  keep(is.factor) %>% 
+  gather() %>% 
+  ggplot(aes(value, fill=value)) +
+    facet_wrap(~ key, scales = "free") +
+    geom_bar() +
+    theme(legend.position="none")
+```
+<center>------------------------------
+</center>
+
+As was just mentioned, we can visually see STORE and StoreID are essentially holding the same information with only indexing versus ID being the difference. Store7 is essentially a binary version of StoreID with 7 being "Yes" and sum of customers in the other stores being "No".
+
+With the categorical data shown, let us visually take a look at the remaining variables in the data set that are more continuous in nature.
+
+<center>------------------------------  
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Visual Look at the Numeric/Continuous Variables in Data Set
+</center>
+```{r, warning=FALSE, results='hide',fig.height=8,fig.width=10}
+OJ %>%
+  keep(is.numeric) %>% 
+  gather() %>% 
+  ggplot(aes(value,fill=key)) +
+    facet_wrap(~ key, scales = "free") +
+    geom_histogram(bins=sqrt(nrow(OJ))) +
+    theme(legend.position="none")
+```
+<center>------------------------------
+</center>
+
+In Figure `r figCounter`, we see some distributions that are also very similar or the same. For example, DiscCH and PctDiscCH look to have almost the same distributions. Also, the PriceDiff (Sale price of MM less sale price of CH) is directly derived from SalePriceCH and SalePriceMM, but it provides a visual representation that MM was usually more expensive than CH in terms of sale price.
+
+Overall, one can see that many variables can be derived from another variable and/or have similar distributions. 
+
+A method to visualize the relationships between variables is with the pairs plot as shown below; however, pairs plot become harder to read when about 15 variables are reached. Here there are 18 variables in the OJ data set.
+
+<center>------------------------------  
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Visual Look at the Data Set with Pairs Plot Colored by Purchase
+</center>
+```{r, warning=FALSE, results='hide',fig.height=10,fig.width=10}
+p = ggpairs(OJ, 
+        aes(colour = Purchase, alpha=0.9),
+        upper = list(continuous = wrap("cor", size = 2)),
+        diag = list(continuous = "barDiag"),
+        lower = list(continuous = "smooth"))
+        
+suppressMessages(print(p))
+```
+<center>------------------------------  
+</center>
+
+As was just mentioned, having more than 15 variables in the pairs plot makes it a little hard to read and decipher what is going on. If one looks closely enough, one can observe patterns and trends; however, we will just reduce the number variables to the numeric (continuous) variables and Purchase, the response variable. This will remove the categorical variables (aside from Purchase) from the pairs plot. The resulting pairs plot will be easier to decipher
+
+<center>------------------------------  
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Visual Look at the Numeric and Purchase Variables in Data Set with Pairs Plot Colored by Purchase
+</center>
+```{r, warning=FALSE, results='hide',fig.height=10,fig.width=10}
+numericCols = sapply(OJ, is.numeric)
+numericCols["Purchase"] = TRUE # add Purchase (The response variable)
+p = ggpairs(OJ[,numericCols], # Get Numeric Cols and then cateogircal?
+        aes(colour = Purchase, alpha=0.9),
+        upper = list(continuous = wrap("cor", size = 2)),
+        diag = list(continuous = "barDiag"),
+        lower = list(continuous = "smooth"))
+suppressMessages(print(p))
+```
+<center>------------------------------
+</center>
+
+From Figure `r figCounter`, the red/pink color corresponds with CH and the blue/teal color corresponds with MM. Starting with the top row, one can see how purchase is distributed by MM and CH across the numeric variables in the box plots. LoyalCH has the easiest to see distinction between CH and MM. This is also seen in the diagonal for LoyalCH, where the blue (MM) customers tend to have lower LoyalCH and the red/pink (CH) customers tend to have higher values of LoyalCH.
+
+Also, one can see almost perfect correlation (0.99) between two pairs of variables, PctDiscMM and DiscMM along with PctDiscCH and DiscCH. The two pairs of variables show almost a straight line in the bottom left scatter plots. These two pairs also have an overall correlation value of around 0.99 shown in the top right portion. 
+
+Then, there are a couple of other highly correlated pairs (>0.8 in magnitude) of variables as well, such as PctDicMM and PriceDiff. These show a general linear trend between the two variables that is easy to distinguish in the scatter plots.
+
+With the numerical variables looked at, let us take a look at the categorical data colored by Purchase.
+
+<center>------------------------------  
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Data Distributions for Categorical Variables of Data Set Colored by Purchase
+</center>
+```{r, warning=FALSE, results='hide'}
+# Melt the data together by Purchase and then plot barplots and color by Purchase
+melted = melt(OJ[sapply(OJ,is.factor)],id.vars="Purchase")
+ggplot(melted, aes(x = value, fill = Purchase)) +
+    geom_bar()+
+    facet_wrap(~variable,scales = "free")
+```
+<center>------------------------------  
+</center>
+
+Recall, there is about a 60%/40% split between CH and MM purchases overall, so one could consider that the normal proportion for CH and MM if the variable had no influence. From Figure `r figCounter`, one can see that CH has closer to 80% of the values for certain aspects like Store 4 and 7 in Store ID along with when there is a special going on for CH (SpecialCH = 1).
+
+With the data explored, let us move on to classification trees.
+
+## Classification Trees
+
+Classification trees are a type of decision tree. From reference [5], A decision tree is a flowchart-like structure in which each internal node represents a "test" on an attribute (like LoyalCH), each branch represents the outcome of the test, and each leaf node represents a class label (decision taken after computing all attributes). More details on classification trees can be found in reference [1] and [5].
+
+In order to properly evaluate the performance of a classification tree on these data, we must estimate the test error rather than simply computing the training error as stated in reference [1]. 
+
+With at being said, we split the observations into a training set and a test set. Here, the training set will have 800 randomly sampled (without replacement) observations from the data set and the test set will be the rest of the unsampled observations.
+
+```{r}
+set.seed(8)
+train=sample(1:nrow(OJ), 800)
+OJ.test=OJ[-train,]
+Purchase.test=OJ$Purchase[-train]
+```
+
+Moving on, we will be looking at two classification trees. The first initial classification tree will be fitted to the training data with Purchase as the response and the other variables as predictors. The second tree will be pruned based on the initial tree. Various aspects of each tree will be looked at. Also, a comparison between the two trees' training error rates and test error rates will be performed.
+
+### Initial Classification Tree
+
+Here, we fit a classification tree on the training set with Purchase as the response and the other variables as predictors. There are a number of methods to split a node. In this case, the split which maximizes the reduction in impurity is chosen. Then, the data set is split and the process repeated. Splitting continues until the terminal nodes are too small or too few to be split. The following is some of the summary statistics for the classification tree fit on the training set.
+
+<center>------------------------------
+</center>
+```{r}
+set.seed(8)
+tree.oj = tree(Purchase~.,OJ,subset=train)
+summary(tree.oj)
+```
+<center>------------------------------
+</center>
+
+Below the "Variables actually used in tree construction" row, one can see that only 4 variables (LoyalCH, PriceDiff, SpecialCH, ListPriceDiff) were used out of the 17 predictors given. There are 8 terminal nodes in this tree and a residual mean deviance of 0.7305. From the last row in the summary, there are 130 observations from the training set of 800 that were misclassified. This resulted in about a 16.25% misclassification error rate.
+
+Also, we can get more information on each node and how it was split by looking at the tree text output from R.
+
+<center>------------------------------
+</center>
+```{r}
+tree.oj
+```
+<center>------------------------------
+</center>
+
+From reference [1], R prints output corresponding to each branch of the tree. R displays the split criterion, the number of observations in that branch, the deviance, the overall prediction for the branch, and the fraction of observations in that branch that take on the given values. Branches that lead to terminal nodes are indicated using asterisks.
+
+Here, we are concerned with Purchases (CH or MM). Let us interpret a terminal node indicated by an asterisk. 
+
+Looking at "7) LoyalCH > 0.764572 258   97.070 CH ( 0.95349 0.04651 ) *", gives a few pieces of information. It means the node was split on LoyalCH greater than 0.764572 (LoyalCH > 0.764572) in the parent node, so this node contains 258 observations that have a LoyalCH greater than 0.764572. 95.349% (0.95349) of the observations have a response value of CH, while 4.651% (0.04651) of the observations have a response value of MM. The 97.070 corresponds to the deviance at this node.
+
+Another method to interpret the tree and nodes is with a visual representation, which is one of the advantages of a using a tree model.
+
+<center>------------------------------  
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Initial Classification Tree based on Training Data
+</center>
+```{r}
+plot(tree.oj)
+text(tree.oj,pretty=0)
+```
+<center>------------------------------  
+</center>
+
+From Figure `r figCounter` showing the tree, the most important indicator of Purchase appears to be LoyalCH, since the first few branches differentiate between varying levels of LoyalCH. This would make sense, as one could reasonably see that loyal customers to CH would tend to buy more CH orange juice. This can be seen by looking at the right side of the plot/tree where the greater than 0.5036 LoyalCH customers are. The tree predicted customers would purchase CH most of time for these customers. This observation of LoyalCH being a potential indicator for CH (vs MM) purchases was also noted in the exploratory data analysis.
+
+Now, the predicted classes (CH or MM Purchases) of the test set were calculated from the tree model fitted on the training set. Afterwards, we compare the actual Purchase response in the test set with the predicted values and created a confusion matrix.
+
+The confusion matrix, which is a table that can show the number of correct predictions from the model (in the diagonals) and the number of incorrect predictions (in the off diagonals), helps give an overall view of how well a classifier has performed. A number of statistics can be calculated from the confusion matrix as well.
+
+<center>------------------------------
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Initial Classification Tree Results on Test Data
+</center>
+```{r}
+tree.pred=predict(tree.oj,OJ.test,type="class")
+cmClassTree = confusionMatrix(data = factor(tree.pred), reference = Purchase.test)
+draw_confusion_matrix(cmClassTree, "CH","MM")
+propOfCorrectChPredTree = cmClassTree$table[1]/(cmClassTree$table[1]+cmClassTree$table[3])
+propOfCorrectMmPredTree = cmClassTree$table[4]/(cmClassTree$table[4]+cmClassTree$table[2])
+```
+<center>------------------------------
+</center>
+
+Looking at the diagonals (green rectangles) in Figure `r figCounter`, we see that the tree correctly predicted `r cmClassTree$table[1]` customers who bought CH and `r cmClassTree$table[4]` customers that bought MM. On the other hand, the tree incorrectly predicted `r cmClassTree$table[2]` customers who actually bought CH instead of the predicted MM. Similarly, the model predicted CH for `r cmClassTree$table[3]` customers who actually bought MM.
+
+For accuracy, `r round(cmClassTree$overall["Accuracy"],4) * 100`% of the OJ brands in Purchase have been correctly predicted for the test data set. With the accuracy being `r round(cmClassTree$overall["Accuracy"],4) * 100`%, the test error rate is `r  round((1-cmClassTree$overall["Accuracy"]),4)* 100`%. `r  round((1-cmClassTree$overall["Accuracy"]),4)* 100`% is close to the 16.25% training (misclassification) error rate on the training set.
+
+The confusion matrix shows that when the tree predicts that the Purchase is CH, it is correct `r round(propOfCorrectChPredTree,4) * 100`% of the time. When it predicts that Purchase is MM, it has a `r round(propOfCorrectMmPredTree,4) * 100`% accuracy.
+
+## Pruned Classification Tree
+
+Now, we consider whether pruning the tree might lead to improved results. First, cross-validation is performed in order to determine the optimal level of tree complexity. Cost complexity pruning is used in order to select a sequence of trees for consideration as mentioned in reference [1]. For this paper, the classification error rate is used to guide the cross-validation and pruning process, rather than the deviance. 
+
+A plot of the tree size and the cross-validated classification error rate is given below.
+
+<center>------------------------------
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Cross-validation Error Rate Results by Tree Size
+</center>
+```{r}
+set.seed(1)
+cv.oj =cv.tree(tree.oj, FUN=prune.misclass)
+plot(cv.oj$size,cv.oj$dev,type="b", xlab = "Tree Size (# of Terminal Nodes)",
+     ylab="CV Classification Error") # plot CV error (dev) and tree size
+```
+<center>------------------------------
+</center>
+
+In this case, the tree with 8 terminal nodes is selected, as it had the lowest cross-validation classification error rate. This is the original initial classification tree looked at earlier. Even with this, we can still create a pruned tree with five terminal nodes. Below is some of the summary statistics produced by R for the pruned classification tree with 5 terminal nodes.
+
+<center>------------------------------
+</center>
+```{r}
+prune.oj=prune.tree(tree.oj,best=5)
+summary(prune.oj)
+```
+<center>------------------------------
+</center>
+
+Looking below the "Variables actually used in tree construction" row, one can see that only 2 variables (LoyalCH, ListPriceDiff) were used compared to the 4 used earlier. There are 5 terminal nodes in this pruned tree and a residual mean deviance of 0.8103. From the last row in the summary, there are 158 observations from the training set of 800 that were misclassified. This resulted in about a 19.75% misclassification error rate.
+
+Let us visualize the tree with the figure below.
+
+<center>------------------------------  
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Pruned Classification Tree based on Initial Tree
+</center>
+```{r}
+plot(prune.oj)
+text(prune.oj,pretty=0)
+```
+<center>------------------------------
+</center>
+
+Like before, the most important indicator of Purchase appears to be LoyalCH, since the most of the branches differentiate between varying levels of LoyalCH. 
+
+Now, the predicted classes (CH or MM Purchases) of the test set were calculated from the pruned tree model. Afterwards, we compare the actual Purchase response in the test set with the predicted values and create a confusion matrix shown below.
+
+<center>------------------------------
+`r figCounter = figCounter + 1`
+Figure `r figCounter`: Pruned Classification Tree Results on Test Data
+</center>
+```{r}
+tree.pred=predict(prune.oj, OJ.test,type="class")
+cmClassTree2 = confusionMatrix(data = factor(tree.pred), reference = Purchase.test)
+draw_confusion_matrix(cmClassTree2, "CH","MM")
+propOfCorrectChPredTree2 = cmClassTree2$table[1]/(cmClassTree2$table[1]+cmClassTree2$table[3])
+propOfCorrectMmPredTree2 = cmClassTree2$table[4]/(cmClassTree2$table[4]+cmClassTree2$table[2])
+```
+<center>------------------------------
+</center>
+
+Looking at the diagonals (green rectangles) in Figure `r figCounter`, we see that the tree correctly predicted `r cmClassTree2$table[1]` customers who bought CH and `r cmClassTree2$table[4]` customers that bought MM. On the other hand, the tree incorrectly predicted `r cmClassTree2$table[2]` customers who actually bought CH instead of the predicted MM. Similarly, the model predicted CH for `r cmClassTree2$table[3]` customers who actually bought MM.
+
+For accuracy, `r round(cmClassTree2$overall["Accuracy"],4) * 100`% of the OJ brands in Purchase have been correctly predicted for the test data set. With the accuracy being `r round(cmClassTree2$overall["Accuracy"],4) * 100`%, the test error rate is `r  round((1-cmClassTree2$overall["Accuracy"]),4)* 100`%. `r  round((1-cmClassTree2$overall["Accuracy"]),4)* 100`% is a few percentage points off from the 19.75% training (misclassification) error rate on the training set.
+
+The confusion matrix shows that when the tree predicts that Purchase is CH, it is correct `r round(propOfCorrectChPredTree2,4) * 100`% of the time. When it predicts that Purchase is MM, it has a `r round(propOfCorrectMmPredTree2,4) * 100`% accuracy.
+
+## Comparison of both Trees
+
+Let us compare the training error rates and the test error rates of the two classification trees looked at. The table below summarizes these values.
+
+<center>------------------------------
+`r tableCounter =  tableCounter + 1`
+Table `r tableCounter`: Tree Comparison
+</center>
+```{r}
+rowLabels = c("Initial (Unpruned) Tree", "Pruned Tree")
+# Agrregate desored data
+accuracy = c(round(cmClassTree$overall["Accuracy"],4), round(cmClassTree2$overall["Accuracy"],4))
+trainingError = c( 0.1625, 0.1975)
+testingError = c(round((1-cmClassTree$overall["Accuracy"]),4),round((1-cmClassTree2$overall["Accuracy"]),4))
+# Create dataframe and display it in table format
+df = data.frame(accuracy, trainingError, testingError, row.names = rowLabels)
+colnames(df) = c("Accuracy", "Training Error", "Testing Error")
+kable(df, format='markdown')
+```
+<center>------------------------------
+</center>
+
+From Table `r tableCounter`, the initial (unpruned) tree had better results with regards to accuracy and error rate compared to the pruned tree. The initial tree had higher accuracy, which is equivalent to having the lower test error rate. The initial tree also had a lower training error rate. In other words, the pruned tree had the higher testing and training error rates along with the lower accuracy when compared with the initial (unpruned) tree.
+
+The outcome was expected to a certain extent as the lowest cross-validation classification error rate belonged to the tree with the most nodes (or the initial unpruned tree).
+
+# Conclusion
+
+This paper looked at a data set relating to customer purchases of orange juice for the Citrus Hill and Minute Maid brands. During exploratory data analysis, a number of observations were noted, including how some variables closely matched each other or how some pairs of variables were highly correlated with each other.
+
+The data was split into a training and testing data set in order to properly test the fitted classification trees. The training set consisted of 800 random observations, while the test set contained the rest of the observations.
+
+An initial classification tree was fitted to the training data in order to predict Purchase, indicating if a customer purchased Citrus Hill or Minute Maid Orange Juice. The summary and visual representation of this tree were analyzed and interpreted. This was an 8 (terminal) node tree that had an accuracy of 83.7% on the test data with a training error rate of 16.25% (misclassification rate on training set).
+
+Cross-validation based on classification error rate was performed on the initial tree to determine the optimal tree size to prune to; however, the largest number of (terminal) nodes of 8 was considered the best since it had the lowest cross-validated classification error rate. This was also seen visually in a tree size versus classification error plot. Regardless, a pruned tree with 5 terminal nodes was constructed. It had a 77.8% accuracy on the test data.
+
+Comparing the two trees, the pruned tree fared worse with a higher training error rate (19.75% vs 16.25%) and a higher test error rate (22.22% vs 16.3%). In other words, the unpruned tree (or the initial tree) was better at predicting Purchase than the pruned tree with better test data accuracy (83.7% vs 77.8%).
+
+In addition, it should be noted that more complex tree based techniques, such as random forest and gradient boosting (xgboost, lightgb, catboost, etc.), utilize multiple decision trees and usually have more accurate results; however, it is currently out of the scope of this current paper and will not be discussed in detail here.
+
+Regardless, I hope you enjoyed going through the Kernel! Let me know what you think via a comment (and/or an upvote)!
+
+# References and Sources
+
+[1] James, G., Witten, D., Hastie, T., and Tibshirani, R. (2013) An Introduction to Statistical Learning with applications in R, www.StatLearning.com, Springer-Verlag, New York
+
+[2] https://stackoverflow.com/questions/23891140/r-how-to-visualize-confusion-matrix-using-the-caret-package
+
+[3] Stine, Robert A., Foster, Dean P., Waterman, Richard P. Business Analysis Using Regression (1998). Published by Springer.
+
+[4] https://en.wikipedia.org/wiki/Decision_tree

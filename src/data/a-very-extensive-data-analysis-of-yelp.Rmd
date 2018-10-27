@@ -1,0 +1,733 @@
+---
+title: "Yelp Data Analysis"
+author: "Bukun"
+output:
+  html_document:
+    number_sections: true
+    toc: true
+    fig_width: 10
+    code_folding: hide
+    fig_height: 4.5
+    theme: cosmo
+    highlight: tango
+---
+
+#Introduction
+
+>
+This dataset is a subset of Yelp's businesses, reviews, and user data. It was originally put together for the Yelp Dataset Challenge which is a chance for students to conduct research or analysis on Yelp's data and share their discoveries. In the dataset you'll find information about businesses across 11 metropolitan areas in four countries.
+
+A great playground for **Data Analysis**              
+
+I am having lots of fun doing **EDA, Text Mining and Geospatial Analysis**. Please check out this kernel and hope you will have fun reading this as much as I had creating it.      
+
+
+
+
+#Load Libraries
+
+```{r,message=FALSE,warning=FALSE}
+
+library(tidyverse)
+library(stringr)
+library(lubridate)
+library('wordcloud')
+library(tidytext)
+library(DT)
+library(leaflet)
+
+library(igraph)
+library(ggraph)
+
+```
+
+#Read the data
+
+```{r,message=FALSE,warning=FALSE}
+
+rm(list=ls())
+
+fillColor = "#FFA07A"
+fillColor2 = "#F1C40F"
+
+reviews <- read_csv('../input/yelp_review.csv')
+business <- read_csv("../input/yelp_business.csv")
+
+
+```
+
+#Business data
+
+```{r,message=FALSE,warning=FALSE}
+
+datatable(head(business), style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+```
+
+#Most Popular Categories
+
+The most popular categories of business are plotted in the bar plot        
+
+
+```{r,message=FALSE,warning=FALSE}
+
+categories = str_split(business$categories,";")
+categories = as.data.frame(unlist(categories))
+colnames(categories) = c("Name")
+
+categories %>%
+  group_by(Name) %>%
+  summarise(Count = n()) %>%
+  arrange(desc(Count)) %>%
+  ungroup() %>%
+  mutate(Name = reorder(Name,Count)) %>%
+  head(10) %>%
+  
+  
+  ggplot(aes(x = Name,y = Count)) +
+  geom_bar(stat='identity',colour="white", fill =fillColor2) +
+  geom_text(aes(x = Name, y = 1, label = paste0("(",Count,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Name of Category', y = 'Count', 
+       title = 'Top 10 Categories of Business') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+
+#Top Ten Cities with the most User Reviews
+
+We show the Top Ten Cities which has the most User Reviews
+
+```{r,message=FALSE,warning=FALSE}
+
+business %>%
+  group_by(city) %>%
+  summarise(Count = n()) %>%
+  arrange(desc(Count)) %>%
+  ungroup() %>%
+  mutate(City = reorder(city,Count)) %>%
+  head(10) %>%
+  
+  ggplot(aes(x = City,y = Count)) +
+  geom_bar(stat='identity',colour="white", fill =fillColor) +
+  geom_text(aes(x = City, y = 1, label = paste0("(",Count,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'City', y = 'Count of Reviews', 
+       title = 'Top 10 Cities with the most Reviews') +
+  coord_flip() + 
+  theme_bw()
+
+
+```
+
+#Map of the business reviews in Las vegas
+
+```{r,message=FALSE,warning=FALSE}
+
+LasvegasCoords = business %>% filter(city == "Las Vegas")
+
+center_lon = median(LasvegasCoords$longitude,na.rm = TRUE)
+center_lat = median(LasvegasCoords$latitude,na.rm = TRUE)
+
+leaflet(LasvegasCoords) %>% addProviderTiles("Esri.NatGeoWorldMap") %>%
+  addCircles(lng = ~longitude, lat = ~latitude,radius = ~sqrt(review_count))  %>%
+  
+  # controls
+  setView(lng=center_lon, lat=center_lat,zoom = 13)
+
+```
+
+
+
+#Business with most Five Star Reviews from Users
+
+The following plot shows the names of business with the most Five Star Reviews
+
+```{r,message=FALSE,warning=FALSE}
+
+most5StarsReviews = reviews %>%
+  filter(stars == 5) %>%
+  group_by(business_id) %>%
+  summarise(Count = n()) %>%
+  arrange(desc(Count)) %>%
+  ungroup() %>%
+  mutate(BusinessID = reorder(business_id,Count)) %>%
+  head(10)
+
+most5StarsReviews = inner_join(most5StarsReviews,business)
+
+most5StarsReviews %>%
+  mutate(name = reorder(name,Count)) %>%
+  ggplot(aes(x = name,y = Count)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_text(aes(x = name, y = 1, label = paste0("(",Count,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Name of the Business', 
+       y = 'Count', 
+       title = 'Name of the Business and Count') +
+  coord_flip() +
+  theme_bw()
+
+```
+
+
+#**"Mon Ami Gabi"**
+
+The location and category of the most liked business **Mon Ami Gabi** is shown below            
+
+
+```{r,message=FALSE,warning=FALSE}
+
+mon_ami_gabi = business %>% filter(business_id == "4JNXUYY8wbaaDmk3BPzlWw") %>%
+  select(name,neighborhood,city,state,postal_code,categories)
+
+datatable(head(mon_ami_gabi), style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+```
+
+## Word Cloud of Mon Ami Gabi
+
+A word cloud is a graphical representation of frequently used words in the text. The height of each word in this picture is an indication of frequency of occurrence of the word in the entire text. The words `steak, service, vegas,french,patio,bellagio,delicious, nice` are the words which have been used very frequently.          
+
+
+```{r,message=FALSE,warning=FALSE}
+
+createWordCloud = function(train)
+{
+  train %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word) %>%
+  count(word,sort = TRUE) %>%
+  ungroup()  %>%
+  head(30) %>%
+  
+  with(wordcloud(word, n, max.words = 30,colors=brewer.pal(8, "Dark2")))
+}
+
+createWordCloud(reviews %>%
+  filter(business_id == "4JNXUYY8wbaaDmk3BPzlWw"))
+
+```
+
+##Top Ten most common Words of the business **"Mon Ami Gabi"**
+
+We examine the Top Ten Most Common words and show them in a bar graph. The words `steak, service, vegas,french,patio,bellagio,delicious, nice` are the words which have been used very frequently.                 
+
+```{r,message=FALSE,warning=FALSE}
+
+reviews %>%
+  filter(business_id == "4JNXUYY8wbaaDmk3BPzlWw") %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word) %>%
+  filter(!word %in% c('food','restaurant')) %>%
+  count(word,sort = TRUE) %>%
+  ungroup() %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>%
+  head(10) %>%
+  
+  ggplot(aes(x = word,y = n)) +
+  geom_bar(stat='identity',colour="white", fill =fillColor) +
+  geom_text(aes(x = word, y = 1, label = paste0("(",n,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Word', y = 'Word Count', 
+       title = 'Word Count') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+## Sentiment Analysis - Postive and Not So Postive Words of **"Mon Ami Gabi"**
+
+We display the Positive and Not So Positive words used by reviewers for the business `Mon Ami Gabi`.We have used the **AFINN sentiment lexicon**, which provides numeric positivity scores for each word, and visualize it with a bar plot.
+
+`Breathtaking,funnier,fun,fantastic,fabulous,ecstatic,brilliant,awesome,amazing` are some of the postive words that we have seen in the reviews of the business.        
+
+
+```{r,message=FALSE,warning=FALSE}
+
+positiveWordsBarGraph <- function(SC) {
+  contributions <- SC %>%
+    unnest_tokens(word, text) %>%
+    count(word,sort = TRUE) %>%
+    ungroup() %>%
+    
+    inner_join(get_sentiments("afinn"), by = "word") %>%
+    group_by(word) %>%
+    summarize(occurences = n(),
+              contribution = sum(score))
+  
+  contributions %>%
+    top_n(20, abs(contribution)) %>%
+    mutate(word = reorder(word, contribution)) %>%
+    head(20) %>%
+    ggplot(aes(word, contribution, fill = contribution > 0)) +
+    geom_col(show.legend = FALSE) +
+    coord_flip() + theme_bw()
+}
+
+positiveWordsBarGraph(reviews %>%
+                        filter(business_id == "4JNXUYY8wbaaDmk3BPzlWw"))
+
+
+```
+
+## Most Common Bigrams of **"Mon Ami Gabi"**
+
+A Bigram is a collection of Two words. We examine the most common Bigrams and plot them in a bar plot.
+
+```{r,message=FALSE,warning=FALSE}
+
+count_bigrams <- function(dataset) {
+  dataset %>%
+    unnest_tokens(bigram, text, token = "ngrams", n = 2) %>%
+    separate(bigram, c("word1", "word2"), sep = " ") %>%
+    filter(!word1 %in% stop_words$word,
+           !word2 %in% stop_words$word) %>%
+    count(word1, word2, sort = TRUE)
+}
+
+
+visualize_bigrams <- function(bigrams) {
+  set.seed(2016)
+  a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+  
+  bigrams %>%
+    graph_from_data_frame() %>%
+    ggraph(layout = "fr") +
+    geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
+    geom_node_point(color = "lightblue", size = 5) +
+    geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+    theme_void()
+  
+}
+
+visualize_bigrams_individual <- function(bigrams) {
+  set.seed(2016)
+  a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+  
+  bigrams %>%
+    graph_from_data_frame() %>%
+    ggraph(layout = "fr") +
+    geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a,end_cap = circle(.07, 'inches')) +
+    geom_node_point(color = "lightblue", size = 5) +
+    geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+    theme_void()
+}
+
+reviews %>%
+  filter(business_id == "4JNXUYY8wbaaDmk3BPzlWw") %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2) %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  filter(!word1 %in% stop_words$word,
+         !word2 %in% stop_words$word) %>%
+  unite(bigramWord, word1, word2, sep = " ") %>%
+  group_by(bigramWord) %>%
+  tally() %>%
+  ungroup() %>%
+  arrange(desc(n)) %>%
+  mutate(bigramWord = reorder(bigramWord,n)) %>%
+  head(10) %>%
+  
+  ggplot(aes(x = bigramWord,y = n)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor2) +
+  geom_text(aes(x = bigramWord, y = 1, label = paste0("(",n,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Bigram', 
+       y = 'Count', 
+       title = 'Bigram and Count') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+
+##Relationship among words
+
+We explore the different relationship among the various words in `Mon Ami Gabi` here through a network graph          
+
+
+```{r,message=FALSE,warning=FALSE}
+
+bigramsMonAmiGabi <- reviews %>%
+  filter(business_id == "4JNXUYY8wbaaDmk3BPzlWw") %>%
+  count_bigrams()
+
+bigramsMonAmiGabi %>%
+  filter(n > 50) %>%
+  visualize_bigrams()
+
+```
+
+###Relationship of words with **steak**
+
+The following network diagram shows the words associated with the word **steak**       
+
+```{r,message = FALSE,warning = FALSE}
+
+bigramsMonAmiGabi %>%
+  filter(word1 == "steak" | word2 == "steak") %>%
+  filter(n > 30) %>%
+  visualize_bigrams()
+
+```
+
+###Relationship of words with **french**
+
+The following network diagram shows the words associated with the word **french**       
+
+```{r,message = FALSE,warning = FALSE}
+
+bigramsMonAmiGabi %>%
+  filter(word1 == "french" | word2 == "french" ) %>%
+  filter(n > 30) %>%
+  visualize_bigrams()
+
+```
+
+# **Bacchanal Buffet**
+
+The location and category of the most liked business **Bacchanal Buffet** is shown below            
+
+
+```{r,message=FALSE,warning=FALSE}
+
+bacchanal = business %>% filter(business_id == "RESDUcs7fIiihp38-d6_6g") %>%
+  select(name,neighborhood,city,state,postal_code,categories)
+
+datatable(head(bacchanal), style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+```
+
+## Word Cloud of **Bacchanal Buffet**
+
+```{r,message=FALSE,warning=FALSE}
+
+bacchanal = reviews %>% filter(business_id == "RESDUcs7fIiihp38-d6_6g")
+
+createWordCloud(bacchanal)
+
+```
+
+
+##Top Ten most common Words of the business **"Bacchanal Buffet"**
+
+We examine the Top Ten Most Common words and show them in a bar graph.                     
+
+```{r,message=FALSE,warning=FALSE}
+
+bacchanal %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word) %>%
+  filter(!word %in% c('food','restaurant')) %>%
+  count(word,sort = TRUE) %>%
+  ungroup() %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>%
+  head(10) %>%
+  
+  ggplot(aes(x = word,y = n)) +
+  geom_bar(stat='identity',colour="white", fill =fillColor) +
+  geom_text(aes(x = word, y = 1, label = paste0("(",n,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Word', y = 'Word Count', 
+       title = 'Word Count') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+## Sentiment Analysis - Postive and Not So Postive Words of **Bacchanal Buffet**
+
+We display the Positive and Not So Positive words used by reviewers for the business `Bacchanal Buffet`.We have used the **AFINN sentiment lexicon**, which provides numeric positivity scores for each word, and visualize it with a bar plot.
+     
+
+
+```{r,message=FALSE,warning=FALSE}
+
+positiveWordsBarGraph(bacchanal)
+
+
+```
+
+##Relationship among words in Bacchanal Buffet
+
+We explore the different relationship among the various words in `Bacchanal Buffet` here through a network graph          
+
+
+```{r,message=FALSE,warning=FALSE}
+
+bigrams_bacchanal <- bacchanal %>%
+  count_bigrams()
+
+bigrams_bacchanal %>%
+  filter(n > 100) %>%
+  visualize_bigrams()
+
+```
+
+###Relationship of words with **crab**
+
+The following network diagram shows the words associated with the word **crab**       
+
+```{r,message = FALSE,warning = FALSE}
+
+bigramsMonAmiGabi %>%
+  filter(word1 == "crab" | word2 == "crab" ) %>%
+  visualize_bigrams()
+
+```
+
+###Relationship of words with **section**
+
+The following network diagram shows the words associated with the word **food**       
+
+```{r,message = FALSE,warning = FALSE}
+
+bigramsMonAmiGabi %>%
+  filter(word1 == "food" | word2 == "food" ) %>%
+  filter(n > 10) %>%
+  visualize_bigrams()
+
+```
+
+
+#Top Ten Business in Toronto
+
+We list the Top Ten business in Toronto giving importance to the number of reviews and then to the number of stars obtained by the business.         
+
+
+```{r,message=FALSE,warning=FALSE}
+
+toronto_biz = business %>%
+  filter(city == "Toronto") %>%
+  arrange(desc(review_count,stars)) %>%
+  select(name,neighborhood,address,review_count,stars) %>%
+  head(10)
+
+datatable(toronto_biz, style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+
+```
+
+#Map of the business reviews in Toronto
+
+```{r,message=FALSE,warning=FALSE}
+
+TorontoCoords = business %>%
+  filter(city == "Toronto")
+
+center_lon = median(TorontoCoords$longitude,na.rm = TRUE)
+center_lat = median(TorontoCoords$latitude,na.rm = TRUE)
+
+leaflet(TorontoCoords) %>% addProviderTiles("Esri.NatGeoWorldMap") %>%
+  addCircles(lng = ~longitude, lat = ~latitude,radius = ~sqrt(review_count))  %>%
+  
+  # controls
+  setView(lng=center_lon, lat=center_lat,zoom = 13)
+
+```
+
+
+# **Pai Northern Thai Kitchen**
+
+##Word Cloud of business **Pai Northern Thai Kitchen**
+
+```{r}
+
+#r_BrIgzYcwo1NAuG9dLbpg
+
+createWordCloud(reviews %>%
+  filter(business_id == "r_BrIgzYcwo1NAuG9dLbpg"))
+
+```
+
+
+##Ten most common words used in reviews of business **Pai Northern Thai Kitchen**
+
+We examine the Top Ten Most Common words and show them in a bar graph.                     
+
+```{r,message=FALSE,warning=FALSE}
+
+reviews %>%
+  filter(business_id == "r_BrIgzYcwo1NAuG9dLbpg") %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word) %>%
+  filter(!word %in% c('food','restaurant')) %>%
+  count(word,sort = TRUE) %>%
+  ungroup() %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>%
+  head(10) %>%
+  
+  ggplot(aes(x = word,y = n)) +
+  geom_bar(stat='identity',colour="white", fill =fillColor) +
+  geom_text(aes(x = word, y = 1, label = paste0("(",n,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Word', y = 'Word Count', 
+       title = 'Word Count') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+
+## Sentiment Analysis - Postive and Not So Postive Words of **Pai Northern Thai Kitchen**
+
+We display the Positive and Not So Positive words used by reviewers for the business `Pai Northern Thai Kitchen`.We have used the **AFINN sentiment lexicon**, which provides numeric positivity scores for each word, and visualize it with a bar plot.
+     
+
+
+```{r,message=FALSE,warning=FALSE}
+
+positiveWordsBarGraph(reviews %>%
+                        filter(business_id == "r_BrIgzYcwo1NAuG9dLbpg"))
+
+
+```
+
+
+##Relationship among words in **Pai Northern Thai Kitchen**
+
+We explore the different relationship among the various words in `*Pai Northern Thai Kitchen` here through a network graph          
+
+
+```{r,message=FALSE,warning=FALSE}
+
+bigrams_thai <- reviews %>%
+  filter(business_id == "r_BrIgzYcwo1NAuG9dLbpg") %>%
+  count_bigrams()
+
+bigrams_thai %>%
+  filter(n > 50) %>%
+  visualize_bigrams()
+
+```
+
+###Relationship of words with **thai**
+
+The following network diagram shows the words associated with the word **thai**       
+
+```{r,message = FALSE,warning = FALSE}
+
+bigrams_thai %>%
+  filter(word1 == "thai" | word2 == "thai" ) %>%
+  filter(n > 5) %>%
+  visualize_bigrams()
+
+```
+
+
+# **Chipotle business**
+
+We explore the various Chipotle business 
+
+```{r,message=FALSE,warning=FALSE}
+
+chipotle_biz = business %>%
+  filter(str_detect(name,"Chipotle") )%>%
+  arrange(desc(review_count,stars))
+
+datatable(chipotle_biz, style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+
+```
+
+
+#Map of the Chipotle business
+
+```{r,message=FALSE,warning=FALSE}
+
+ChipotleBizCoords = business %>%
+  filter(str_detect(name,"Chipotle") )
+
+center_lon = median(ChipotleBizCoords$longitude,na.rm = TRUE)
+center_lat = median(ChipotleBizCoords$latitude,na.rm = TRUE)
+
+leaflet(ChipotleBizCoords) %>% addProviderTiles("Esri.NatGeoWorldMap") %>%
+  addCircles(lng = ~longitude, lat = ~latitude,radius = ~(sqrt(review_count)*4))  %>%
+  
+  # controls
+  setView(lng=center_lon, lat=center_lat,zoom = 3)
+
+```
+
+# Chipotle Business in Yonge Street Toronto
+
+We explore in detail the Chipotle business in Yonge Street Toronto since this has recived the **highest** number of reviews among the Chipotle business.        
+
+##Word Cloud of business **Chipotle Business in Yonge Street Toronto**
+
+```{r}
+
+#gOBxVkHpqtjRRxHBIrpnMA
+
+chioptle_yonge = reviews %>%
+  filter(business_id == "gOBxVkHpqtjRRxHBIrpnMA")
+
+createWordCloud(chioptle_yonge)
+
+```
+
+
+##Top Ten most common Words of the business **"Chipotle Business in Yonge Street Toronto"**
+
+We examine the Top Ten Most Common words and show them in a bar graph.                     
+
+```{r,message=FALSE,warning=FALSE}
+
+chioptle_yonge %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word) %>%
+  filter(!word %in% c('food','restaurant')) %>%
+  count(word,sort = TRUE) %>%
+  ungroup() %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>%
+  head(10) %>%
+  
+  ggplot(aes(x = word,y = n)) +
+  geom_bar(stat='identity',colour="white", fill =fillColor) +
+  geom_text(aes(x = word, y = 1, label = paste0("(",n,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Word', y = 'Word Count', 
+       title = 'Word Count') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+## Sentiment Analysis - Postive and Not So Postive Words of **Chipotle Business in Yonge Street Toronto**
+
+We display the Positive and Not So Positive words used by reviewers for the business `Chipotle Business in Yonge Street Toronto`.We have used the **AFINN sentiment lexicon**, which provides numeric positivity scores for each word, and visualize it with a bar plot.
+     
+
+
+```{r,message=FALSE,warning=FALSE}
+
+positiveWordsBarGraph(chioptle_yonge)
+
+
+```
+
+##Relationship among words in Chipotle Business in Yonge Street Toronto
+
+We explore the different relationship among the various words in `Chipotle Business in Yonge Street Toronto` here through a network graph          
+
+
+```{r,message=FALSE,warning=FALSE}
+
+bigrams_chioptle_yonge <- chioptle_yonge %>%
+  count_bigrams()
+
+bigrams_chioptle_yonge %>%
+  filter(n > 5) %>%
+  visualize_bigrams()
+
+```

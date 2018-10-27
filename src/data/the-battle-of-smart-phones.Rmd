@@ -1,0 +1,234 @@
+---
+title: "The battle of smart phones"
+author: "33Vito"
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    toc: true
+    toc_float: false
+    code_folding: hide
+    highlight: zenburn
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, message=F, warning=F, fig.width=9.5, fig.height=4)
+
+library(plotly)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(RColorBrewer)
+library(lubridate)
+library(stringr)
+library(d3heatmap)
+library(data.table)
+library(ggthemes)
+library(scales)
+library(formattable)
+library(viridis)
+library(animation)
+library(ggmap)
+library(leaflet)
+library(gridExtra)
+library(showtext)
+library(extrafont)
+
+# Sys.setlocale(category = "LC_ALL", locale = "chinese")
+# windowsFonts(simkai=windowsFont("simkai"))
+# showtext.auto()
+# font_import()
+
+pbdm <- read_csv("../input/phone_brand_device_model.csv")
+events <- read_csv("../input/events.csv")
+gat <- read_csv("../input/gender_age_train.csv")
+
+plyr::join_all(list(pbdm,events,gat), by='device_id', type='left') %>%
+  filter(!is.na(group)) %>%
+  mutate(gender = ifelse(gender == "F", "Female", "Male")) -> raw.data
+```
+
+##Overview of the market share
+
+Note: It is __important__ to exclude duplicated device id for the market share analysis. A seperate analysis is performed to assess the activeness of users for different brands using the frequency of the same device id. 
+
+###Top 15 by gender
+
+```{r}
+data1 <- raw.data[!duplicated(raw.data$device_id),]
+
+brand <- c("HTC", "LG","OPPO","vivo","三星","中兴","乐视","努比亚","华为","小米","索尼","联想","酷派","金立","魅族")
+eng.brand <- c("HTC", "LG","OPPO","vivo","Samsung","ZTE","LeEco","Niube","Huawei","Xiaomi","Sony","Lenovo","Kupo","Gionne","Meizu")
+
+data1$phone_brand <- plyr::mapvalues(as.factor(data1$phone_brand), brand, eng.brand)
+
+top15 <- names(sort(table(data1[]$phone_brand), decreasing = T))[1:15]
+top5 <- names(sort(table(data1$phone_brand), decreasing = T))[1:5]
+  
+data1 %>% 
+  group_by(gender, age, phone_brand) %>%
+  summarise(n=n()) %>%
+  filter(phone_brand %in% top15) -> gapn
+
+g1 <- ggplot(data=gapn, aes(x=reorder(phone_brand,n), y=n, fill = gender)) + 
+  geom_bar(stat = "identity", position="dodge",alpha=.7) + 
+  scale_fill_brewer(palette = "Set1") + 
+  # scale_y_continuous(labels=function(x) x/1000) + 
+  xlab("") + 
+  ylab("# of Users") + 
+  coord_flip() + 
+  theme_tufte(base_size = 10) + 
+  theme(text = element_text(family = "simkai"), legend.position="top", legend.title=element_blank())
+
+g2 <- ggplot(data=gapn, aes(x=reorder(phone_brand,n), y=n, fill = gender)) + 
+  geom_bar(stat = "identity", position="fill",alpha=.7) + 
+  scale_fill_brewer(palette = "Set1") + 
+  scale_y_continuous(labels=function(x) round(x,2)) + 
+  xlab("") + 
+  ylab("% of Users") + 
+  coord_flip() + 
+  theme_tufte(base_size = 10) + 
+  theme(text = element_text(family = "simkai"), legend.position="top", legend.title=element_blank())
+
+grid.arrange(g1, g2, nrow = 1)
+```
+
+Huawei (华为) and seems to have an advantabe in attracting male while OPPO and vivo are prefered by female (not surprising if you are familiar with these brands in China). 
+
+Xiaomi (小米) is the king here (of course Apple is excluded). 
+
+###Top 15 by age
+
+```{r, fig.height=5.5}
+data1 %>% 
+  group_by(phone_brand, gender, age) %>%
+  summarise(n=n()) %>%
+  filter(phone_brand %in% top15) -> pgan
+
+ggplot(data = pgan, aes(x=reorder(phone_brand, age), y=age)) + 
+  facet_grid(gender~.) + 
+  geom_boxplot() + 
+  geom_jitter(alpha = .2, shape = 1, width = .5) + 
+  xlab("") + ylab("age") + 
+  theme_tufte(base_size = 10) +
+  theme(legend.position="none") + 
+  theme(text = element_text(family = "simkai"))
+```
+
+###Top 5 distribution
+
+```{r, fig.height=3.5}
+g1 <- ggplot(data = filter(pgan, phone_brand %in% top5), 
+       aes(x=age, y=n, fill=reorder(phone_brand,-n))) + 
+  geom_bar(stat = "identity", col = "white", size = 0.1, position = "stack", alpha=.7) + 
+  scale_fill_brewer(palette = "Set1") + 
+  xlim(15, 55) + 
+  ylab("# of Users") + 
+  facet_grid(~gender, drop = T) +
+  theme_tufte(base_size = 10) +
+  theme(legend.title = element_blank()) + 
+  theme(text = element_text(family = "simkai"), legend.position="top")
+
+g2 <- ggplot(data = filter(pgan, phone_brand %in% top5), 
+       aes(x=age, y=n, fill=reorder(phone_brand,-n))) + 
+  geom_bar(stat = "identity", col = "white", size = 0.1, position = "fill", alpha=.7) + 
+  scale_fill_brewer(palette = "Set1") + 
+  xlim(15, 55) + 
+  ylab("% of Users") + 
+  scale_y_continuous(labels=function(x) round(x,2)) + 
+  facet_grid(~gender, drop = T) +
+  theme_tufte(base_size = 10) +
+  theme(legend.title = element_blank()) + 
+  theme(text = element_text(family = "simkai"), legend.position="top")
+
+grid.arrange(g1, g2, nrow = 1)
+```
+
+Both charts reveals that the young generation prefer the fasion (and more affordable) OPPO and Vivo while senior people prefere Huawei (华为) and Samsung (三星). Again, Xiaomi (小米) is the dominant.  
+
+##Spatial visualisation (Top 5 brand and 50% of the sample)
+
+```{r, fig.height=6.5}
+data1 %>% 
+  filter(phone_brand %in% top5, !is.na(longitude), !is.na(latitude)) %>%
+  sample_frac(.5) -> data2
+  
+data2$phone_brand <- droplevels(data2$phone_brand)
+  
+factpal <- colorFactor(viridis(5), data2$phone_brand)
+qpal <- colorNumeric(viridis(10, option = "plasma"), data2$age)
+factpal2 <- colorFactor(c("darkorange", "steelblue"), data2$gender)
+
+leaflet(data = data2) %>% 
+  setView(lng = 103, lat = 35, zoom = 4) %>%
+  addProviderTiles("Stamen.TonerLite") %>% 
+  addCircleMarkers(stroke = FALSE, group = "Brand", 
+                   fillOpacity = 0.5, 
+                   radius=2.5, 
+                   popup = ~phone_brand, 
+                   color = ~factpal(data2$phone_brand)) %>%
+  addCircleMarkers(stroke = FALSE, group = "Age", 
+                   fillOpacity = 0.5, 
+                   radius=2.5, 
+                   popup = ~age, 
+                   color = ~qpal(data2$age)) %>%
+  addCircleMarkers(stroke = FALSE, group = "Gender", 
+                   fillOpacity = 0.5, 
+                   radius=2.5, 
+                   popup = ~phone_brand, 
+                   color = ~factpal2(data2$gender)) %>%
+  addLegend("topleft", pal = factpal, values = data2$phone_brand, 
+    title = "Phone brands", 
+    opacity = .8) %>% 
+  addLegend("topleft", pal = qpal, values = data2$age, 
+    title = "User age", 
+    opacity = .8) %>% 
+  addLegend("topleft", pal = factpal2, values = data2$gender, 
+    title = "User gender", 
+    opacity = .8) %>% 
+  addLayersControl(
+    baseGroups = c("Brand", "Age", "Gender"),
+    # overlayGroups = c(),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+```
+
+##Number of models offered by each brand
+
+Let's see if the number of models offered by each brand is boosting sales. 
+
+```{r, fig.height=6, fig.width =8}
+n.model <- data1 %>% 
+  filter(phone_brand %in% top15) %>%
+  group_by(phone_brand) %>%
+  summarise(obs = n(), 
+            model = n_distinct(device_model))
+
+ggplot(data = n.model, aes(x=model, y=obs)) + 
+  geom_point(size = 2) + 
+  geom_text(aes(label = phone_brand), hjust = 1, vjust = 1, size=4) + 
+  xlim(-10,180) + 
+  theme_minimal(base_size = 10)
+```
+
+This chart is quite consistent with my expectation. It can be seen that 
+
+* Xiaomi has acquired exceptional high sales (obs as the proxy) with very little # of models (they always compared themselves with Apple);
+* Samsung and Huawei have acquired high sales through quite a large number of different models;
+* While Lenovo has a lot of different models, none of them seem to attract enough customers. 
+
+Note that the conclusion here is rooted from the assumption that the sample here is a good representation of the market. 
+
+<br>
+<br>
+<br>
+
+
+
+
+
+
+
+
+
+

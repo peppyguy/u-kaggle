@@ -1,0 +1,129 @@
+---
+title: "Santander Product Recommendation first view"
+author: "Donyoe"
+output: 
+  html_document: 
+    fig_height: 7
+    fig_width: 10
+---
+
+![](http://4.bp.blogspot.com/-YkdUZVa6ioI/ToA7i-YGOSI/AAAAAAAAC2U/3tnZLp54Gxc/s1600/logo-santander.jpg)
+
+> The Santander Group is a Spanish banking group centered on Banco Santander, S.A. As its name suggests, the company originated in Santander, Cantabria, Spain.  
+The group has expanded since 2000 through a number of acquisitions, with operations across Europe, Latin America, North America and Asia. Many subsidiaries, such as Abbey National, have been rebranded under the Santander name.  
+The company is a component of the Euro Stoxx 50 stock market index. In May 2016, Santander was ranked as 37th in the Forbes Global 2000 list of the world's largest companies.
+
+# Reading Data and Cleaning
+```{r, message=FALSE, warning=FALSE}
+library(data.table)
+library(ggplot2)
+library(lubridate)
+selectrow <- c("fecha_dato","fecha_alta","pais_residencia") # Rows that I want to analize
+train <- fread("../input/train_ver2.csv",select = selectrow,showProgress =F)
+train$fecha_dato <- ymd(train$fecha_dato) # Format date
+train$fecha_alta <- ymd(train$fecha_alta)
+train$year_dato <- year(train$fecha_dato) # Extract year
+train$year_alta <- year(train$fecha_alta)
+train$month_dato <- month(train$fecha_dato,label=T) # Extract month
+train$month_alta <- month(train$fecha_alta,label=T)
+train$weekday_alta <- wday(train$fecha_alta,label=T)
+train<-as.data.table(train)
+```
+
+# Plot by year and month
+```{r, eval=FALSE, include=FALSE}
+ggplot(train[,.N,by=.(month_dato,year_dato)],aes(x = month_dato,y=N,fill=month_dato))+
+  geom_bar(stat="identity")+ggtitle("Number of products by month and year")+
+  facet_wrap(~year_dato)
+  
+  
+It looks that we have the same number of elements the first six months, then a big gap and later the number of products increases constantly.
+
+```
+
+```{r}
+ggplot(train[,.N,by=weekday_alta],aes(x = weekday_alta,y = N,fill=weekday_alta))+
+  geom_bar(stat="identity")+ggtitle("Number of customers that became 'first holder' by day of week")
+```  
+  
+  
+```{r}
+ggplot(train[year_alta>2009,.N,by=.(month_alta,year_alta)],aes(x = month_alta,y=N,fill=month_alta))+
+  geom_bar(stat="identity")+ggtitle("Number of customers that became 'first holder' by month and year")+
+  facet_wrap(~year_alta)
+```
+
+ There is a significant rise in July that remains until Autumn, this might be because July is the first month in Spain with vacations, and also we can see that between September and October has the most number of first holders, that is because in Spain, the academic calendar starts in September-October and is considerate like a "new year", very prone to doing new things, like, for example, to open a new bank account.
+
+# WoldMap
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(rworldmap)
+pais <- train[,.N,by=pais_residencia] # Number of customers by country
+
+ fr <- joinCountryData2Map(dF = pais,joinCode = "ISO2",nameJoinColumn = "pais_residencia",verbose=F) # Prepare data to plot
+  
+  mapCountryData(mapToPlot = fr,nameColumnToPlot = "N",catMethod = "logFixedWidth",
+                 oceanCol = "steelblue1",missingCountryCol = "white",
+                 mapTitle = "Number of customers by country",
+                 aspect = "variable") # Plot Worlmap
+```
+
+# Gross income of the household
+
+
+```{r, echo=FALSE}
+rm(list = ls())
+selectrow <- c("ind_empleado","renta")
+train <- fread("../input/train_ver2.csv",select = selectrow,showProgress = F)
+train <- train[!is.na(train$renta)]
+ggplot(train,aes(x = ind_empleado,y = renta,fill=ind_empleado))+
+  ggtitle("Gross income of the household by Employee index")+
+  geom_boxplot(na.rm=TRUE)+scale_y_log10()+
+  scale_fill_discrete(name = "Employee index",labels = c("Active", "Ex employed","filial","Not employee","Pasive"))
+```
+
+
+```{r, echo=FALSE}
+rm(list = ls())
+selectrow <- c("segmento","renta")
+train <- fread("../input/train_ver2.csv",select = selectrow,showProgress = F)
+train <- train[!is.na(train$renta)]
+ggplot(train,aes(x = segmento,y = renta,fill=segmento))+
+  ggtitle("Gross income of the household by segmentation")+
+  geom_boxplot(na.rm=TRUE)+scale_y_log10()
+```
+
+## The particular group have more household income than the college graduated?
+```{r}
+rm(list = ls())
+selectrow <- c("segmento","renta")
+train <- fread("../input/train_ver2.csv",select = selectrow,showProgress = F)
+train <- train[!is.na(train$renta)]
+t.test(x = train[segmento=="02 - PARTICULARES",renta],y =train[segmento=="03 - UNIVERSITARIO",renta],alternative = "greater")
+```
+
+* p-value<0.05, we can accept that the particular group have more household income than the college graduated
+
+# Lets take a look at the age
+```{r, echo=FALSE}
+rm(list = ls())
+selectrow <- c("age","ncodpers")
+train <- fread("../input/train_ver2.csv",select = selectrow,nrows = 1000000,showProgress = F)
+ggplot(train[age<118,.("age"=mean(age,na.rm = T)),by=ncodpers],aes(age))+
+  stat_count()+ggtitle("Number of persons by age")
+summary(train[,age])
+```
+
+Hmm, there are some people with age <18 and with more than 110, we might remove that, lets see how many people are there:
+
+We have `r length(train[age<18,unique(ncodpers)]) ` people with <18 years and `r length(train[age>=110,unique(ncodpers)]) ` with more than  110 years
+
+
+Lets do the summary without them:
+```{r, echo=FALSE}
+summary(train[age>=18&age<110,age])
+```
+
+
+
+Hope you like it!

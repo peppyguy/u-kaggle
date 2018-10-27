@@ -1,0 +1,1553 @@
+---
+title: "Spooky Fun EDA and Modelling"
+author: "Bukun"
+output:
+  html_document:
+    number_sections: true
+    toc: true
+    fig_width: 10
+    code_folding: hide
+    fig_height: 4.5
+    theme: cosmo
+    highlight: tango
+---
+
+#Introduction
+
+Lets have **fun** doing `Spooking EDA and Modelling`  as outlined in the `Table of Contents`.Please click on [Little Book on Spooky Authors](https://ambarishg.github.io/public/LittleBookTextMining/)
+to view the **detailed** description of the kernel in **chapterwise** fashion.                    
+
+
+The tutorial is divided into 3 major sections
+
+* Data Visualization              
+* Sentiment Analysis              
+* Modelling             
+
+**Data Visualization**          
+
+Here we do the following            
+
+* Sentence length comparison with the help of bar charts and histogram     
+* Seperating the words in the dataset          
+* Word Clouds                    
+* TF-IDF , a very interesting concept in Text Mining        
+* Most commonly used `Bigrams` and `Trigrams`. Bigrams and Trigrams are collection of two and three words respectively.               
+
+**Sentiment Analysis**          
+
+We investigate the `sentiments` of the various authors.We use the `AFINN and NRC` sentiment lexicon for the analysis. A sentiment lexicon has a mapping of a word and its associated numeric sentiment.          
+
+The analysis involves                 
+
+* Using the `AFINN sentiment lexicon`, we identify the positive and not so positive words for the various authors as a whole and also separately. We also build a `feature` for our modelling exercise which has the sentiment score for each line       
+* Using the `NRC sentiment lexicon`, we examine the sentiments of `joy`,`fear` and `surprise`             
+
+* He or she analysis investigates the common words which follow the pronoun `he` or `she`    
+
+
+**Modelling**
+
+This section investigates **Topic Modelling** and **Modelling using Supervised Learning Techniques**.            
+
+**Topic Modelling**   
+Topic modeling is a method for unsupervised classification of documents, similar to clustering on numeric data, which finds natural groups of items even when we’re not sure what we’re looking for.          
+
+**Modelling using Supervised Learning techniques**      
+
+The modelling section involves `feature engineering` and using supervised learning techniques such as `xgboost` and `glmnet`. The `glmnet` model uses a combination of `Ridge and Lasso regression` techniques internally. All the models use the caret package for standardization.           
+
+
+Hope you will have fun going through this tutorial as much as I had writing it.
+
+Let's start the party then!
+         
+
+
+#Read the Data
+
+```{r,message=FALSE,warning=FALSE}
+
+library(tidyverse)
+library(tidytext)
+library(stringr)
+library(DT)
+library('wordcloud')
+library(igraph)
+library(ggraph)
+library(tm)
+library(topicmodels)
+
+library(caret)
+library(syuzhet)
+library(text2vec)
+
+library(data.table)
+library("readr")
+library(glmnet)
+
+
+
+
+rm(list=ls())
+
+fillColor = "#FFA07A"
+fillColor2 = "#F1C40F"
+
+train = read_csv("../input/train.csv")
+
+test = read_csv("../input/test.csv")
+
+```
+
+<hr></hr>
+
+<h1 font color="#66CCFF">Section : Data Visualization</h1>
+
+<hr></hr>
+
+
+#Add Feature Number of Words
+
+We add a Feature Number of Words to the Train and Test data sets
+
+```{r,message=FALSE,warning=FALSE}
+
+train$len = str_count(train$text)
+test$len = str_count(test$text)
+
+```
+
+
+#Peek into the Data
+
+```{r,message=FALSE,warning=FALSE}
+
+datatable(head(train), style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+```
+
+#Length Comparison
+
+We examine the `median` length of the sentences by the different `authors` and plot in a  flipped bar plot.
+
+HP Lovecraft writes `long` sentences with the highest number of words per sentence.Edgar Allen Poe writes `short` sentences compared to the other Two authors.         
+
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  group_by(author) %>%
+  summarise(CountMedian = median(len,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,CountMedian)) %>%
+  
+  ggplot(aes(x = author,y = CountMedian)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor2) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",CountMedian,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'Count', 
+       title = 'author and Count') +
+  coord_flip() + 
+  theme_bw()
+  
+```
+
+
+
+# Words Length  Distribution
+
+We examine the number of words written by the author in a single sentence with the `histogram`. Unfortunately the plot does not reveal much. Therefore we would like to change the x-axis so that we can have a better plot.         
+
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+      ggplot(aes(x = len, fill = author)) +    
+      geom_histogram() +
+      scale_fill_manual( values = c("red","blue","orange") ) +
+      facet_wrap(~author) +
+      labs(x= 'Word Length',y = 'Count', title = paste("Distribution of", ' Word Length ')) +
+      theme_bw()
+
+```
+
+## Words Length  Distribution Plot 2
+
+We limit the word length to 100 and investigate the distribution.We notice that HP Lovecraft and Mary Wollstonecraft Shelley  have a lot of sentences with word length in the range 75 - 100.                  
+
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+      ggplot(aes(x = len, fill = author)) +    
+      geom_histogram() +
+      scale_x_continuous(limits = c(15,100)) +
+      scale_fill_manual( values = c("red","blue","orange") ) +
+      facet_wrap(~author) +
+      labs(x= 'Word Length',y = 'Count', title = paste("Distribution of", ' Word Length ')) +
+      theme_bw()
+
+```
+
+#Tokensiation
+
+We break the text into individual tokens which are simply individual words. This process is called tokenisation. 
+This is accomplished through the **unnest_tokens** function.              
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  unnest_tokens(word, text) %>%
+  head(10)
+
+```
+
+##Removing the Stop words
+
+We seperate the words in the train dataset and remove the most commonly occuring words        
+
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word) %>% head(10)
+
+```
+
+
+#Top Ten most Common Words
+
+We examine the Top Ten Most Common words and show them in a bar graph. Several words which occur a lot are **time , life , found , night, eyes, day , death, mind , heard**         
+
+
+```{r,message=FALSE,warning=FALSE}
+
+createBarPlotCommonWords = function(train,title)
+{
+  train %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word) %>%
+  count(word,sort = TRUE) %>%
+  ungroup() %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>%
+  head(10) %>%
+  
+  ggplot(aes(x = word,y = n)) +
+  geom_bar(stat='identity',colour="white", fill =fillColor) +
+  geom_text(aes(x = word, y = 1, label = paste0("(",n,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Word', y = 'Word Count', 
+       title = title) +
+  coord_flip() + 
+  theme_bw()
+
+}
+
+createBarPlotCommonWords(train,'Top 10 most Common Words')
+
+```
+
+
+## WordCloud of the Common Words         
+
+A word cloud is a graphical representation of frequently used words in the **text**. The height of each word in this picture is an indication of frequency of occurrence of the word in the entire text.            
+                               
+
+```{r, message=FALSE, warning=FALSE}
+
+createWordCloud = function(train)
+{
+  train %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word) %>%
+  count(word,sort = TRUE) %>%
+  ungroup()  %>%
+  head(30) %>%
+  
+  with(wordcloud(word, n, max.words = 30,colors=brewer.pal(8, "Dark2")))
+}
+
+createWordCloud(train)
+
+```
+
+##WordCloud of HPL
+
+**Time , night, strange, found, house** are the most common words written by HP Lovecraft.           
+
+
+```{r,message=FALSE,warning=FALSE}
+
+createWordCloud(train %>% filter(author == 'HPL'))
+
+```
+
+## BarPlot for words of HPL
+
+```{r,message=FALSE,warning=FALSE}
+
+createBarPlotCommonWords(train %>% filter(author == 'HPL'),'Top 10 most Common Words of HPL')
+
+```
+
+
+
+##WordCloud of MWS
+
+**Raymond,heart, love, time and eyes** are the most common words written by Mary Wollstonecraft Shelley              
+
+
+```{r,message=FALSE,warning=FALSE}
+
+createWordCloud(train %>% filter(author == 'MWS'))
+
+```
+
+## BarPlot for words of MWS
+
+```{r,message=FALSE,warning=FALSE}
+
+createBarPlotCommonWords(train %>% filter(author == 'MWS'),'Top 10 most Common Words of MWS')
+
+```
+
+
+##WordCloud of EAP
+
+**Found, time, eyes, length, head, day** are the most common words written by  Edgar Allan Poe.     
+
+```{r,message=FALSE,warning=FALSE}
+
+createWordCloud(train %>% filter(author == 'EAP'))
+
+```
+
+## BarPlot for words of EAP
+
+```{r,message=FALSE,warning=FALSE}
+
+createBarPlotCommonWords(train %>% filter(author == 'EAP'),'Top 10 most Common Words of EAP')
+
+```
+
+
+
+#TF-IDF
+
+We wish to find out the important words which are written by the authors. Example for your young child , the most important word is **mom**. Example for a bar tender , important words would be related to **drinks**.
+
+We would explore this using a fascinating concept known as **Term Frequency - Inverse Document Frequency**. Quite a mouthful, but we will unpack it and clarify each and every term. 
+
+
+A **document** in this case is the set of lines written by an author. 
+
+
+Therefore we have different **documents** for each **Author**.
+
+From the book [5 Algorithms Every Web Developer Can Use and Understand](https://lizrush.gitbooks.io/algorithms-for-webdevs-ebook/content/chapters/tf-idf.html)       
+
+
+>    TF-IDF computes a weight which represents the importance of a term inside a document. 
+
+>    It does this by comparing the frequency of usage inside an individual document as opposed to the entire data set (a collection of documents).
+The importance increases proportionally to the number of times a word appears in the individual document itself--this is called Term Frequency. However, if multiple documents contain the same word many times then you run into a problem. That's why TF-IDF also offsets this value by the frequency of the term in the entire document set, a value called Inverse Document Frequency.
+
+
+## The Math
+>  TF(t) = (Number of times term t appears in a document) / (Total number of terms in the document)         
+IDF(t) = log_e(Total number of documents / Number of documents with term t in it).         
+Value = TF * IDF
+
+
+## Twenty Most Important words
+
+Here using **TF-IDF** , we investigate the **Twenty Most Important words**                
+
+
+```{r, message=FALSE, warning=FALSE}
+
+trainWords <- train %>%
+  unnest_tokens(word, text) %>%
+  count(author, word, sort = TRUE) %>%
+  ungroup()
+
+total_words <- trainWords %>% 
+  group_by(author) %>% 
+  summarize(total = sum(n))
+
+trainWords <- left_join(trainWords, total_words)
+
+#Now we are ready to use the bind_tf_idf which computes the tf-idf for each term. 
+trainWords <- trainWords %>%
+  filter(!is.na(author)) %>%
+  bind_tf_idf(word, author, n)
+
+   
+plot_trainWords <- trainWords %>%
+  arrange(desc(tf_idf)) %>%
+  mutate(word = factor(word, levels = rev(unique(word))))
+
+plot_trainWords %>% 
+  top_n(20) %>%
+  ggplot(aes(word, tf_idf)) +
+  geom_col(fill = fillColor) +
+  labs(x = NULL, y = "tf-idf") +
+  coord_flip() +
+  theme_bw()
+
+```
+
+### Most Important Words and TFIDF
+
+
+The important words have high TFIDF.             
+
+```{r,message=FALSE,warning=FALSE}
+
+plot_trainWords %>% head(10)
+
+```
+
+
+###Common Words and TFIDF
+
+We observe the common words like `the, of, and ,to` have very low tf idf.             
+
+
+```{r,message=FALSE,warning=FALSE}
+
+plot_trainWords_common <- trainWords %>%
+  arrange(tf_idf) %>%
+  mutate(word = factor(word, levels = rev(unique(word)))) %>% head(10)
+
+
+plot_trainWords_common
+
+```
+
+
+###Twenty most important words HPL
+
+```{r,message=FALSE,warning=FALSE}
+
+plot_trainWords %>%
+  filter(author == 'HPL') %>%
+  top_n(20) %>%
+  ggplot(aes(word, tf_idf)) +
+  geom_col(fill = fillColor2) +
+  labs(x = NULL, y = "tf-idf") +
+  coord_flip() +
+  theme_bw()
+
+```
+
+
+###Twenty most important words EAP
+
+```{r,message=FALSE,warning=FALSE}
+
+plot_trainWords %>%
+  filter(author == 'EAP') %>%
+  top_n(20) %>%
+  ggplot(aes(word, tf_idf)) +
+  geom_col(fill = fillColor) +
+  labs(x = NULL, y = "tf-idf") +
+  coord_flip() +
+  theme_bw()
+
+```
+
+###Twenty most important words MWS
+
+```{r,message=FALSE,warning=FALSE}
+
+plot_trainWords %>%
+  filter(author == 'MWS') %>%
+  top_n(20) %>%
+  ggplot(aes(word, tf_idf, fill = author)) +
+  geom_col() +
+  labs(x = NULL, y = "tf-idf") +
+  coord_flip() +
+  theme_bw()
+
+```
+
+
+##Word Cloud for the Most Important Words
+
+We show the **Hundred** most important words. This Word Cloud is based on the **TF- IDF** scores. Higher the score, bigger is the size of the text.                
+
+
+```{r, message=FALSE, warning=FALSE}
+
+plot_trainWords %>%
+  with(wordcloud(word, tf_idf, max.words = 100,colors=brewer.pal(8, "Dark2")))
+
+```
+
+
+#Most Common Bigrams
+
+A **Bigram** is a collection of Two words. We examine the most common Bigrams and plot them in a bar plot.            
+
+
+```{r,message=FALSE,warning =FALSE}
+
+count_bigrams <- function(dataset) {
+  dataset %>%
+    unnest_tokens(bigram, text, token = "ngrams", n = 2) %>%
+    separate(bigram, c("word1", "word2"), sep = " ") %>%
+    filter(!word1 %in% stop_words$word,
+           !word2 %in% stop_words$word) %>%
+    count(word1, word2, sort = TRUE)
+}
+
+
+visualize_bigrams <- function(bigrams) {
+  set.seed(2016)
+  a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+  
+  bigrams %>%
+    graph_from_data_frame() %>%
+    ggraph(layout = "fr") +
+    geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a) +
+    geom_node_point(color = "lightblue", size = 5) +
+    geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+    theme_void()
+  
+}
+
+visualize_bigrams_individual <- function(bigrams) {
+  set.seed(2016)
+  a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+  
+  bigrams %>%
+    graph_from_data_frame() %>%
+    ggraph(layout = "fr") +
+    geom_edge_link(aes(edge_alpha = n), show.legend = FALSE, arrow = a,end_cap = circle(.07, 'inches')) +
+    geom_node_point(color = "lightblue", size = 5) +
+    geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+    theme_void()
+}
+
+train %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2) %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  filter(!word1 %in% stop_words$word,
+         !word2 %in% stop_words$word) %>%
+  unite(bigramWord, word1, word2, sep = " ") %>%
+  group_by(bigramWord) %>%
+  tally() %>%
+  ungroup() %>%
+  arrange(desc(n)) %>%
+  mutate(bigramWord = reorder(bigramWord,n)) %>%
+  head(10) %>%
+  
+  ggplot(aes(x = bigramWord,y = n)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor2) +
+  geom_text(aes(x = bigramWord, y = 1, label = paste0("(",n,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Bigram', 
+       y = 'Count', 
+       title = 'Bigram and Count') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+
+#Most Common Trigrams               
+
+A **Trigram** is a collection of Three words. We examine the most common Trigrams and plot them in a bar plot.     
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  unnest_tokens(trigram, text, token = "ngrams", n = 3) %>%
+  separate(trigram, c("word1", "word2","word3"), sep = " ") %>%
+  filter(!word1 %in% stop_words$word,
+         !word2 %in% stop_words$word,
+         !word3 %in% stop_words$word) %>%
+  unite(trigramWord, word1, word2, word3,sep = " ") %>%
+  group_by(trigramWord) %>%
+  tally() %>%
+  ungroup() %>%
+  arrange(desc(n)) %>%
+  mutate(trigramWord = reorder(trigramWord,n)) %>%
+  head(10) %>%
+  
+  ggplot(aes(x = trigramWord,y = n)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor2) +
+  geom_text(aes(x = trigramWord, y = 1, label = paste0("(",n,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Trigram', 
+       y = 'Count', 
+       title = 'Trigram and Count') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+
+
+#Relationship among words
+
+Til now, we have explored the most important words for a author. Now, we will explore the relationship between words. 
+
+```{r, message=FALSE, warning=FALSE}
+
+trainWords <- train %>%
+  count_bigrams()
+
+trainWords %>%
+  filter(n > 10) %>%
+  visualize_bigrams()
+
+```
+
+The above infographic shows the words which follow another word.          
+
+#Sentiment Analysis using AFINN Sentiment lexicon
+
+## Postive Authors and Not so Positive Authors
+
+We investigate how often positive and negative words occurred in the text written by the authors. Which author was the most positive or negative overall?
+
+We will use the **AFINN sentiment lexicon**, which provides numeric positivity scores for each word, and visualize it with a bar plot.                 
+
+Edgar Allen Poe and  Mary Wollstonecraft Shelley  are `positive` authors     
+
+HP Lovecraft is unfortunately a `negative` author as explained through a bar plot. We need to go into detail why `HP Lovecraft` is a `negative` author.        
+
+
+
+```{r, message=FALSE, warning=FALSE}
+
+visualize_sentiments <- function(SCWords) {
+  SCWords_sentiments <- SCWords %>%
+    inner_join(get_sentiments("afinn"), by = "word") %>%
+    group_by(author) %>%
+    summarize(score = sum(score * n) / sum(n)) %>%
+    arrange(desc(score))
+  
+  SCWords_sentiments %>%
+    mutate(author = reorder(author, score)) %>%
+    ggplot(aes(author, score, fill = score > 0)) +
+    geom_col(show.legend = TRUE) +
+    coord_flip() +
+    ylab("Average sentiment score") + theme_bw()
+}
+
+
+
+trainWords <- train %>%
+  unnest_tokens(word, text) %>%
+  count(author, word, sort = TRUE) %>%
+  ungroup()
+
+visualize_sentiments(trainWords)
+
+```
+
+
+## Postive and Not So Postive Words of Authors         
+
+The following graph shows the Twenty high positive and the negative words       
+
+
+```{r, message=FALSE, warning=FALSE}
+
+positiveWordsBarGraph <- function(SC) {
+  contributions <- SC %>%
+    unnest_tokens(word, text) %>%
+    count(author, word, sort = TRUE) %>%
+    ungroup() %>%
+    
+    inner_join(get_sentiments("afinn"), by = "word") %>%
+    group_by(word) %>%
+    summarize(occurences = n(),
+              contribution = sum(score))
+  
+  contributions %>%
+    top_n(20, abs(contribution)) %>%
+    mutate(word = reorder(word, contribution)) %>%
+    head(20) %>%
+    ggplot(aes(word, contribution, fill = contribution > 0)) +
+    geom_col(show.legend = FALSE) +
+    coord_flip() + theme_bw()
+}
+
+positiveWordsBarGraph(train)
+
+
+```
+
+## Postive and Not So Postive Words of Author HPL
+
+```{r, message=FALSE, warning=FALSE}
+
+trainHPL = train %>% filter(author == 'HPL')
+
+positiveWordsBarGraph(trainHPL)
+```
+
+## Postive and Not So Postive Words of Author EAP
+
+```{r, message=FALSE, warning=FALSE}
+
+trainEAP = train %>% filter(author == 'EAP')
+
+positiveWordsBarGraph(trainEAP)
+```
+
+## Postive and Not So Postive Words of Author MWS
+
+```{r, message=FALSE, warning=FALSE}
+
+trainMWS = train %>% filter(author == 'MWS')
+
+positiveWordsBarGraph(trainMWS)
+```
+
+#Sentiment Analysis using NRC Sentiment lexicon
+
+We examine the following sentiments using `NRC Sentiment lexicon`             
+
+* Fear          
+
+* Surprise      
+
+* Joy       
+
+Mary Wollstonecraft Shelley is the most `Fearful`  and most `Surprising`  and most `Joyful` author.                 
+
+Edgar Allen Poe is the least `Fearful` author.      
+
+HP Lovecraft is the least `Surprising` author.             
+
+HP Lovecraft is the least `Joyful` author.          
+
+
+##Sentiment Analysis Words - Fear
+
+The plot shows the authors with the  **Count** of fear words.            
+
+
+```{r, message=FALSE, warning=FALSE}
+
+plotEmotions = function(emotion,fillColor = fillColor2)
+{
+  nrcEmotions = get_sentiments("nrc") %>% 
+  filter(sentiment == emotion)
+
+train %>%
+  unnest_tokens(word, text) %>%
+  filter(!word %in% stop_words$word) %>%
+  inner_join(nrcEmotions)  %>%
+  group_by(author) %>%
+  summarise(Count = n()) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,Count)) %>%
+  
+  ggplot(aes(x = author,y = Count)) +
+  geom_bar(stat='identity',colour="white", fill =fillColor) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",Count,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', y = 'Count', 
+       title = paste0('Author and ',emotion,' Words ')) +
+  coord_flip() + 
+  theme_bw()
+
+}
+
+
+plotEmotions("fear")
+
+```
+
+
+##Fear Word Cloud  - MWP
+
+The following table and word cloud shows the fear words written by MWP , the most **fearful** author.            
+
+
+```{r,message=FALSE,warning=FALSE}
+
+getEmotionalWords = function(emotion,author)
+{
+  nrcEmotions = get_sentiments("nrc") %>% 
+    filter(sentiment == emotion) 
+  
+  emotionalWords = train %>%
+    unnest_tokens(word, text) %>%
+    filter(!word %in% stop_words$word) %>%
+    filter(author == author) %>%
+    inner_join(nrcEmotions) %>%
+    group_by(word) %>%
+    summarise(Count = n()) %>%
+    arrange(desc(Count))
+    
+  
+  return(emotionalWords)
+  
+}
+
+FearWordsMWS = getEmotionalWords('fear','MWS')
+
+datatable(head(FearWordsMWS), style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+wordcloud(FearWordsMWS$word, FearWordsMWS$Count, max.words = 30,colors=brewer.pal(8, "Dark2"))
+
+```
+
+
+##Sentiment Analysis Words - Surprise
+
+The plot shows the authors with the  **Count** of Surprise words.   
+
+```{r, message=FALSE, warning=FALSE}
+
+plotEmotions("surprise",fillColor)
+
+```
+
+
+##Surprise Word Cloud  - MWP
+
+The following table and word cloud shows the surprising words written by MWP , the most **surprising** author.            
+
+
+```{r,message=FALSE,warning=FALSE}
+SurpriseWordsMWS = getEmotionalWords('surprise','MWS')
+
+datatable(head(SurpriseWordsMWS), style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+wordcloud(SurpriseWordsMWS$word, SurpriseWordsMWS$Count, max.words = 30,colors=brewer.pal(8, "Dark2"))
+
+```
+
+##Sentiment Analysis Words - Joy
+
+The plot shows the authors with the  **Count** of Joy words.   
+
+```{r, message=FALSE, warning=FALSE}
+
+plotEmotions("joy",fillColor2)
+
+```
+
+##Joy Word Cloud  - MWP
+
+The following table and word cloud shows the joy words written by MWP , the most **joy** author.            
+
+
+```{r,message=FALSE,warning=FALSE}
+JoyWordsMWS = getEmotionalWords('joy','MWS')
+
+datatable(head(JoyWordsMWS), style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+wordcloud(JoyWordsMWS$word, JoyWordsMWS$Count, max.words = 30,colors=brewer.pal(8, "Dark2"))
+
+```
+
+
+#Positive and Not So Postive Lines
+
+```{r,message=FALSE,warning=FALSE}
+
+sentiment_lines  =  train %>%
+  unnest_tokens(word, text) %>%
+  inner_join(get_sentiments("afinn"), by = "word") %>%
+  group_by(id) %>%
+  summarize(sentiment = mean(score),
+            words = n()) 
+
+```
+
+
+The  sentences having **top Ten positive sentiments** are 
+
+```{r, result='asis', echo=FALSE}
+
+pos_sentiment_lines = sentiment_lines %>%
+  arrange(desc(sentiment))  %>%
+  top_n(10, sentiment) %>%
+  inner_join(train, by = "id") 
+  
+
+datatable(pos_sentiment_lines, style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+```
+
+The  sentences having **top Ten NOT so positive sentiments** are 
+
+
+```{r, result='asis', echo=FALSE}
+
+neg_sentiment_lines = sentiment_lines %>%
+  arrange(sentiment)  %>%
+  top_n(-10, sentiment) %>%
+  inner_join(train, train = "id") 
+  
+
+datatable(neg_sentiment_lines, style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+```
+
+#Feature Sentiment Score
+
+We calculate the sentiment score for each line thru the following code.          
+
+
+```{r,message=FALSE,warning=FALSE}
+
+getSentimentScore = function(train)
+{
+  sentiment_lines  =  train %>%
+  unnest_tokens(word, text) %>%
+  inner_join(get_sentiments("afinn"), by = "word") %>%
+  group_by(id) %>%
+  summarize(sentiment = mean(score))
+
+sentiment_lines = sentiment_lines %>%
+    right_join(train, by = "id") 
+
+sentiment_lines = sentiment_lines %>% mutate(sentiment = ifelse(is.na(sentiment),0,sentiment))
+
+return(sentiment_lines$sentiment)
+
+}
+
+```
+
+
+#Feature NRC Sentiments
+
+We create the **NRC Sentiments** in the following section. We display the sentiment scores for Six lines of the `train` dataset.          
+
+
+```{r,message=FALSE,warning=FALSE}
+
+sentimentsTrain = get_nrc_sentiment(train$text)
+
+sentimentsTest = get_nrc_sentiment(test$text)
+
+
+datatable(head(sentimentsTrain), style="bootstrap", class="table-condensed", options = list(dom = 'tp',scrollX = TRUE))
+
+```
+
+#He or She Analysis
+
+We examine the words which start with `he` or `she`. This section draws inspiration from the blog post by `David Robinson` in his [writeup](http://varianceexplained.org/r/tidytext-gender-plots/) 
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2) %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  filter(word1 %in% c("he", "she"))
+
+```
+
+## Gender associated verbs
+
+Which words were most shifted towards occurring after “he” or “she”? We’ll filter for words that appeared at least 20 times.
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  unnest_tokens(bigram, text, token = "ngrams", n = 2) %>%
+  separate(bigram, c("word1", "word2"), sep = " ") %>%
+  filter(word1 %in% c("he", "she")) %>%
+  count(word1,word2) %>%
+  spread(word1, n, fill = 0) %>%
+  mutate(total = he + she,
+       he = (he + 1) / sum(he + 1),
+       she = (she + 1) / sum(she + 1),
+       log_ratio = log2(she / he),
+       abs_ratio = abs(log_ratio)) %>%
+  arrange(desc(log_ratio)) %>%
+  
+  filter(!word2 %in% c("himself", "herself"),
+         !word2 %in% stop_words$word,
+         total>= 20) %>%
+  group_by(direction = ifelse(log_ratio > 0, 'More "she"', "More 'he'")) %>%
+  top_n(15, abs_ratio) %>%
+  ungroup() %>%
+  mutate(word2 = reorder(word2, log_ratio)) %>%
+  ggplot(aes(word2, log_ratio, fill = direction)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = "",
+       y = 'Relative appearance after "she" compared to "he"',
+       fill = "",
+       title = "Gender associated with Verbs ") +
+  scale_y_continuous(labels = c("4X", "2X", "Same", "2X"),
+                     breaks = seq(-2, 1)) +
+  guides(fill = guide_legend(reverse = TRUE)) +
+  theme_bw()
+
+
+```
+
+She cried , She loved , She died ,She heard is common while He told, He spoke, He sat, He wished , He found are common               
+
+
+#Document Term Matrix
+
+Document Term Matrix creates a **Bag of Words** and does the following operations                                           
+*  make the words lower              
+
+* remove punctuation                            
+
+* remove `stopwords` of English                        
+
+* `stem` the bag of Words. The tm package provides the `stemDocument()` function to get to a word's root              
+
+
+```{r,message=FALSE,warning = FALSE}
+
+makeDTM <- function(train,tfidfFlag = 1) {
+  
+  corpus = Corpus(VectorSource(train$text))
+  
+  # Pre-process data
+  corpus <- tm_map(corpus, tolower)
+  
+  corpus <- tm_map(corpus, removePunctuation)
+  
+  corpus <- tm_map(corpus, removeWords, stopwords("english"))
+  
+  corpus <- tm_map(corpus, stemDocument)
+  
+  if(tfidfFlag == 1 )
+  {
+    dtm = DocumentTermMatrix(corpus,control = list(weighting = weightTfIdf))
+  }
+  else
+  {
+    dtm = DocumentTermMatrix(corpus)
+  }
+  
+  
+  
+  # Remove sparse terms
+  dtm = removeSparseTerms(dtm, 0.997)
+  
+  # Create data frame
+  labeledTerms = as.data.frame(as.matrix(dtm))
+  
+  return(labeledTerms)
+}
+
+
+```
+
+<hr>
+<h1 font color="#66CCFF">Section : Topic Modelling</h1>
+<hr>
+
+Topic modeling is a method for unsupervised classification of documents, similar to clustering on numeric data, which finds natural groups of items even when we’re not sure what we’re looking for.
+
+**Latent Dirichlet allocation (LDA)** is a particularly popular method for fitting a topic model. It treats each document as a mixture of topics, and each topic as a mixture of words. This allows documents to “overlap” each other in terms of content, rather than being separated into discrete groups, in a way that mirrors typical use of natural language.
+
+```{r,message=FALSE,warning=FALSE}
+
+labeledTerms4LDA = makeDTM(train,tfidfFlag = 0)
+
+labeledTerms4LDA = labeledTerms4LDA[rowSums(abs(labeledTerms4LDA)) != 0,]
+
+spooky_lda <- LDA(labeledTerms4LDA, k = 9, control = list(seed = 13))
+
+spooky_lda
+
+#The tidytext package provides this method for extracting the per-topic-per-word probabilities, 
+# called   β  (“beta”), from the model
+spooky_topics <- tidy(spooky_lda, matrix = "beta")
+
+spooky_top_terms <- spooky_topics %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+spooky_top_terms %>%
+  mutate(term = reorder(term, beta)) %>%
+  ggplot(aes(term, beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() + theme_bw()
+
+
+```
+
+This visualization lets us understand the *Nine* topics that were extracted from the Words. 
+
+Some of the words occur in more than one topic.               
+
+
+<hr>
+<h1 font color="#66CCFF">Section : Modelling</h1>
+<hr>
+
+#Feature Engineering   
+
+Here we add some Features to both the `train` and `test` datasets. The fatures are
+
+* Number of commas         
+
+* Number of semicolons         
+
+* Number of colons        
+
+* Number of blanks       
+
+* Number of others        
+
+* Number of words beginning with Capitals      
+
+* Number of words with Capitals                 
+
+
+All these features have been borrowed from Kaggler *jayjay* 's kernel found [here](https://www.kaggle.com/jayjay75/text2vec-glmnet). Great work jayjay!       
+
+
+
+```{r,message=FALSE,warning=FALSE}
+
+createFE = function(ds)
+{
+  ds = ds %>%
+  mutate(Ncommas = str_count(ds$text, ",")) %>%
+  mutate(Nsemicolumns = str_count(ds$text, ";")) %>%
+  mutate(Ncolons = str_count(ds$text, ":")) %>%
+  mutate(Nblank = str_count(ds$text, " ")) %>%
+  mutate(Nother = str_count(ds$text, "[\\.\\.]")) %>%
+  mutate(Ncapitalfirst = str_count(ds$text, " [A-Z][a-z]")) %>%
+  mutate(Ncapital = str_count(ds$text, "[A-Z]"))
+  
+  return(ds)
+}
+
+
+train = createFE(train)
+
+test = createFE(test)
+
+
+
+```
+
+#Feature Visualization{.tabset}
+
+##Authors and Commas
+
+The bar plot shows the authors with the Total Number of Commas used by them.          
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  group_by(author) %>%
+  summarise(SumCommas = sum(Ncommas,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,SumCommas)) %>%
+  
+  ggplot(aes(x = author,y = SumCommas)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor2) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",SumCommas,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'Commas', 
+       title = 'author and Total Number of Commas') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+
+##Authors and Semicolons
+
+The bar plot shows the authors with the Total Number of SemiColons used by them.          
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  group_by(author) %>%
+  summarise(SumSemiColons = sum(Nsemicolumns,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,SumSemiColons)) %>%
+  
+  ggplot(aes(x = author,y = SumSemiColons)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",SumSemiColons,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'SemiColons', 
+       title = 'author and Total Number of SemiColons') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+##Authors and Colons
+
+The bar plot shows the authors with the Total Number of Colons used by them.          
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  group_by(author) %>%
+  summarise(SumColons = sum(Ncolons,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,SumColons)) %>%
+  
+  ggplot(aes(x = author,y = SumColons)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",SumColons,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'Colons', 
+       title = 'author and Total Number of Colons') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+##Authors and Capital
+
+The bar plot shows the authors with the Total Number of Capital letters used by them.          
+
+```{r,message=FALSE,warning=FALSE}
+
+train %>%
+  group_by(author) %>%
+  summarise(SumCapital = sum(Ncapital,na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(author = reorder(author,SumCapital)) %>%
+  
+  ggplot(aes(x = author,y = SumCapital)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_text(aes(x = author, y = 1, label = paste0("(",SumCapital,")",sep="")),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'author', 
+       y = 'Capital Letters', 
+       title = 'author and Total Number of  Capital Letters') +
+  coord_flip() + 
+  theme_bw()
+
+```
+
+
+
+#Modelling with XGBoost
+
+We try to predict whether the lines are **written by a specific author**.             
+
+We do **Cross Validation** using Caret package.Lastly we wish to examine the feature importance of the variables. This is shown in the flipped bar chart.   
+
+We then use the model to predict the **authors**.             
+
+
+```{r, message=FALSE, warning=FALSE}
+
+makeFeatures <- function(train) {
+  
+  labeledTerms = makeDTM(train,tfidfFlag = 0)
+  
+  ## Preparing the features for the XGBoost Model
+  
+  features <- colnames(labeledTerms)
+  
+  for (f in features) {
+    if ((class(labeledTerms[[f]])=="factor") || (class(labeledTerms[[f]])=="character")) {
+      levels <- unique(labeledTerms[[f]])
+      labeledTerms[[f]] <- as.numeric(factor(labeledTerms[[f]], levels=levels))
+    }
+  }
+  
+  return(labeledTerms)
+}
+
+labeledTerms = makeFeatures(train)
+
+labeledTermsTest = makeFeatures(test)
+
+colnamesSame = intersect(colnames(labeledTerms),colnames(labeledTermsTest))
+
+labeledTerms = labeledTerms[ , (colnames(labeledTerms) %in% colnamesSame)]
+labeledTermsTest = labeledTermsTest[ , (colnames(labeledTermsTest) %in% colnamesSame)]
+
+```
+
+#Inspect Document Term Matrix
+
+The first 10 rows and 10 columns of the Document Term Matrix is shown below.  
+
+
+```{r,message=FALSE,warning=FALSE}
+
+
+labeledTerms[1:10,1:10]
+
+```
+
+##Add features
+
+We add the following features to the model
+
+* Number of words in the line
+
+* Sentiment Score per line
+
+
+```{r,message=FALSE,warning=FALSE}
+
+labeledTerms$len = train$len
+labeledTermsTest$len = test$len
+
+labeledTerms$sentiScore = getSentimentScore(train)
+labeledTermsTest$sentiScore = getSentimentScore(test)
+
+labeledTerms$Ncommas = train$Ncommas
+labeledTerms$Nsemicolumns = train$Nsemicolumns
+labeledTerms$Ncolons = train$Ncolons 
+labeledTerms$Nblank = train$Nblank 
+labeledTerms$Nother = train$Nother 
+labeledTerms$Ncapitalfirst = train$Ncapitalfirst 
+labeledTerms$Ncapital = train$Ncapital 
+
+labeledTermsTest$Ncommas = test$Ncommas
+labeledTermsTest$Nsemicolumns = test$Nsemicolumns
+labeledTermsTest$Ncolons = test$Ncolons 
+labeledTermsTest$Nblank = test$Nblank 
+labeledTermsTest$Nother = test$Nother 
+labeledTermsTest$Ncapitalfirst = test$Ncapitalfirst 
+labeledTermsTest$Ncapital = test$Ncapital 
+
+```
+
+
+## Creating the XGBoost Model
+
+```{r,message=FALSE,warning=FALSE}
+
+labeledTerms$author = as.factor(train$author)
+levels(labeledTerms$author) = make.names(unique(labeledTerms$author))
+
+formula = author ~ .
+
+#Please uncomment if you want to do Cross Validation
+# fitControl <- trainControl(method="cv",number = 5,classProbs=TRUE, summaryFunction=mnLogLoss)
+# 
+# xgbGrid <- expand.grid(nrounds = 500,
+#                        max_depth = 3,
+#                        eta = .05,
+#                        gamma = 0,
+#                        colsample_bytree = .8,
+#                        min_child_weight = 1,
+#                        subsample = 1)
+
+fitControl <- trainControl(method="none",classProbs=TRUE, summaryFunction=mnLogLoss)
+
+xgbGrid <- expand.grid(nrounds = 500,
+                       max_depth = 3,
+                       eta = .05,
+                       gamma = 0,
+                       colsample_bytree = .8,
+                       min_child_weight = 1,
+                       subsample = 1)
+
+
+set.seed(13)
+
+AuthorXGB = train(formula, data = labeledTerms,
+                 method = "xgbTree",trControl = fitControl,
+                 tuneGrid = xgbGrid,na.action = na.pass,metric="LogLoss", maximize=FALSE)
+
+importance = varImp(AuthorXGB)
+
+varImportance <- data.frame(Variables = row.names(importance[[1]]), 
+                            Importance = round(importance[[1]]$Overall,2))
+
+# Create a rank variable based on importance
+rankImportance <- varImportance %>%
+  mutate(Rank = paste0('#',dense_rank(desc(Importance)))) %>%
+  head(20)
+
+rankImportancefull = rankImportance
+
+ggplot(rankImportance, aes(x = reorder(Variables, Importance), 
+                           y = Importance)) +
+  geom_bar(stat='identity',colour="white", fill = fillColor) +
+  geom_text(aes(x = Variables, y = 1, label = Rank),
+            hjust=0, vjust=.5, size = 4, colour = 'black',
+            fontface = 'bold') +
+  labs(x = 'Variables', title = 'Relative Variable Importance') +
+  coord_flip() + 
+  theme_bw()
+
+
+AuthorXGB
+
+
+
+```
+
+#Predictions using the XGB Model
+
+
+```{r,message=FALSE,warning=FALSE}
+
+predictions = predict(AuthorXGB,labeledTermsTest,type = 'prob')
+
+# Save the solution to a dataframe
+solution <- data.frame('id' = test$id, predictions)
+
+head(solution)
+
+# Write it to file
+write.csv(solution, 'XGBEDASpooky26Nov2017.csv', row.names = F)
+
+
+```
+
+
+#Modelling using the glmnet Model
+
+We predict using the `glmnet` model.The model uses techniques of `Regularized` and `Lasso` Regression with the tuning parameters `alpha` and `lambda`. The parameters and the 
+predictions for the results are shown below.           
+
+
+
+```{r,message=FALSE,warning=FALSE}
+
+AuthorGLM = train(formula, data = labeledTerms,
+                  method = "glmnet",trControl = fitControl,
+                  na.action = na.pass,metric="LogLoss", maximize=FALSE)  
+                  
+AuthorGLM$bestTune
+
+
+predictions = predict(AuthorGLM,labeledTermsTest,type = 'prob')
+
+# Save the solution to a dataframe
+solution <- data.frame('id' = test$id, predictions)
+
+head(solution)
+
+# Write it to file
+write.csv(solution, 'GLMNetEDASpooky26Nov2017.csv', row.names = F)
+
+
+```
+
+#Modelling using the text2vec package 
+
+We create a vocabulary-based DTM. Here we collect unique terms from all documents and mark each of them with a unique ID using the create_vocabulary() function. We use an iterator to create the vocabulary. We also prune the vocabulary to reduce the terms in the matrix.
+
+```{r,message=FALSE,warning=FALSE}
+
+
+prep_fun  = function(x) {
+  stringr::str_replace_all(tolower(x), "[^[:alpha:]]", " ")
+}
+
+tok_fun = word_tokenizer
+
+it_train = itoken(train$text, 
+                  preprocessor = prep_fun, 
+                  tokenizer = tok_fun, 
+                  ids = train$id, 
+                  progressbar = FALSE)
+
+
+
+it_test = test$text %>% 
+  prep_fun %>% 
+  tok_fun %>% 
+  itoken(ids = test$id,  progressbar = FALSE)
+
+
+NFOLDS = 4
+vocab = create_vocabulary(it_train, ngram = c(1L, 3L))
+vocab = vocab %>% prune_vocabulary(term_count_min = 10, 
+                                   doc_proportion_max = 0.5,
+                                   doc_proportion_min = 0.01)
+
+trigram_vectorizer = vocab_vectorizer(vocab)
+
+dtm_train = create_dtm(it_train, trigram_vectorizer)
+dtm_test = create_dtm(it_test, trigram_vectorizer)
+
+
+```
+
+## Inspect the vocabulary
+
+```{r,message=FALSE,warning=FALSE}
+
+vocab
+
+```
+
+## Inspect the Document Term Matrix
+
+```{r,message=FALSE,warning=FALSE}
+
+dim(dtm_train)
+
+```
+
+
+##Build the Multinomial Logistic Regression Model
+
+```{r,message=FALSE,warning=FALSE}
+
+dtm_train <- cBind(train$len, dtm_train)
+dtm_test <- cBind(test$len, dtm_test)
+
+glmnet_classifier = cv.glmnet(x = dtm_train, y = train[['author']], 
+                              family = 'multinomial', 
+                              alpha = 1,
+                              type.measure = "class",
+                              nfolds = NFOLDS,
+                              thresh = 1e-3,
+                              maxit = 1e3)
+
+
+```
+
+
+
+##Predict using the Multinomial Logistic Regression Model
+
+```{r,message=FALSE,warning=FALSE}
+
+preds = data.frame(id=test$id,predict(glmnet_classifier, dtm_test, type = 'response'))
+names(preds)[2] <- "EAP"
+names(preds)[3] <- "HPL"
+names(preds)[4] <- "MWS"
+
+write_csv(preds, "glmnet_benchmark_vocab_3N-grams.csv")
+
+```
+
+#References
+
+1. An **awesome book** [Text Mining with R - A Tidy Approach -  Julia Silge and David Robinson - 
+2017-05-07](http://tidytextmining.com/)
+
+2. [5 Algorithms Every Web Developer Can Use and Understand](https://lizrush.gitbooks.io/algorithms-for-webdevs-ebook/content/) . This book is used for the **TF-IDF** explanation.
